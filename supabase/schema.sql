@@ -103,6 +103,10 @@ CREATE TABLE IF NOT EXISTS ai_analyses (
 -- ============================================================
 -- INDEXES
 -- ============================================================
+
+-- Enable Realtime for profiles so role changes reflect instantly
+ALTER PUBLICATION supabase_realtime ADD TABLE profiles;
+
 CREATE INDEX IF NOT EXISTS idx_profiles_org ON profiles(organization_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_user ON profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);

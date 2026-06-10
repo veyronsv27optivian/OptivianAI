@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Users as UsersIcon, UserPlus, Search, X, Check, AlertCircle, Trash2,
-  ChevronDown, Sparkles, Filter
+  ChevronDown, Sparkles, Filter, TriangleAlert
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 
@@ -32,6 +32,8 @@ export default function Users() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState(null);
 
   const userRole = user?.user_metadata?.role || 'staff';
   const canManageStaff = userRole === 'admin' || userRole === 'manager';
@@ -75,22 +77,33 @@ export default function Users() {
     }
   };
 
-  const handleRemove = async (memberId) => {
-    if (!confirm('Are you sure you want to remove this staff member?')) return;
+  const handleRemoveClick = (member) => {
+    setMemberToRemove(member);
+    setShowRemoveModal(true);
+  };
+
+  const handleRemoveConfirm = async () => {
+    if (!memberToRemove || actionLoading) return;
     setActionLoading(true);
+    setShowRemoveModal(false);
+    setActionError('');
     try {
-      await removeStaffMember(memberId);
+      const { error } = await removeStaffMember(memberToRemove.id, memberToRemove.user_id);
+      if (error) throw new Error(error.message || error);
+      setActionSuccess('Staff member removed successfully.');
       loadMembers();
     } catch (err) {
-      console.error(err);
+      setActionError(err.message || 'Failed to remove staff member.');
     } finally {
       setActionLoading(false);
+      setMemberToRemove(null);
     }
   };
 
   const handleRoleChange = async (memberId, newRole) => {
     try {
-      await updateStaffRole(memberId, newRole);
+      const { error } = await updateStaffRole(memberId, newRole);
+      if (error) throw new Error(error.message || error);
       loadMembers();
     } catch (err) {
       console.error(err);
@@ -239,7 +252,7 @@ export default function Users() {
                   <div className="sm:col-span-2 flex justify-end gap-2">
                     {canManageStaff && (
                       <button
-                        onClick={() => handleRemove(member.id)}
+                        onClick={() => handleRemoveClick(member)}
                         className="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
                         title="Remove member"
                       >
@@ -368,6 +381,40 @@ export default function Users() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Staff Confirmation Modal */}
+      {showRemoveModal && memberToRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl shadow-2xl animate-scale-in overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/25 mb-4">
+                <TriangleAlert size={28} className="text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Remove Staff Member?</h2>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Are you sure you want to remove <span className="text-white font-medium">{memberToRemove.email}</span>?
+                This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-3 px-6 pb-6">
+              <button
+                onClick={() => { setShowRemoveModal(false); setMemberToRemove(null); }}
+                className="flex-1 px-4 py-3 rounded-xl font-semibold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemoveConfirm}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 active:scale-[0.98] transition-all shadow-lg shadow-rose-500/25"
+              >
+                <Trash2 size={16} />
+                Remove
+              </button>
+            </div>
           </div>
         </div>
       )}

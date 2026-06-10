@@ -60,6 +60,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const listenersRef = useRef(new Set());
+  const userRef = useRef(null);
 
   // Notify all listeners of auth state changes
   const notifyListeners = useCallback((event, session) => {
@@ -67,6 +68,9 @@ export function AuthProvider({ children }) {
       try { cb(event, session); } catch {}
     });
   }, []);
+
+  // Keep userRef in sync with user state
+  useEffect(() => { userRef.current = user; }, [user]);
 
   // Initialize auth state on mount
   useEffect(() => {
@@ -93,7 +97,57 @@ export function AuthProvider({ children }) {
         setLoading(false);
       });
 
-      return () => subscription.unsubscribe();
+      // Subscribe to profile changes for the current user
+      let channel;
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session?.user?.id) return;
+        channel = supabase
+          .channel('profile-changes')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'profiles',
+              filter: `user_id=eq.${session.user.id}`,
+            },
+            (payload) => {
+              if (payload.new && payload.new.role) {
+                // Sync to auth metadata so JWT refresh doesn't overwrite
+                supabase.auth.updateUser({ data: { role: payload.new.role } }).then(({ error }) => {
+                  if (error) {
+                    // Fallback: just update local state
+                    setUser(prev => prev ? {
+                      ...prev,
+                      user_metadata: { ...prev.user_metadata, role: payload.new.role },
+                    } : prev);
+                  }
+                });
+              }
+            }
+          )
+          .subscribe();
+      });
+
+      // Fallback: poll the profiles table every 30s for role changes
+      const pollInterval = setInterval(async () => {
+        const uid = userRef.current?.id;
+        if (!uid) return;
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', uid)
+          .single();
+        if (profile?.role && profile.role !== userRef.current?.user_metadata?.role) {
+          supabase.auth.updateUser({ data: { role: profile.role } });
+        }
+      }, 30000);
+
+      return () => {
+        subscription.unsubscribe();
+        if (channel) supabase.removeChannel(channel);
+        clearInterval(pollInterval);
+      };
     }
   }, []);
 
@@ -459,7 +513,7 @@ export function AuthProvider({ children }) {
     return { data, error };
   }, [user]);
 
-  const removeStaffMember = useCallback(async (memberId) => {
+  const removeStaffMember = useCallback(async (memberId, userId) => {
     if (!user) return { error: { message: 'Not authenticated.' } };
 
     if (DEV_MODE) {
@@ -471,11 +525,32 @@ export function AuthProvider({ children }) {
       return { error: null };
     }
 
-    const { error } = await supabase
+    // Delete profile row
+    const { error: profileError } = await supabase
       .from('profiles')
       .delete()
       .eq('id', memberId);
-    return { error };
+    if (profileError) return { error: profileError };
+
+    // Delete auth user via Edge Function (requires deployment)
+    if (userId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+      const result = await res.json();
+      if (result.error) return { error: result.error };
+    }
+
+    return { error: null };
   }, [user]);
 
   const updateStaffRole = useCallback(async (memberId, newRole) => {
@@ -487,6 +562,12 @@ export function AuthProvider({ children }) {
       if (idx === -1) return { error: { message: 'User not found.' } };
       users[idx].user_metadata = { ...users[idx].user_metadata, role: newRole };
       saveDevUsers(users);
+      if (memberId === user.id) {
+        setUser(prev => prev ? {
+          ...prev,
+          user_metadata: { ...prev.user_metadata, role: newRole },
+        } : prev);
+      }
       return { error: null };
     }
 
@@ -495,6 +576,33 @@ export function AuthProvider({ children }) {
       .update({ role: newRole })
       .eq('id', memberId);
     return { error };
+  }, [user]);
+
+  // Re-fetch the current user's profile from Supabase and update local state
+  const refreshUserProfile = useCallback(async () => {
+    if (!user) return;
+    if (DEV_MODE) {
+      const profiles = getDevProfiles();
+      const myProfile = profiles.find(p => p.user_id === user.id);
+      if (myProfile?.role) {
+        setUser(prev => prev ? {
+          ...prev,
+          user_metadata: { ...prev.user_metadata, role: myProfile.role },
+        } : prev);
+      }
+      return;
+    }
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+    if (!error && data?.role) {
+      setUser(prev => prev ? {
+        ...prev,
+        user_metadata: { ...prev.user_metadata, role: data.role },
+      } : prev);
+    }
   }, [user]);
 
   const value = {
@@ -510,6 +618,7 @@ export function AuthProvider({ children }) {
     createStaffMember,
     removeStaffMember,
     updateStaffRole,
+    refreshUserProfile,
     isDevMode: DEV_MODE,
   };
 
