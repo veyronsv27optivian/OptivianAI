@@ -65,13 +65,16 @@ export default function CreateOrganization() {
 
     try {
       // Step 1: Create the admin user
-      const { error: authError } = await signUp({
+      const { data: authData, error: authError } = await signUp({
         email: formData.adminEmail,
         password: formData.adminPassword,
         role: 'admin',
       });
 
       if (authError) throw new Error(authError.message);
+
+      // Use the user from the signUp response directly (avoids React state timing issues)
+      const sessionUser = authData?.session?.user || authData?.user;
 
       // Step 2: Store organization details and create profile
       const { error: orgError } = await createOrganization({
@@ -82,7 +85,7 @@ export default function CreateOrganization() {
         instagram: formData.socialInsta,
         twitter: formData.socialTwitter,
         telegram: formData.socialTelegram,
-      });
+      }, sessionUser);
 
       if (orgError) throw new Error(orgError.message);
 

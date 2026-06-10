@@ -241,26 +241,27 @@ export function AuthProvider({ children }) {
   }, [user, session, notifyListeners]);
 
   // Dev profile/org storage helpers (for Create Org flow)
-  const createOrganization = useCallback(async (orgData) => {
-    if (!user) return { error: { message: 'Not authenticated.' } };
+  const createOrganization = useCallback(async (orgData, sessionUser) => {
+    // Prefer the user from the signUp response (avoids React state / session timing issues)
+    let currentUser = sessionUser || user;
+    if (!currentUser) {
+      if (DEV_MODE) {
+        const s = getDevSession();
+        currentUser = s?.user ?? null;
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
+        currentUser = session?.user ?? null;
+      }
+    }
+    if (!currentUser) return { error: { message: 'Not authenticated.' } };
 
     if (DEV_MODE) {
       const profiles = getDevProfiles();
       const orgs = getDevOrgs();
 
-      const newProfile = {
-        id: uid(),
-        user_id: user.id,
-        email: user.email,
-        role: 'admin',
-        created_at: new Date().toISOString(),
-      };
-      profiles.push(newProfile);
-      saveDevProfiles(profiles);
-
       const newOrg = {
         id: uid(),
-        owner_id: user.id,
+        owner_id: currentUser.id,
         name: orgData.name,
         type: orgData.type,
         explanation: orgData.explanation,
@@ -275,19 +276,22 @@ export function AuthProvider({ children }) {
       orgs.push(newOrg);
       saveDevOrgs(orgs);
 
-      return { data: { profile: newProfile, organization: newOrg }, error: null };
+      profiles.push({
+        id: uid(),
+        user_id: currentUser.id,
+        email: currentUser.email,
+        role: 'admin',
+        organization_id: newOrg.id,
+        created_at: new Date().toISOString(),
+      });
+      saveDevProfiles(profiles);
+
+      return { data: { profile: profiles[profiles.length - 1], organization: newOrg }, error: null };
     }
 
     // Real Supabase mode
-    const { error: profileError } = await supabase.from('profiles').insert({
-      user_id: user.id,
-      email: user.email,
-      role: 'admin',
-    });
-    if (profileError) return { error: profileError };
-
     const { error: orgError } = await supabase.from('organizations').insert({
-      owner_id: user.id,
+      owner_id: currentUser.id,
       name: orgData.name,
       type: orgData.type,
       explanation: orgData.explanation,
@@ -298,17 +302,43 @@ export function AuthProvider({ children }) {
         telegram: orgData.telegram,
       },
     });
-    return { error: orgError };
+    if (orgError) return { error: orgError };
+
+    // Fetch the org ID we just created
+    const { data: orgDataResult } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('owner_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ role: 'admin', organization_id: orgDataResult?.id })
+      .eq('user_id', currentUser.id);
+    if (profileError) return { error: profileError };
+
+    return { error: null };
   }, [user]);
 
-  // ─── Staff Management (Dev Mode) ───────────────────────────────
+  // ─── Staff Management ───────────────────────────────────────────
   const getStaffMembers = useCallback(async () => {
     if (!user) return [];
 
     if (DEV_MODE) {
+      const profiles = getDevProfiles();
+      const myProfile = profiles.find(p => p.user_id === user.id);
+      const orgId = myProfile?.organization_id;
+
       const allUsers = getDevUsers();
       return allUsers
-        .filter(u => u.id !== user.id)
+        .filter(u => {
+          if (u.id === user.id) return false;
+          if (!orgId) return false;
+          const userProfile = profiles.find(p => p.user_id === u.id);
+          return userProfile?.organization_id === orgId;
+        })
         .map(u => ({
           id: u.id,
           email: u.email,
@@ -318,10 +348,19 @@ export function AuthProvider({ children }) {
         }));
     }
 
-    // Real Supabase: query profiles table
+    // Real Supabase: query profiles table filtered by org
+    const { data: myProfile } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!myProfile?.organization_id) return [];
+
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
+      .eq('organization_id', myProfile.organization_id)
       .neq('user_id', user.id);
     if (error) throw error;
     return data || [];
@@ -336,6 +375,10 @@ export function AuthProvider({ children }) {
         return { error: { message: 'A user with this email already exists.' } };
       }
 
+      const profiles = getDevProfiles();
+      const myProfile = profiles.find(p => p.user_id === user.id);
+      const orgId = myProfile?.organization_id;
+
       const id = uid();
       const newUser = {
         id,
@@ -346,6 +389,19 @@ export function AuthProvider({ children }) {
       };
       users.push(newUser);
       saveDevUsers(users);
+
+      if (orgId) {
+        profiles.push({
+          id: uid(),
+          user_id: id,
+          email,
+          role: role || 'staff',
+          organization_id: orgId,
+          created_at: new Date().toISOString(),
+        });
+        saveDevProfiles(profiles);
+      }
+
       return { data: newUser, error: null };
     }
 
@@ -410,6 +466,8 @@ export function AuthProvider({ children }) {
       const users = getDevUsers();
       const filtered = users.filter(u => u.id !== memberId);
       saveDevUsers(filtered);
+      const profiles = getDevProfiles();
+      saveDevProfiles(profiles.filter(p => p.user_id !== memberId));
       return { error: null };
     }
 

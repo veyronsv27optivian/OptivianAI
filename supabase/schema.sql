@@ -128,70 +128,109 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_analyses ENABLE ROW LEVEL SECURITY;
 
 -- ORGANIZATIONS: owner has full access
+DROP POLICY IF EXISTS "org_owner_select" ON organizations;
 CREATE POLICY "org_owner_select" ON organizations FOR SELECT USING (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "org_owner_insert" ON organizations;
 CREATE POLICY "org_owner_insert" ON organizations FOR INSERT WITH CHECK (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "org_owner_update" ON organizations;
 CREATE POLICY "org_owner_update" ON organizations FOR UPDATE USING (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "org_owner_delete" ON organizations;
 CREATE POLICY "org_owner_delete" ON organizations FOR DELETE USING (auth.uid() = owner_id);
 
+-- Helpers: security definer functions to get current user's org/role (avoids RLS recursion)
+CREATE OR REPLACE FUNCTION public.get_user_org_id()
+RETURNS UUID
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT organization_id FROM public.profiles WHERE user_id = auth.uid()
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_user_role()
+RETURNS TEXT
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT role FROM public.profiles WHERE user_id = auth.uid()
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_user_profile_id()
+RETURNS UUID
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT id FROM public.profiles WHERE user_id = auth.uid()
+$$;
+
 -- PROFILES: users can view profiles in their org, edit own. Admins/managers can manage org profiles.
+DROP POLICY IF EXISTS "profiles_select" ON profiles;
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (
-  organization_id IN (
-    SELECT organization_id FROM profiles WHERE user_id = auth.uid()
-  ) OR user_id = auth.uid() OR organization_id IS NULL
+  organization_id = public.get_user_org_id() OR user_id = auth.uid()
 );
 
 -- Allow org owners or admins to insert/update/delete profiles
+DROP POLICY IF EXISTS "profiles_insert" ON profiles;
 CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (
   auth.uid() = user_id OR 
   auth.uid() IN (SELECT owner_id FROM organizations)
 );
 
+DROP POLICY IF EXISTS "profiles_update" ON profiles;
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (
   user_id = auth.uid() OR 
   organization_id IN (SELECT id FROM organizations WHERE owner_id = auth.uid()) OR
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid() AND role IN ('admin', 'manager'))
+  (organization_id = public.get_user_org_id() AND public.get_user_role() IN ('admin', 'manager'))
 );
 
+DROP POLICY IF EXISTS "profiles_delete" ON profiles;
 CREATE POLICY "profiles_delete" ON profiles FOR DELETE USING (
-  organization_id IN (
-    SELECT id FROM organizations WHERE owner_id = auth.uid()
-  ) OR
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid() AND role IN ('admin', 'manager'))
+  organization_id IN (SELECT id FROM organizations WHERE owner_id = auth.uid()) OR
+  (organization_id = public.get_user_org_id() AND public.get_user_role() IN ('admin', 'manager'))
 );
 
 -- STAFF CREDENTIALS: only org owner
+DROP POLICY IF EXISTS "staff_creds_select" ON staff_credentials;
 CREATE POLICY "staff_creds_select" ON staff_credentials FOR SELECT USING (
   organization_id IN (SELECT id FROM organizations WHERE owner_id = auth.uid())
 );
+DROP POLICY IF EXISTS "staff_creds_insert" ON staff_credentials;
 CREATE POLICY "staff_creds_insert" ON staff_credentials FOR INSERT WITH CHECK (
   organization_id IN (SELECT id FROM organizations WHERE owner_id = auth.uid())
 );
+DROP POLICY IF EXISTS "staff_creds_delete" ON staff_credentials;
 CREATE POLICY "staff_creds_delete" ON staff_credentials FOR DELETE USING (
   organization_id IN (SELECT id FROM organizations WHERE owner_id = auth.uid())
 );
 
 -- TASKS: org members
+DROP POLICY IF EXISTS "tasks_select" ON tasks;
 CREATE POLICY "tasks_select" ON tasks FOR SELECT USING (
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid())
+  organization_id = public.get_user_org_id()
 );
+DROP POLICY IF EXISTS "tasks_insert" ON tasks;
 CREATE POLICY "tasks_insert" ON tasks FOR INSERT WITH CHECK (
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid())
+  organization_id = public.get_user_org_id()
 );
+DROP POLICY IF EXISTS "tasks_update" ON tasks;
 CREATE POLICY "tasks_update" ON tasks FOR UPDATE USING (
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid())
+  organization_id = public.get_user_org_id()
 );
 
 -- CONVERSATIONS: participants
+DROP POLICY IF EXISTS "conv_select" ON conversations;
 CREATE POLICY "conv_select" ON conversations FOR SELECT USING (
-  id IN (SELECT conversation_id FROM conversation_participants WHERE profile_id IN (
-    SELECT id FROM profiles WHERE user_id = auth.uid()
-  ))
+  id IN (SELECT conversation_id FROM conversation_participants WHERE profile_id = public.get_user_profile_id())
 );
+DROP POLICY IF EXISTS "conv_insert" ON conversations;
 CREATE POLICY "conv_insert" ON conversations FOR INSERT WITH CHECK (
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid())
+  organization_id = public.get_user_org_id()
 );
 
 -- MESSAGES: participants of the conversation
+DROP POLICY IF EXISTS "msg_select" ON messages;
 CREATE POLICY "msg_select" ON messages FOR SELECT USING (
   conversation_id IN (
     SELECT cp.conversation_id FROM conversation_participants cp
@@ -199,6 +238,7 @@ CREATE POLICY "msg_select" ON messages FOR SELECT USING (
     WHERE p.user_id = auth.uid()
   )
 );
+DROP POLICY IF EXISTS "msg_insert" ON messages;
 CREATE POLICY "msg_insert" ON messages FOR INSERT WITH CHECK (
   conversation_id IN (
     SELECT cp.conversation_id FROM conversation_participants cp
@@ -208,11 +248,13 @@ CREATE POLICY "msg_insert" ON messages FOR INSERT WITH CHECK (
 );
 
 -- AI ANALYSES: org members
+DROP POLICY IF EXISTS "ai_select" ON ai_analyses;
 CREATE POLICY "ai_select" ON ai_analyses FOR SELECT USING (
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid())
+  organization_id = public.get_user_org_id()
 );
+DROP POLICY IF EXISTS "ai_insert" ON ai_analyses;
 CREATE POLICY "ai_insert" ON ai_analyses FOR INSERT WITH CHECK (
-  organization_id IN (SELECT organization_id FROM profiles WHERE user_id = auth.uid())
+  organization_id = public.get_user_org_id()
 );
 
 -- ============================================================
