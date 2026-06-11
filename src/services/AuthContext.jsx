@@ -72,8 +72,14 @@ export function AuthProvider({ children }) {
   // Keep userRef in sync with user state
   useEffect(() => { userRef.current = user; }, [user]);
 
+  // Counter for unique channel names (prevents StrictMode double-mount collisions)
+  const mountKeyRef = useRef(0);
+
   // Initialize auth state on mount
   useEffect(() => {
+    mountKeyRef.current += 1;
+    const mountId = mountKeyRef.current;
+
     if (DEV_MODE) {
       // Dev mode: restore session from localStorage
       const saved = getDevSession();
@@ -97,12 +103,12 @@ export function AuthProvider({ children }) {
         setLoading(false);
       });
 
-      // Subscribe to profile changes for the current user
+      // Subscribe to profile changes for the current user (unique name per mount)
       let channel;
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (!session?.user?.id) return;
         channel = supabase
-          .channel('profile-changes')
+          .channel('profile-changes-' + session.user.id + '-' + mountId)
           .on(
             'postgres_changes',
             {
@@ -393,13 +399,17 @@ export function AuthProvider({ children }) {
           const userProfile = profiles.find(p => p.user_id === u.id);
           return userProfile?.organization_id === orgId;
         })
-        .map(u => ({
-          id: u.id,
-          email: u.email,
-          role: u.user_metadata?.role || 'staff',
-          isTempPassword: u.user_metadata?.temp_password === true,
-          createdAt: u.created_at,
-        }));
+        .map(u => {
+          const userProfile = profiles.find(p => p.user_id === u.id);
+          return {
+            id: u.id,
+            profileId: userProfile?.id || null,
+            email: u.email,
+            role: u.user_metadata?.role || 'staff',
+            isTempPassword: u.user_metadata?.temp_password === true,
+            createdAt: u.created_at,
+          };
+        });
     }
 
     // Real Supabase: query profiles table filtered by org

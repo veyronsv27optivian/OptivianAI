@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LogOut, Home, Users, CheckSquare, Brain, MessageSquare,
-  ChevronLeft, ChevronRight, Bell, Search, Settings
+  ChevronLeft, ChevronRight, Bell, Search, Settings, X
 } from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
+import {
+  getUnreadCountAsync,
+  markAllRead,
+  getNotificationsAsync,
+} from '../services/notificationService';
 
 function getNavItems(role) {
   const items = [
@@ -22,8 +27,74 @@ export default function MainLayout() {
   const location = useLocation();
   const { user, signOut, isDevMode } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const bellRef = useRef(null);
+  const dropdownRef = useRef(null);
+
   const userRole = user?.user_metadata?.role || 'staff';
   const navItems = getNavItems(userRole);
+
+  // ── Notification helpers ────────────────────────
+  const refreshNotifications = useCallback(async () => {
+    if (!user?.id) return;
+    const count = await getUnreadCountAsync(user.id);
+    setUnreadCount(count);
+    if (showNotifications) {
+      const items = await getNotificationsAsync(user.id);
+      setNotifications(items);
+    }
+  }, [user?.id, showNotifications]);
+
+  // Load unread count on mount and listen for updates
+  useEffect(() => {
+    refreshNotifications();
+    const handler = () => refreshNotifications();
+    window.addEventListener('notification-update', handler);
+
+    // Poll every 10s as a fallback
+    const interval = setInterval(refreshNotifications, 10000);
+
+    return () => {
+      window.removeEventListener('notification-update', handler);
+      clearInterval(interval);
+    };
+  }, [refreshNotifications]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handleClick = (e) => {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+        bellRef.current && !bellRef.current.contains(e.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showNotifications]);
+
+  const handleBellClick = async () => {
+    if (showNotifications) {
+      setShowNotifications(false);
+      return;
+    }
+
+    // Open the dropdown and fetch notifications
+    if (user?.id) {
+      const items = await getNotificationsAsync(user.id);
+      setNotifications(items);
+    }
+    setShowNotifications(true);
+
+    // Mark all as read — the notification-update event will refresh the count
+    if (unreadCount > 0 && user?.id) {
+      markAllRead(user.id);
+    }
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -33,6 +104,19 @@ export default function MainLayout() {
   const displayName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
   const userInitial = (user?.email || 'User').charAt(0).toUpperCase();
   const userEmail = user?.email || '';
+
+  // Format notification time as relative
+  const timeAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  };
 
   return (
     <div className="flex h-screen bg-slate-950">
@@ -135,10 +219,85 @@ export default function MainLayout() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button aria-label="Notifications" className="relative p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
-            </button>
+            {/* Notification bell */}
+            <div className="relative" ref={bellRef}>
+              <button
+                aria-label="Notifications"
+                onClick={handleBellClick}
+                className={`relative p-2.5 rounded-xl transition-all duration-200 ${
+                  showNotifications
+                    ? 'bg-blue-500/15 text-blue-400'
+                    : 'text-slate-400 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center bg-rose-500 text-[9px] font-bold text-white rounded-full shadow-lg shadow-rose-500/50 animate-scale-in">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification dropdown */}
+              {showNotifications && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50 animate-scale-in"
+                >
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                    <h3 className="text-sm font-bold text-white">Notifications</h3>
+                    {notifications.length > 0 && (
+                      <button
+                        onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); }}
+                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                  <div className="overflow-y-auto max-h-80">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-sm text-slate-500">
+                        <Bell size={24} className="mx-auto mb-2 text-slate-600" />
+                        No notifications
+                      </div>
+                    ) : (
+                      notifications.slice(0, 20).map((n) => (
+                        <div
+                          key={n.id}
+                          className={`px-4 py-3 border-b border-white/5 last:border-0 transition-colors ${
+                            !n.read ? 'bg-blue-500/5 border-l-2 border-l-blue-500' : ''
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`p-1.5 rounded-lg shrink-0 ${
+                              n.type === 'task_assigned' ? 'bg-emerald-500/10' : 'bg-blue-500/10'
+                            }`}>
+                              <CheckSquare size={14} className={n.type === 'task_assigned' ? 'text-emerald-400' : 'text-blue-400'} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm text-white leading-snug">{n.message}</p>
+                              <p className="text-xs text-slate-500 mt-1">{timeAgo(n.created_at)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <div className="px-4 py-2.5 border-t border-white/10 bg-white/[0.02]">
+                      <button
+                        onClick={() => navigate('/app/tasks')}
+                        className="w-full text-xs text-slate-400 hover:text-white text-center transition-colors"
+                      >
+                        View all tasks
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center gap-3 pl-3 border-l border-white/10">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-blue-500/25">
                 {userInitial}

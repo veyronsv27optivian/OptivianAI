@@ -48,7 +48,6 @@ CREATE TABLE IF NOT EXISTS tasks (
   organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
-  assigned_to UUID REFERENCES profiles(id) ON DELETE SET NULL,
   assigned_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'review', 'done', 'cancelled')),
   priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
@@ -56,6 +55,20 @@ CREATE TABLE IF NOT EXISTS tasks (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Drop legacy single-assignee column and add JSONB columns for multi-assignee support
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'tasks' AND column_name = 'assigned_to'
+  ) THEN
+    ALTER TABLE tasks DROP COLUMN assigned_to;
+  END IF;
+END $$;
+
+-- Add JSONB columns for storing assignees directly on the task (no junction table needed)
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS assigned_tos JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS assignee_statuses JSONB DEFAULT '{}'::jsonb;
 
 -- 5. CONVERSATIONS (chat groups / DMs)
 CREATE TABLE IF NOT EXISTS conversations (
@@ -100,24 +113,50 @@ CREATE TABLE IF NOT EXISTS ai_analyses (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 9. NOTIFICATIONS
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  type TEXT NOT NULL DEFAULT 'info',
+  message TEXT NOT NULL,
+  ref_type TEXT,
+  ref_id TEXT,
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 10. (reserved for future use)
+
 -- ============================================================
 -- INDEXES
 -- ============================================================
 
 -- Enable Realtime for profiles so role changes reflect instantly
-ALTER PUBLICATION supabase_realtime ADD TABLE profiles;
+-- Safe to run multiple times – checks if the table is already enrolled
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+    AND schemaname = 'public'
+    AND tablename = 'profiles'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE profiles;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_profiles_org ON profiles(organization_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_user ON profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
 CREATE INDEX IF NOT EXISTS idx_tasks_org ON tasks(organization_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to);
+-- idx_tasks_assigned was dropped along with the legacy assigned_to column
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_messages_conv ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_ai_analyses_org ON ai_analyses(organization_id);
 CREATE INDEX IF NOT EXISTS idx_staff_credentials_org ON staff_credentials(organization_id);
 CREATE INDEX IF NOT EXISTS idx_staff_credentials_email ON staff_credentials(email);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
 
 -- ============================================================
 -- ROW LEVEL SECURITY
@@ -126,6 +165,7 @@ ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE staff_credentials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
@@ -222,6 +262,10 @@ DROP POLICY IF EXISTS "tasks_update" ON tasks;
 CREATE POLICY "tasks_update" ON tasks FOR UPDATE USING (
   organization_id = public.get_user_org_id()
 );
+DROP POLICY IF EXISTS "tasks_delete" ON tasks;
+CREATE POLICY "tasks_delete" ON tasks FOR DELETE USING (
+  organization_id = public.get_user_org_id()
+);
 
 -- CONVERSATIONS: participants
 DROP POLICY IF EXISTS "conv_select" ON conversations;
@@ -249,6 +293,24 @@ CREATE POLICY "msg_insert" ON messages FOR INSERT WITH CHECK (
     JOIN profiles p ON p.id = cp.profile_id
     WHERE p.user_id = auth.uid()
   )
+);
+
+-- NOTIFICATIONS: users see only their own
+DROP POLICY IF EXISTS "notifications_select" ON notifications;
+CREATE POLICY "notifications_select" ON notifications FOR SELECT USING (
+  user_id = auth.uid()
+);
+DROP POLICY IF EXISTS "notifications_insert" ON notifications;
+CREATE POLICY "notifications_insert" ON notifications FOR INSERT WITH CHECK (
+  true  -- any authenticated user can create notifications
+);
+DROP POLICY IF EXISTS "notifications_update" ON notifications;
+CREATE POLICY "notifications_update" ON notifications FOR UPDATE USING (
+  user_id = auth.uid()
+);
+DROP POLICY IF EXISTS "notifications_delete" ON notifications;
+CREATE POLICY "notifications_delete" ON notifications FOR DELETE USING (
+  user_id = auth.uid()
 );
 
 -- AI ANALYSES: org members
