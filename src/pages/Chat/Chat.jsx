@@ -111,10 +111,11 @@ export default function Chat() {
   const mountId = useRef(Date.now().toString(36));
   const lastReadTimestamps = useRef({});
   const manuallyReadRef = useRef(new Set());
+  const unreadCountsRef = useRef({});
 
   // Fire event for bell when unread count changes
   const fireUnreadEvent = useCallback((map) => {
-    const count = Object.values(map).filter(Boolean).length;
+    const count = Object.values(map).filter(v => v > 0).length;
     window.dispatchEvent(new CustomEvent('chat-unread-update', { detail: count }));
   }, []);
 
@@ -136,25 +137,26 @@ export default function Chat() {
     for (const conv of conversations) {
       const lastMsg = conv.lastMessage;
       if (!lastMsg) {
-        newMap[conv.id] = false;
+        newMap[conv.id] = 0;
         continue;
       }
       if (lastMsg.sender_id === myProfileId) {
-        newMap[conv.id] = false;
+        newMap[conv.id] = 0;
         continue;
       }
       if (conv.id === selectedConv?.id) {
-        newMap[conv.id] = false;
+        newMap[conv.id] = 0;
         continue;
       }
       if (manuallyReadRef.current.has(conv.id)) {
-        newMap[conv.id] = false;
+        newMap[conv.id] = 0;
         continue;
       }
       const lastRead = lastReadTimestamps.current[conv.id];
       const msgTime = new Date(lastMsg.created_at).getTime();
       const readTime = lastRead ? new Date(lastRead).getTime() : 0;
-      newMap[conv.id] = msgTime > readTime;
+      const count = unreadCountsRef.current[conv.id] || 0;
+      newMap[conv.id] = msgTime > readTime ? Math.max(count, 1) : count;
     }
     setUnreadMap(newMap);
     fireUnreadEvent(newMap);
@@ -366,6 +368,9 @@ export default function Chat() {
         table: 'messages',
       }, async (payload) => {
         const newMsg = payload.new;
+        if (newMsg.sender_id !== myProfileId && newMsg.conversation_id !== selectedConv?.id) {
+          unreadCountsRef.current[newMsg.conversation_id] = (unreadCountsRef.current[newMsg.conversation_id] || 0) + 1;
+        }
         setConversations(prev => {
           const idx = prev.findIndex(c => c.id === newMsg.conversation_id);
           if (idx === -1) return prev;
@@ -479,6 +484,7 @@ export default function Chat() {
   const handleSelectConv = (conv) => {
     lastReadTimestamps.current[conv.id] = new Date().toISOString();
     manuallyReadRef.current.add(conv.id);
+    unreadCountsRef.current[conv.id] = 0;
     setSelectedConv(conv);
     setReplyTo(null);
     setEditingMsg(null);
@@ -756,7 +762,7 @@ export default function Chat() {
                         </div>
                       );
                     })()}
-                    {unreadMap[conv.id] && (
+                    {unreadMap[conv.id] > 0 && (
                       <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-white" />
                     )}
                   </div>
@@ -765,8 +771,8 @@ export default function Chat() {
                       <p className="text-sm font-medium text-slate-900 truncate">{name}</p>
                       <span className="text-xs text-slate-400 shrink-0">{formatTime(lastTime)}</span>
                     </div>
-                    <p className={`text-xs truncate mt-0.5 ${unreadMap[conv.id] ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
-                      {lastContent || 'No messages yet'}
+                    <p className={`text-xs truncate mt-0.5 ${unreadMap[conv.id] > 0 ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
+                      {unreadMap[conv.id] > 1 ? `${unreadMap[conv.id]} new messages` : (lastContent || 'No messages yet')}
                     </p>
                   </div>
                 </button>
