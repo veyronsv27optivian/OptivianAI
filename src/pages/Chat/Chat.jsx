@@ -110,6 +110,7 @@ export default function Chat() {
   const inputRef = useRef(null);
   const mountId = useRef(Date.now().toString(36));
   const lastReadTimestamps = useRef({});
+  const manuallyReadRef = useRef(new Set());
 
   // Fire event for bell when unread count changes
   const fireUnreadEvent = useCallback((map) => {
@@ -131,6 +132,10 @@ export default function Chat() {
         continue;
       }
       if (conv.id === selectedConv?.id) {
+        newMap[conv.id] = false;
+        continue;
+      }
+      if (manuallyReadRef.current.has(conv.id)) {
         newMap[conv.id] = false;
         continue;
       }
@@ -347,7 +352,7 @@ export default function Chat() {
     return () => { cancelled = true; };
   }, [user, selectedConv]);
 
-  // Subscribe to all new messages user can see (to update conv list / unread dots)
+  // Subscribe to all messages changes (to keep conv list / messages in sync)
   useEffect(() => {
     if (!user || DEV_MODE || !myProfileId) return;
 
@@ -363,6 +368,33 @@ export default function Chat() {
           const idx = prev.findIndex(c => c.id === newMsg.conversation_id);
           if (idx === -1) return prev;
           return prev.map((c, i) => i === idx ? { ...c, lastMessage: newMsg } : c);
+        });
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'messages',
+      }, async (payload) => {
+        const updated = payload.new;
+        setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, ...updated } : m));
+        setConversations(prev => {
+          const idx = prev.findIndex(c => c.id === updated.conversation_id);
+          if (idx === -1) return prev;
+          return prev.map((c, i) => i === idx ? { ...c, lastMessage: c.lastMessage?.id === updated.id ? updated : c.lastMessage } : c);
+        });
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'messages',
+      }, async (payload) => {
+        const deleted = payload.old;
+        setMessages(prev => prev.filter(m => m.id !== deleted.id));
+        setConversations(prev => {
+          const idx = prev.findIndex(c => c.id === deleted.conversation_id);
+          if (idx === -1) return prev;
+          if (prev[idx].lastMessage?.id !== deleted.id) return prev;
+          return prev.map((c, i) => i === idx ? { ...c, lastMessage: null } : c);
         });
       })
       .subscribe();
@@ -444,9 +476,7 @@ export default function Chat() {
 
   const handleSelectConv = (conv) => {
     lastReadTimestamps.current[conv.id] = new Date().toISOString();
-    setUnreadMap(prev => ({ ...prev, [conv.id]: false }));
-    const current = { ...unreadMap, [conv.id]: false };
-    fireUnreadEvent(current);
+    manuallyReadRef.current.add(conv.id);
     setSelectedConv(conv);
     setReplyTo(null);
     setEditingMsg(null);
