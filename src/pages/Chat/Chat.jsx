@@ -759,9 +759,13 @@ export default function Chat() {
                       onClick={() => handleStartChat(member)}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-200 transition-colors"
                     >
-                      <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                        {initial}
-                      </div>
+                      {member.avatar_url ? (
+                        <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                          {initial}
+                        </div>
+                      )}
                       <span className="truncate">{member.email?.split('@')[0] || member.email}</span>
                     </button>
                   );

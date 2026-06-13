@@ -82,7 +82,7 @@ export async function getConversations(user) {
 
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('id, email')
+        .select('id, email, avatar_url')
         .in('id', pIds);
 
       const { data: lastMsgs } = await supabase

@@ -147,14 +147,21 @@ export default function Settings() {
                       if (!file) return;
                       setUploadingAvatar(true);
                       try {
+                        let url;
                         if (DEV_MODE) {
                           const reader = new FileReader();
-                          reader.onload = (ev) => {
-                            const url = ev.target?.result;
-                            setAvatarUrl(url);
-                            updatePassword({ metadata: { avatar_url: url } });
-                          };
-                          reader.readAsDataURL(file);
+                          url = await new Promise((resolve) => {
+                            reader.onload = (ev) => resolve(ev.target?.result);
+                            reader.readAsDataURL(file);
+                          });
+                          setAvatarUrl(url);
+                          await updatePassword({ metadata: { avatar_url: url } });
+                          const profiles = JSON.parse(localStorage.getItem('optivian_dev_profiles') || '[]');
+                          const idx = profiles.findIndex(p => p.user_id === user.id);
+                          if (idx !== -1) {
+                            profiles[idx].avatar_url = url;
+                            localStorage.setItem('optivian_dev_profiles', JSON.stringify(profiles));
+                          }
                         } else {
                           const ext = file.name.split('.').pop();
                           const path = `avatars/${user.id}_${Date.now()}.${ext}`;
@@ -165,9 +172,10 @@ export default function Settings() {
                           const { data: urlData } = supabase.storage
                             .from('chat_files')
                             .getPublicUrl(path);
-                          const url = urlData.publicUrl;
+                          url = urlData.publicUrl;
                           setAvatarUrl(url);
                           await updatePassword({ metadata: { avatar_url: url } });
+                          await supabase.from('profiles').update({ avatar_url: url }).eq('user_id', user.id);
                         }
                       } catch (err) {
                         setSaveError(err.message || 'Failed to upload avatar');

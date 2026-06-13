@@ -243,7 +243,7 @@ export default function MainLayout() {
                     <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
                     {notifications.length > 0 && (
                       <button
-                        onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); setShowNotifications(false); }}
+                        onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); setUnreadCount(0); setShowNotifications(false); }}
                         className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
                       >
                         Clear all
