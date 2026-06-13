@@ -97,12 +97,14 @@ CREATE TABLE IF NOT EXISTS messages (
   file_url TEXT,
   file_type TEXT,
   file_name TEXT,
-  reply_to UUID REFERENCES messages(id) ON DELETE SET NULL,
-  edited_at TIMESTAMPTZ,
-  edited_content TEXT,
-  deleted_for_user_ids UUID[] DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Add new columns to messages if the table already exists (safe to re-run)
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS reply_to UUID REFERENCES messages(id) ON DELETE SET NULL;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS edited_at TIMESTAMPTZ;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS edited_content TEXT;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS deleted_for_user_ids UUID[] DEFAULT '{}';
 
 -- 8. AI ANALYSES
 CREATE TABLE IF NOT EXISTS ai_analyses (

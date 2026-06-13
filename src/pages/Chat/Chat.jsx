@@ -118,6 +118,18 @@ export default function Chat() {
     window.dispatchEvent(new CustomEvent('chat-unread-update', { detail: count }));
   }, []);
 
+  // Initialize lastReadTimestamps for conversations that have no timestamp yet
+  const initTimestamps = useCallback(() => {
+    const now = new Date().toISOString();
+    for (const conv of conversations) {
+      if (!lastReadTimestamps.current[conv.id]) {
+        lastReadTimestamps.current[conv.id] = now;
+      }
+    }
+  }, [conversations]);
+
+  initTimestamps();
+
   // Compute unread status whenever conversations change or selection changes
   useEffect(() => {
     const newMap = {};
@@ -147,16 +159,6 @@ export default function Chat() {
     setUnreadMap(newMap);
     fireUnreadEvent(newMap);
   }, [conversations, selectedConv, myProfileId, fireUnreadEvent]);
-
-  // Initialize lastReadTimestamps for conversations that have no timestamp yet
-  useEffect(() => {
-    const now = new Date().toISOString();
-    for (const conv of conversations) {
-      if (!lastReadTimestamps.current[conv.id]) {
-        lastReadTimestamps.current[conv.id] = now;
-      }
-    }
-  }, [conversations]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -763,7 +765,7 @@ export default function Chat() {
                       <p className="text-sm font-medium text-slate-900 truncate">{name}</p>
                       <span className="text-xs text-slate-400 shrink-0">{formatTime(lastTime)}</span>
                     </div>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                    <p className={`text-xs truncate mt-0.5 ${unreadMap[conv.id] ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
                       {lastContent || 'No messages yet'}
                     </p>
                   </div>
