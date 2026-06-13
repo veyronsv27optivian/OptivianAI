@@ -482,6 +482,7 @@ export default function Chat() {
       setEditingMsg(null);
       setInput('');
       setSending(false);
+      inputRef.current?.focus();
       return;
     }
 
@@ -494,6 +495,7 @@ export default function Chat() {
       console.error('Failed to send:', error);
       setInput(content);
       setSending(false);
+      inputRef.current?.focus();
       return;
     }
 
