@@ -205,9 +205,13 @@ export default function Users() {
                 >
                   {/* Email */}
                   <div className="sm:col-span-5 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                      {member.email?.charAt(0).toUpperCase() || '?'}
-                    </div>
+                    {member.avatar_url ? (
+                      <img src={member.avatar_url} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                        {member.email?.charAt(0).toUpperCase() || '?'}
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-slate-900 truncate">{member.email}</p>
                       <p className="text-xs text-slate-400">ID: {member.id.slice(0, 8)}</p>

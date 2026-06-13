@@ -97,6 +97,10 @@ CREATE TABLE IF NOT EXISTS messages (
   file_url TEXT,
   file_type TEXT,
   file_name TEXT,
+  reply_to UUID REFERENCES messages(id) ON DELETE SET NULL,
+  edited_at TIMESTAMPTZ,
+  edited_content TEXT,
+  deleted_for_user_ids UUID[] DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -127,11 +131,26 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 -- 10. (reserved for future use)
 
+-- 10. STORAGE BUCKET for chat file uploads
+INSERT INTO storage.buckets (id, name, public) VALUES ('chat_files', 'chat_files', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Allow authenticated users to upload and read chat files
+DROP POLICY IF EXISTS "chat_files_insert" ON storage.objects;
+CREATE POLICY "chat_files_insert" ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'chat_files' AND auth.role() = 'authenticated'
+);
+
+DROP POLICY IF EXISTS "chat_files_select" ON storage.objects;
+CREATE POLICY "chat_files_select" ON storage.objects FOR SELECT USING (
+  bucket_id = 'chat_files' AND auth.role() = 'authenticated'
+);
+
 -- ============================================================
 -- INDEXES
 -- ============================================================
 
--- Enable Realtime for profiles so role changes reflect instantly
+-- Enable Realtime for profiles, messages, and conversation_participants
 -- Safe to run multiple times – checks if the table is already enrolled
 DO $$ BEGIN
   IF NOT EXISTS (
@@ -141,6 +160,28 @@ DO $$ BEGIN
     AND tablename = 'profiles'
   ) THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE profiles;
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+    AND schemaname = 'public'
+    AND tablename = 'messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+    AND schemaname = 'public'
+    AND tablename = 'conversation_participants'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE conversation_participants;
   END IF;
 END $$;
 
@@ -170,6 +211,51 @@ ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_analyses ENABLE ROW LEVEL SECURITY;
+
+-- RPC: create a conversation and add participants atomically (bypasses RLS via SECURITY DEFINER)
+CREATE OR REPLACE FUNCTION public.create_conversation_rpc(
+  p_name TEXT,
+  p_is_group BOOLEAN,
+  p_participant_ids UUID[]
+)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_org_id UUID;
+  v_profile_id UUID;
+  v_conv_id UUID;
+  v_result JSON;
+BEGIN
+  SELECT organization_id, id INTO v_org_id, v_profile_id
+  FROM public.profiles WHERE user_id = auth.uid();
+  
+  IF v_org_id IS NULL THEN
+    RAISE EXCEPTION 'No organization found for this user';
+  END IF;
+
+  INSERT INTO public.conversations (organization_id, name, is_group, created_by)
+  VALUES (v_org_id, p_name, p_is_group, v_profile_id)
+  RETURNING id INTO v_conv_id;
+
+  INSERT INTO public.conversation_participants (conversation_id, profile_id)
+  SELECT v_conv_id, unnest(p_participant_ids);
+
+  SELECT json_build_object(
+    'id', v_conv_id,
+    'organization_id', v_org_id,
+    'name', p_name,
+    'is_group', p_is_group,
+    'created_by', v_profile_id
+  ) INTO v_result;
+
+  RETURN v_result;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.create_conversation_rpc TO authenticated;
 
 -- ORGANIZATIONS: owner has full access
 DROP POLICY IF EXISTS "org_owner_select" ON organizations;
@@ -274,7 +360,42 @@ CREATE POLICY "conv_select" ON conversations FOR SELECT USING (
 );
 DROP POLICY IF EXISTS "conv_insert" ON conversations;
 CREATE POLICY "conv_insert" ON conversations FOR INSERT WITH CHECK (
+  organization_id IS NOT NULL
+  AND
   organization_id = public.get_user_org_id()
+);
+
+-- Helper: check if the current user participates in a conversation (bypasses RLS to avoid recursion)
+CREATE OR REPLACE FUNCTION public.is_conv_participant(conv_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM conversation_participants
+    WHERE conversation_id = conv_id
+      AND profile_id = public.get_user_profile_id()
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_conv_participant TO authenticated, anon;
+
+-- CONVERSATION PARTICIPANTS: members can view others, creator can add
+DROP POLICY IF EXISTS "conv_participants_select" ON conversation_participants;
+CREATE POLICY "conv_participants_select" ON conversation_participants FOR SELECT USING (
+  profile_id = public.get_user_profile_id()
+  OR
+  public.is_conv_participant(conversation_id)
+);
+
+DROP POLICY IF EXISTS "conv_participants_insert" ON conversation_participants;
+CREATE POLICY "conv_participants_insert" ON conversation_participants FOR INSERT WITH CHECK (
+  profile_id = public.get_user_profile_id()
+  OR
+  conversation_id IN (
+    SELECT id FROM conversations WHERE created_by = public.get_user_profile_id()
+  )
 );
 
 -- MESSAGES: participants of the conversation
@@ -293,6 +414,14 @@ CREATE POLICY "msg_insert" ON messages FOR INSERT WITH CHECK (
     JOIN profiles p ON p.id = cp.profile_id
     WHERE p.user_id = auth.uid()
   )
+);
+DROP POLICY IF EXISTS "msg_update" ON messages;
+CREATE POLICY "msg_update" ON messages FOR UPDATE USING (
+  sender_id = public.get_user_profile_id()
+);
+DROP POLICY IF EXISTS "msg_delete" ON messages;
+CREATE POLICY "msg_delete" ON messages FOR DELETE USING (
+  sender_id = public.get_user_profile_id()
 );
 
 -- NOTIFICATIONS: users see only their own

@@ -40,11 +40,7 @@ export default function MainLayout() {
     if (!user?.id) return;
     const count = await getUnreadCountAsync(user.id);
     setUnreadCount(count);
-    if (showNotifications) {
-      const items = await getNotificationsAsync(user.id);
-      setNotifications(items);
-    }
-  }, [user?.id, showNotifications]);
+  }, [user?.id]);
 
   useEffect(() => {
     refreshNotifications();
@@ -76,13 +72,10 @@ export default function MainLayout() {
       setShowNotifications(false);
       return;
     }
+    setShowNotifications(true);
     if (user?.id) {
       const items = await getNotificationsAsync(user.id);
       setNotifications(items);
-    }
-    setShowNotifications(true);
-    if (unreadCount > 0 && user?.id) {
-      markAllRead(user.id);
     }
   };
 
@@ -92,6 +85,7 @@ export default function MainLayout() {
   };
 
   const displayName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  const avatarUrl = user?.user_metadata?.avatar_url;
   const userInitial = (user?.email || 'User').charAt(0).toUpperCase();
   const userEmail = user?.email || '';
 
@@ -218,7 +212,7 @@ export default function MainLayout() {
                     <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
                     {notifications.length > 0 && (
                       <button
-                        onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); }}
+                        onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); setShowNotifications(false); }}
                         className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
                       >
                         Clear all
@@ -269,9 +263,13 @@ export default function MainLayout() {
             </div>
 
             <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
-                {userInitial}
-              </div>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                  {userInitial}
+                </div>
+              )}
               <div className="text-left">
                 <p className="text-sm font-medium text-slate-900">{displayName}</p>
                 <p className="text-xs text-slate-500">{userEmail}</p>

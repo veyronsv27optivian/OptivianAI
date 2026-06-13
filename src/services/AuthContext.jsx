@@ -408,6 +408,7 @@ export function AuthProvider({ children }) {
             role: u.user_metadata?.role || 'staff',
             isTempPassword: u.user_metadata?.temp_password === true,
             createdAt: u.created_at,
+            avatar_url: userProfile?.avatar_url || null,
           };
         });
     }

@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Settings as SettingsIcon, User, Building2, Key,
-  Save, LogOut, Eye, EyeOff, Check, AlertCircle
+  Save, LogOut, Eye, EyeOff, Check, AlertCircle, Camera
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
+import { supabase } from '../../services/supabase';
 import { useNavigate } from 'react-router-dom';
+
+const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
 export default function Settings() {
   const { user, signOut, isDevMode, updatePassword } = useAuth();
   const navigate = useNavigate();
+  const avatarInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('profile');
+  const [displayName, setDisplayName] = useState(user?.user_metadata?.name || user?.email?.split('@')[0] || '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.user_metadata?.avatar_url || '');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -108,12 +117,70 @@ export default function Settings() {
           {activeTab === 'profile' && (
             <div className="space-y-6">
               <div className="flex items-center gap-4 pb-6 border-b border-slate-200">
-                <div className="w-14 h-14 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
-                  {user?.email?.charAt(0).toUpperCase() || '?'}
+                <div className="relative shrink-0">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="w-14 h-14 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                      {user?.email?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
+                    title="Change photo"
+                  >
+                    {uploadingAvatar ? (
+                      <div className="w-3 h-3 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
+                    ) : (
+                      <Camera size={12} />
+                    )}
+                  </button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setUploadingAvatar(true);
+                      try {
+                        if (DEV_MODE) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const url = ev.target?.result;
+                            setAvatarUrl(url);
+                            updatePassword({ metadata: { avatar_url: url } });
+                          };
+                          reader.readAsDataURL(file);
+                        } else {
+                          const ext = file.name.split('.').pop();
+                          const path = `avatars/${user.id}_${Date.now()}.${ext}`;
+                          const { error: uploadErr } = await supabase.storage
+                            .from('chat_files')
+                            .upload(path, file, { upsert: true });
+                          if (uploadErr) throw uploadErr;
+                          const { data: urlData } = supabase.storage
+                            .from('chat_files')
+                            .getPublicUrl(path);
+                          const url = urlData.publicUrl;
+                          setAvatarUrl(url);
+                          await updatePassword({ metadata: { avatar_url: url } });
+                        }
+                      } catch (err) {
+                        setSaveError(err.message || 'Failed to upload avatar');
+                        setTimeout(() => setSaveError(''), 3000);
+                      }
+                      setUploadingAvatar(false);
+                      e.target.value = '';
+                    }}
+                  />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">
-                    {user?.email?.split('@')[0] || 'User'}
+                    {displayName}
                   </h2>
                   <p className="text-sm text-slate-500">{user?.email}</p>
                   <div className="flex items-center gap-2 mt-1">
@@ -136,7 +203,8 @@ export default function Settings() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Display Name</label>
                   <input
                     type="text"
-                    defaultValue={user?.email?.split('@')[0] || ''}
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                     className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                   />
                 </div>
@@ -151,13 +219,41 @@ export default function Settings() {
                 </div>
               </div>
 
+              {saveError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                  <AlertCircle size={16} className="text-red-600 shrink-0" />
+                  <p className="text-sm text-red-700">{saveError}</p>
+                </div>
+              )}
+
               <div className="flex justify-end">
                 <button
-                  onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all"
+                  onClick={async () => {
+                    setSaveError('');
+                    setSaving(true);
+                    const { error } = await updatePassword({ metadata: { name: displayName } });
+                    setSaving(false);
+                    if (error) {
+                      setSaveError(error.message || 'Failed to update display name');
+                      return;
+                    }
+                    setSaved(true);
+                    setTimeout(() => setSaved(false), 2000);
+                  }}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all disabled:opacity-50"
                 >
-                  <Save size={16} />
-                  {saved ? 'Saved!' : 'Save Changes'}
+                  {saving ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={16} />
+                      {saved ? 'Saved!' : 'Save Changes'}
+                    </>
+                  )}
                 </button>
               </div>
             </div>
