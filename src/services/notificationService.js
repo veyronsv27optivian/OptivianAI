@@ -79,7 +79,7 @@ export function getNotifications(userId) {
 
   if (isDev) {
     return devGet()
-      .filter((n) => n.user_id === userId)
+      .filter((n) => n.user_id === userId && !n.read)
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
@@ -149,6 +149,7 @@ export async function getNotificationsAsync(userId) {
     .from('notifications')
     .select('*')
     .eq('user_id', userId)
+    .eq('read', false)
     .order('created_at', { ascending: false })
     .limit(20);
 
