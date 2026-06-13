@@ -125,7 +125,12 @@ export default function Chat() {
     try { localStorage.setItem(getStorageKey(), JSON.stringify(lastReadTimestamps.current)); }
     catch {}
   }
-  const lastReadTimestamps = useRef(loadTimestamps());
+  function reloadTimestamps() {
+    lastReadTimestamps.current = loadTimestamps();
+  }
+  const lastReadTimestamps = useRef({});
+  // Re-load timestamps from localStorage when user is ready (ref init runs with user=null)
+  useEffect(() => { reloadTimestamps(); }, [user?.id]);
   const manuallyReadRef = useRef(new Set());
   const unreadCountsRef = useRef({});
 
