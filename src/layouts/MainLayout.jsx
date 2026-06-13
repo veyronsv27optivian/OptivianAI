@@ -160,7 +160,7 @@ export default function MainLayout() {
             return (
               <button
                 key={item.label}
-                onClick={() => { if (item.label === 'Chat') markAllConversationsRead(); navigate(item.path); }}
+                onClick={() => navigate(item.path)}
                 className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
                   isActive
                     ? 'bg-blue-50 text-blue-700 font-medium'

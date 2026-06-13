@@ -124,6 +124,14 @@ export default function Chat() {
     window.dispatchEvent(new CustomEvent('chat-unread-update', { detail: count }));
   }, []);
 
+  // Re-sync tracker counts when conversations load (handles late tracker init)
+  useEffect(() => {
+    if (conversations.length === 0) return;
+    const c = getUnreadCounts();
+    Object.assign(unreadCountsRef.current, c);
+    setTrackerVersion(v => v + 1);
+  }, [conversations.length]);
+
   // Initialize lastReadTimestamps for conversations that have no timestamp yet
   const initTimestamps = useCallback(() => {
     const now = new Date().toISOString();
@@ -363,9 +371,12 @@ export default function Chat() {
 
   // Sync global tracker counts into local ref (covers msgs received while Chat was unmounted)
   useEffect(() => {
-    const trackerCounts = getUnreadCounts();
-    Object.assign(unreadCountsRef.current, trackerCounts);
-    setTrackerVersion(v => v + 1);
+    const sync = () => {
+      const c = getUnreadCounts();
+      Object.assign(unreadCountsRef.current, c);
+      setTrackerVersion(v => v + 1);
+    };
+    sync();
     const remove = addListener((counts) => {
       Object.assign(unreadCountsRef.current, counts);
       setTrackerVersion(v => v + 1);
