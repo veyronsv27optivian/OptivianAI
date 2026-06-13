@@ -102,6 +102,7 @@ export default function Chat() {
   const [editingMsg, setEditingMsg] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const messagesEndRef = useRef(null);
   const channelRef = useRef(null);
@@ -497,7 +498,6 @@ export default function Chat() {
 
   const handleClearChat = async () => {
     if (!selectedConv || DEV_MODE) return;
-    if (!window.confirm('Clear all messages in this conversation?')) return;
     const { error } = await supabase
       .from('messages')
       .delete()
@@ -509,6 +509,7 @@ export default function Chat() {
       ));
     }
     setShowHeaderMenu(false);
+    setShowClearConfirm(false);
   };
 
   const handleKeyDown = (e) => {
@@ -852,7 +853,7 @@ export default function Chat() {
                 {showHeaderMenu && (
                   <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1">
                     <button
-                      onClick={handleClearChat}
+                      onClick={() => { setShowHeaderMenu(false); setShowClearConfirm(true); }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 size={14} />
@@ -1064,6 +1065,40 @@ export default function Chat() {
           </div>
         )}
       </div>
+
+      {/* Clear Chat Confirm Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-sm mx-4 p-6 animate-fade-in">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-lg bg-red-100">
+                <Trash2 size={18} className="text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Clear chat</h3>
+                <p className="text-xs text-slate-500">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-6">
+              All messages in this conversation will be permanently deleted for everyone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleClearChat}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-all"
+              >
+                Delete all messages
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Context Menu */}
       {contextMenu && (
