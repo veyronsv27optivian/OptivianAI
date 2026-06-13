@@ -11,7 +11,7 @@ import {
   getOrCreateDirectConversation, createConversation,
   editMessage, deleteMessageForMe, deleteMessageForEveryone, uploadFile
 } from '../../services/chatService';
-import { markConversationRead } from '../../services/chatUnreadTracker';
+import { markConversationRead, addListener, getUnreadCounts } from '../../services/chatUnreadTracker';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
@@ -103,6 +103,7 @@ export default function Chat() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [trackerVersion, setTrackerVersion] = useState(0);
 
   const messagesEndRef = useRef(null);
   const channelRef = useRef(null);
@@ -164,7 +165,7 @@ export default function Chat() {
     }
     setUnreadMap(newMap);
     fireUnreadEvent(newMap);
-  }, [conversations, selectedConv, myProfileId, fireUnreadEvent]);
+  }, [conversations, selectedConv, myProfileId, fireUnreadEvent, trackerVersion]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -359,6 +360,18 @@ export default function Chat() {
     load();
     return () => { cancelled = true; };
   }, [user, selectedConv]);
+
+  // Sync global tracker counts into local ref (covers msgs received while Chat was unmounted)
+  useEffect(() => {
+    const trackerCounts = getUnreadCounts();
+    Object.assign(unreadCountsRef.current, trackerCounts);
+    setTrackerVersion(v => v + 1);
+    const remove = addListener((counts) => {
+      Object.assign(unreadCountsRef.current, counts);
+      setTrackerVersion(v => v + 1);
+    });
+    return remove;
+  }, []);
 
   // Subscribe to all messages changes (to keep conv list / messages in sync)
   useEffect(() => {
