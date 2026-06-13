@@ -449,6 +449,13 @@ export default function Chat() {
     return () => clearInterval(interval);
   }, [user]);
 
+  // Auto-focus input after sending completes or conversation selected
+  useEffect(() => {
+    if (selectedConv && !sending && !uploadingFile) {
+      inputRef.current?.focus();
+    }
+  }, [selectedConv, sending, uploadingFile]);
+
   const broadcastTyping = useCallback(() => {
     if (DEV_MODE || !typingChannelRef.current || !myProfileId) return;
     typingChannelRef.current.send({
@@ -482,7 +489,6 @@ export default function Chat() {
       setEditingMsg(null);
       setInput('');
       setSending(false);
-      setTimeout(() => inputRef.current?.focus(), 0);
       return;
     }
 
@@ -495,7 +501,6 @@ export default function Chat() {
       console.error('Failed to send:', error);
       setInput(content);
       setSending(false);
-      setTimeout(() => inputRef.current?.focus(), 0);
       return;
     }
 
@@ -508,7 +513,6 @@ export default function Chat() {
 
     setReplyTo(null);
     setSending(false);
-    setTimeout(() => inputRef.current?.focus(), 0);
   }, [input, sending, selectedConv, user, replyTo, editingMsg, uploadingFile]);
 
   const handleSelectConv = (conv) => {
