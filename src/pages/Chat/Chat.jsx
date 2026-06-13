@@ -255,6 +255,8 @@ export default function Chat() {
         setConversations(prev => prev.map(c =>
           c.id === selectedConv.id ? { ...c, lastMessage: newMsg } : c
         ));
+        lastReadTimestamps.current[selectedConv.id] = new Date().toISOString();
+        persistTimestamps();
       })
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -396,6 +398,10 @@ export default function Chat() {
           if (idx === -1) return prev;
           return prev.map((c, i) => i === idx ? { ...c, lastMessage: newMsg } : c);
         });
+        if (newMsg.conversation_id === selectedConv?.id) {
+          lastReadTimestamps.current[newMsg.conversation_id] = new Date().toISOString();
+          persistTimestamps();
+        }
       })
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -503,6 +509,8 @@ export default function Chat() {
       ));
     }
 
+    lastReadTimestamps.current[selectedConv.id] = new Date().toISOString();
+    persistTimestamps();
     setReplyTo(null);
     setSending(false);
   }, [input, sending, selectedConv, user, replyTo, editingMsg, uploadingFile]);
