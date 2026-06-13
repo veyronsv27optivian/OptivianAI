@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LogOut, Home, Users, CheckSquare, Brain, MessageSquare,
-  ChevronLeft, ChevronRight, Bell, Search, Settings, X
+  ChevronLeft, ChevronRight, Bell, Search, Settings
 } from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
 import {
@@ -36,7 +36,6 @@ export default function MainLayout() {
   const userRole = user?.user_metadata?.role || 'staff';
   const navItems = getNavItems(userRole);
 
-  // ── Notification helpers ────────────────────────
   const refreshNotifications = useCallback(async () => {
     if (!user?.id) return;
     const count = await getUnreadCountAsync(user.id);
@@ -47,22 +46,17 @@ export default function MainLayout() {
     }
   }, [user?.id, showNotifications]);
 
-  // Load unread count on mount and listen for updates
   useEffect(() => {
     refreshNotifications();
     const handler = () => refreshNotifications();
     window.addEventListener('notification-update', handler);
-
-    // Poll every 10s as a fallback
     const interval = setInterval(refreshNotifications, 10000);
-
     return () => {
       window.removeEventListener('notification-update', handler);
       clearInterval(interval);
     };
   }, [refreshNotifications]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!showNotifications) return;
     const handleClick = (e) => {
@@ -82,15 +76,11 @@ export default function MainLayout() {
       setShowNotifications(false);
       return;
     }
-
-    // Open the dropdown and fetch notifications
     if (user?.id) {
       const items = await getNotificationsAsync(user.id);
       setNotifications(items);
     }
     setShowNotifications(true);
-
-    // Mark all as read — the notification-update event will refresh the count
     if (unreadCount > 0 && user?.id) {
       markAllRead(user.id);
     }
@@ -105,7 +95,6 @@ export default function MainLayout() {
   const userInitial = (user?.email || 'User').charAt(0).toUpperCase();
   const userEmail = user?.email || '';
 
-  // Format notification time as relative
   const timeAgo = (dateStr) => {
     if (!dateStr) return '';
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -119,26 +108,25 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-950">
+    <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
       <div className={`relative flex flex-col transition-all duration-300 ease-out ${
         collapsed ? 'w-20' : 'w-64'
-      } bg-white/[0.03] backdrop-blur-xl border-r border-white/10`}>
+      } bg-white border-r border-slate-200`}>
         {/* Logo */}
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-white/10`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-slate-200`}>
           {!collapsed && (
-            <h1 className="text-xl font-bold">
-              <span className="text-white">Optivian</span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">AI</span>
+            <h1 className="text-xl font-bold text-slate-900">
+              Optivian<span className="text-blue-600">AI</span>
             </h1>
           )}
           {collapsed && (
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">O</span>
+            <span className="text-xl font-bold text-blue-600">O</span>
           )}
           <button
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-all duration-200"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -153,29 +141,15 @@ export default function MainLayout() {
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
                   isActive
-                    ? 'bg-blue-500/15 text-blue-400 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.05]'
+                    ? 'bg-blue-50 text-blue-700 font-medium'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                {/* Active indicator */}
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-gradient-to-b from-blue-400 to-indigo-500" />
-                )}
-                <div className="relative">
-                  <Icon size={20} className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                  {item.badge && (
-                    <span className="absolute -top-2 -right-2 w-4 h-4 flex items-center justify-center bg-rose-500 text-[10px] font-bold text-white rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </div>
+                <Icon size={20} className={`shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!collapsed && (
-                  <span className="font-medium text-sm">{item.label}</span>
-                )}
-                {!collapsed && item.badge && (
-                  <span className="ml-auto text-xs bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full font-medium">{item.badge}</span>
+                  <span className="text-sm">{item.label}</span>
                 )}
               </button>
             );
@@ -183,23 +157,21 @@ export default function MainLayout() {
         </nav>
 
         {/* Bottom section */}
-        <div className="p-3 border-t border-white/10">
-          {/* Settings */}
+        <div className="p-3 border-t border-slate-200">
           <button
             onClick={() => navigate('/app/settings')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/[0.05] transition-all duration-200 ${collapsed ? 'justify-center' : ''}`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 ${collapsed ? 'justify-center' : ''}`}
           >
-            <Settings size={20} />
-            {!collapsed && <span className="font-medium text-sm">Settings</span>}
+            <Settings size={20} className="shrink-0 text-slate-400" />
+            {!collapsed && <span className="text-sm">Settings</span>}
           </button>
 
-          {/* Logout */}
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''}`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''}`}
           >
-            <LogOut size={20} />
-            {!collapsed && <span className="font-medium text-sm">Sign Out</span>}
+            <LogOut size={20} className="shrink-0" />
+            {!collapsed && <span className="text-sm">Sign Out</span>}
           </button>
         </div>
       </div>
@@ -207,49 +179,47 @@ export default function MainLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between px-8 py-4 border-b border-white/5 bg-white/[0.02]">
+        <header className="flex items-center justify-between px-8 py-3 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1 max-w-md">
-              <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search anything..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/40 transition-all text-sm"
+                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
               />
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {/* Notification bell */}
             <div className="relative" ref={bellRef}>
               <button
                 aria-label="Notifications"
                 onClick={handleBellClick}
-                className={`relative p-2.5 rounded-xl transition-all duration-200 ${
+                className={`relative p-2 rounded-lg transition-all duration-200 ${
                   showNotifications
-                    ? 'bg-blue-500/15 text-blue-400'
-                    : 'text-slate-400 hover:text-white hover:bg-white/10'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center bg-rose-500 text-[9px] font-bold text-white rounded-full shadow-lg shadow-rose-500/50 animate-scale-in">
+                  <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center bg-red-500 text-[9px] font-bold text-white rounded-full">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
 
-              {/* Notification dropdown */}
               {showNotifications && (
                 <div
                   ref={dropdownRef}
-                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50 animate-scale-in"
+                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden z-50"
                 >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                    <h3 className="text-sm font-bold text-white">Notifications</h3>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+                    <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
                     {notifications.length > 0 && (
                       <button
                         onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); }}
-                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                        className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
                       >
                         Clear all
                       </button>
@@ -257,27 +227,27 @@ export default function MainLayout() {
                   </div>
                   <div className="overflow-y-auto max-h-80">
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-sm text-slate-500">
-                        <Bell size={24} className="mx-auto mb-2 text-slate-600" />
+                      <div className="p-8 text-center text-sm text-slate-400">
+                        <Bell size={24} className="mx-auto mb-2 text-slate-300" />
                         No notifications
                       </div>
                     ) : (
                       notifications.slice(0, 20).map((n) => (
                         <div
                           key={n.id}
-                          className={`px-4 py-3 border-b border-white/5 last:border-0 transition-colors ${
-                            !n.read ? 'bg-blue-500/5 border-l-2 border-l-blue-500' : ''
+                          className={`px-4 py-3 border-b border-slate-100 last:border-0 ${
+                            !n.read ? 'bg-blue-50 border-l-2 border-l-blue-500' : 'hover:bg-slate-50'
                           }`}
                         >
                           <div className="flex items-start gap-3">
                             <div className={`p-1.5 rounded-lg shrink-0 ${
-                              n.type === 'task_assigned' ? 'bg-emerald-500/10' : 'bg-blue-500/10'
+                              n.type === 'task_assigned' ? 'bg-emerald-100' : 'bg-blue-100'
                             }`}>
-                              <CheckSquare size={14} className={n.type === 'task_assigned' ? 'text-emerald-400' : 'text-blue-400'} />
+                              <CheckSquare size={14} className={n.type === 'task_assigned' ? 'text-emerald-600' : 'text-blue-600'} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm text-white leading-snug">{n.message}</p>
-                              <p className="text-xs text-slate-500 mt-1">{timeAgo(n.created_at)}</p>
+                              <p className="text-sm text-slate-700 leading-snug">{n.message}</p>
+                              <p className="text-xs text-slate-400 mt-1">{timeAgo(n.created_at)}</p>
                             </div>
                           </div>
                         </div>
@@ -285,10 +255,10 @@ export default function MainLayout() {
                     )}
                   </div>
                   {notifications.length > 0 && (
-                    <div className="px-4 py-2.5 border-t border-white/10 bg-white/[0.02]">
+                    <div className="px-4 py-2.5 border-t border-slate-200 bg-slate-50">
                       <button
                         onClick={() => navigate('/app/tasks')}
-                        className="w-full text-xs text-slate-400 hover:text-white text-center transition-colors"
+                        className="w-full text-xs text-slate-500 hover:text-slate-700 text-center transition-colors"
                       >
                         View all tasks
                       </button>
@@ -298,15 +268,15 @@ export default function MainLayout() {
               )}
             </div>
 
-            <div className="flex items-center gap-3 pl-3 border-l border-white/10">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-blue-500/25">
+            <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
                 {userInitial}
               </div>
               <div className="text-left">
-                <p className="text-sm font-medium text-white">{displayName}</p>
+                <p className="text-sm font-medium text-slate-900">{displayName}</p>
                 <p className="text-xs text-slate-500">{userEmail}</p>
                 {isDevMode && (
-                  <span className="text-[10px] text-amber-500 font-medium">Dev Mode</span>
+                  <span className="text-[10px] text-amber-600 font-medium">Dev Mode</span>
                 )}
               </div>
             </div>
