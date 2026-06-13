@@ -114,7 +114,18 @@ export default function Chat() {
   const fileInputRef = useRef(null);
   const inputRef = useRef(null);
   const mountId = useRef(Date.now().toString(36));
-  const lastReadTimestamps = useRef({});
+  function getStorageKey() {
+    return `optivian_lastRead_${user?.id || 'default'}`;
+  }
+  function loadTimestamps() {
+    try { return JSON.parse(localStorage.getItem(getStorageKey()) || '{}'); }
+    catch { return {}; }
+  }
+  function persistTimestamps() {
+    try { localStorage.setItem(getStorageKey(), JSON.stringify(lastReadTimestamps.current)); }
+    catch {}
+  }
+  const lastReadTimestamps = useRef(loadTimestamps());
   const manuallyReadRef = useRef(new Set());
   const unreadCountsRef = useRef({});
 
@@ -131,18 +142,6 @@ export default function Chat() {
     Object.assign(unreadCountsRef.current, c);
     setTrackerVersion(v => v + 1);
   }, [conversations.length]);
-
-  // Initialize lastReadTimestamps for conversations that have no timestamp yet
-  const initTimestamps = useCallback(() => {
-    const now = new Date().toISOString();
-    for (const conv of conversations) {
-      if (!lastReadTimestamps.current[conv.id]) {
-        lastReadTimestamps.current[conv.id] = now;
-      }
-    }
-  }, [conversations]);
-
-  initTimestamps();
 
   // Compute unread status whenever conversations change or selection changes
   useEffect(() => {
@@ -517,6 +516,7 @@ export default function Chat() {
 
   const handleSelectConv = (conv) => {
     lastReadTimestamps.current[conv.id] = new Date().toISOString();
+    persistTimestamps();
     manuallyReadRef.current.add(conv.id);
     unreadCountsRef.current[conv.id] = 0;
     markConversationRead(conv.id);
