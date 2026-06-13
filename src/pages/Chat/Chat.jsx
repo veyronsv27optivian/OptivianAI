@@ -165,10 +165,6 @@ export default function Chat() {
         newMap[conv.id] = 0;
         continue;
       }
-      if (manuallyReadRef.current.has(conv.id)) {
-        newMap[conv.id] = 0;
-        continue;
-      }
       const lastRead = lastReadTimestamps.current[conv.id];
       const msgTime = new Date(lastMsg.created_at).getTime();
       const readTime = lastRead ? new Date(lastRead).getTime() : 0;
