@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   MessageSquare, Send, Search, Plus, ArrowLeft, User,
-  Reply, Edit3, Trash2, X, Paperclip, Image as ImageIcon, File
+  Reply, Edit3, Trash2, X, Paperclip, Image as ImageIcon, File,
+  MoreVertical
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 import { supabase } from '../../services/supabase';
@@ -10,6 +11,7 @@ import {
   getOrCreateDirectConversation, createConversation,
   editMessage, deleteMessageForMe, deleteMessageForEveryone, uploadFile
 } from '../../services/chatService';
+import { markConversationRead } from '../../services/chatUnreadTracker';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
@@ -99,6 +101,7 @@ export default function Chat() {
   const [replyTo, setReplyTo] = useState(null);
   const [editingMsg, setEditingMsg] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
 
   const messagesEndRef = useRef(null);
   const channelRef = useRef(null);
@@ -485,10 +488,27 @@ export default function Chat() {
     lastReadTimestamps.current[conv.id] = new Date().toISOString();
     manuallyReadRef.current.add(conv.id);
     unreadCountsRef.current[conv.id] = 0;
+    markConversationRead(conv.id);
     setSelectedConv(conv);
     setReplyTo(null);
     setEditingMsg(null);
     setContextMenu(null);
+  };
+
+  const handleClearChat = async () => {
+    if (!selectedConv || DEV_MODE) return;
+    if (!window.confirm('Clear all messages in this conversation?')) return;
+    const { error } = await supabase
+      .from('messages')
+      .delete()
+      .eq('conversation_id', selectedConv.id);
+    if (!error) {
+      setMessages([]);
+      setConversations(prev => prev.map(c =>
+        c.id === selectedConv.id ? { ...c, lastMessage: null } : c
+      ));
+    }
+    setShowHeaderMenu(false);
   };
 
   const handleKeyDown = (e) => {
@@ -822,6 +842,25 @@ export default function Chat() {
                   )}
                 </div>
               </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowHeaderMenu(v => !v)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+                >
+                  <MoreVertical size={18} />
+                </button>
+                {showHeaderMenu && (
+                  <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1">
+                    <button
+                      onClick={handleClearChat}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 size={14} />
+                      Clear chat
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Messages */}
@@ -847,7 +886,7 @@ export default function Chat() {
                     const replyMsg = msg.reply_to ? messages.find(m => m.id === msg.reply_to) : null;
 
                     return (
-                      <div key={msg.id}>
+                      <div key={msg.id} id={`msg-${msg.id}`}>
                         {showDate && (
                           <div className="flex justify-center my-4">
                             <span className="text-xs text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200">
@@ -865,7 +904,13 @@ export default function Chat() {
                             )}
                             {/* Reply preview */}
                             {replyMsg && (
-                              <div className={`mb-1 px-3 py-1.5 rounded-lg text-xs border-l-2 border-blue-400 bg-opacity-50 ${isMine ? 'bg-blue-500/10 ml-auto' : 'bg-slate-100'} max-w-[90%]`}>
+                              <div
+                                className={`mb-1 px-3 py-1.5 rounded-lg text-xs border-l-2 border-blue-400 bg-opacity-50 cursor-pointer ${isMine ? 'bg-blue-500/10 ml-auto' : 'bg-slate-100'} max-w-[90%]`}
+                                onClick={() => {
+                                  const el = document.getElementById(`msg-${msg.reply_to}`);
+                                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }}
+                              >
                                 <p className="text-blue-600 font-medium text-[10px]">{senderEmail(replyMsg.sender_id, messageSenders)}</p>
                                 <p className="text-slate-500 truncate">{replyMsg.content || (replyMsg.file_name ? '📎 ' + replyMsg.file_name : '')}</p>
                               </div>

@@ -5,11 +5,13 @@ import {
   ChevronLeft, ChevronRight, Bell, Search, Settings
 } from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
+import { supabase } from '../services/supabase';
 import {
   getUnreadCountAsync,
   markAllRead,
   getNotificationsAsync,
 } from '../services/notificationService';
+import { initTracker, addListener, markAllConversationsRead } from '../services/chatUnreadTracker';
 
 function getNavItems(role) {
   const items = [
@@ -28,6 +30,7 @@ export default function MainLayout() {
   const { user, signOut, isDevMode } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const bellRef = useRef(null);
@@ -35,6 +38,29 @@ export default function MainLayout() {
 
   const userRole = user?.user_metadata?.role || 'staff';
   const navItems = getNavItems(userRole);
+
+  // Init chat unread tracker (survives tab switches)
+  useEffect(() => {
+    if (!user) return;
+    let cleanup;
+    (async () => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (profile) {
+        cleanup = initTracker(user.id, profile.id);
+        const removeListener = addListener((_counts, total) => {
+          setChatUnreadCount(total);
+        });
+        // Wrap both cleanups
+        const origCleanup = cleanup;
+        cleanup = () => { origCleanup?.(); removeListener(); };
+      }
+    })();
+    return () => { cleanup?.(); };
+  }, [user]);
 
   const refreshNotifications = useCallback(async () => {
     if (!user?.id) return;
@@ -134,7 +160,7 @@ export default function MainLayout() {
             return (
               <button
                 key={item.label}
-                onClick={() => navigate(item.path)}
+                onClick={() => { if (item.label === 'Chat') markAllConversationsRead(); navigate(item.path); }}
                 className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
                   isActive
                     ? 'bg-blue-50 text-blue-700 font-medium'
@@ -144,6 +170,11 @@ export default function MainLayout() {
                 <Icon size={20} className={`shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!collapsed && (
                   <span className="text-sm">{item.label}</span>
+                )}
+                {item.label === 'Chat' && chatUnreadCount > 0 && (
+                  <span className={`absolute ${collapsed ? 'top-0 right-0' : 'right-3'} min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center`}>
+                    {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+                  </span>
                 )}
               </button>
             );
