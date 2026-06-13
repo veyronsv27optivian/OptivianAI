@@ -11,7 +11,7 @@ import {
   markAllRead,
   getNotificationsAsync,
 } from '../services/notificationService';
-import { initTracker, addListener, markAllConversationsRead } from '../services/chatUnreadTracker';
+import { initTracker, addListener } from '../services/chatUnreadTracker';
 
 function getNavItems(role) {
   const items = [
@@ -39,7 +39,33 @@ export default function MainLayout() {
   const userRole = user?.user_metadata?.role || 'staff';
   const navItems = getNavItems(userRole);
 
-  // Init chat unread tracker (survives tab switches)
+  // Compute initial unread count from localStorage
+  function computeLocalUnread() {
+    const isDev = !import.meta.env.VITE_SUPABASE_URL;
+    if (!isDev) return 0;
+    try {
+      const timestamps = JSON.parse(localStorage.getItem(`optivian_lastRead_${user?.id}`) || '{}');
+      const conversations = JSON.parse(localStorage.getItem('optivian_dev_conversations') || '[]');
+      const profiles = JSON.parse(localStorage.getItem('optivian_dev_profiles') || '[]');
+      const myProfile = profiles.find(p => p.user_id === user?.id);
+      if (!myProfile) return 0;
+
+      let unread = 0;
+      for (const conv of conversations) {
+        const parts = JSON.parse(localStorage.getItem(`optivian_dev_conversations_participants_${conv.id}`) || '[]');
+        if (!parts.includes(myProfile.id)) continue;
+        const messages = JSON.parse(localStorage.getItem(`optivian_dev_messages_${conv.id}`) || '[]');
+        const lastMsg = messages[messages.length - 1];
+        if (!lastMsg) continue;
+        if (lastMsg.sender_id === myProfile.id) continue;
+        const readTime = timestamps[conv.id] ? new Date(timestamps[conv.id]).getTime() : 0;
+        if (new Date(lastMsg.created_at).getTime() > readTime) unread++;
+      }
+      return unread;
+    } catch { return 0; }
+  }
+
+  // Init chat unread tracker (Survives tab switches in Supabase mode)
   useEffect(() => {
     if (!user) return;
     let cleanup;
@@ -51,15 +77,15 @@ export default function MainLayout() {
         .single();
       if (profile) {
         cleanup = initTracker(user.id, profile.id);
-        const removeListener = addListener((_counts, total) => {
-          setChatUnreadCount(total);
-        });
-        // Wrap both cleanups
-        const origCleanup = cleanup;
-        cleanup = () => { origCleanup?.(); removeListener(); };
       }
     })();
-    return () => { cleanup?.(); };
+    // Listen for Chat's unread-update DOM event (carries the count in detail)
+    const removeListener = addListener((e) => {
+      setChatUnreadCount(typeof e?.detail === 'number' ? e.detail : computeLocalUnread());
+    });
+    // Set initial count from localStorage
+    setChatUnreadCount(computeLocalUnread());
+    return () => { cleanup?.(); removeListener(); };
   }, [user]);
 
   const refreshNotifications = useCallback(async () => {

@@ -11,7 +11,7 @@ import {
   getOrCreateDirectConversation, createConversation,
   editMessage, deleteMessageForMe, deleteMessageForEveryone, uploadFile
 } from '../../services/chatService';
-import { markConversationRead, addListener, getUnreadCounts } from '../../services/chatUnreadTracker';
+import { getUnreadCounts } from '../../services/chatUnreadTracker';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
@@ -370,17 +370,9 @@ export default function Chat() {
 
   // Sync global tracker counts into local ref (covers msgs received while Chat was unmounted)
   useEffect(() => {
-    const sync = () => {
-      const c = getUnreadCounts();
-      Object.assign(unreadCountsRef.current, c);
-      setTrackerVersion(v => v + 1);
-    };
-    sync();
-    const remove = addListener((counts) => {
-      Object.assign(unreadCountsRef.current, counts);
-      setTrackerVersion(v => v + 1);
-    });
-    return remove;
+    const c = getUnreadCounts();
+    Object.assign(unreadCountsRef.current, c);
+    setTrackerVersion(v => v + 1);
   }, []);
 
   // Subscribe to all messages changes (to keep conv list / messages in sync)
@@ -519,7 +511,6 @@ export default function Chat() {
     persistTimestamps();
     manuallyReadRef.current.add(conv.id);
     unreadCountsRef.current[conv.id] = 0;
-    markConversationRead(conv.id);
     setSelectedConv(conv);
     setReplyTo(null);
     setEditingMsg(null);
