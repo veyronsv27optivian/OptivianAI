@@ -482,7 +482,7 @@ export default function Chat() {
       setEditingMsg(null);
       setInput('');
       setSending(false);
-      inputRef.current?.focus();
+      setTimeout(() => inputRef.current?.focus(), 0);
       return;
     }
 
@@ -495,7 +495,7 @@ export default function Chat() {
       console.error('Failed to send:', error);
       setInput(content);
       setSending(false);
-      inputRef.current?.focus();
+      setTimeout(() => inputRef.current?.focus(), 0);
       return;
     }
 
@@ -508,7 +508,7 @@ export default function Chat() {
 
     setReplyTo(null);
     setSending(false);
-    inputRef.current?.focus();
+    setTimeout(() => inputRef.current?.focus(), 0);
   }, [input, sending, selectedConv, user, replyTo, editingMsg, uploadingFile]);
 
   const handleSelectConv = (conv) => {
@@ -547,10 +547,10 @@ export default function Chat() {
       if (editingMsg) {
         setEditingMsg(null);
         setInput('');
-        inputRef.current?.focus();
+        setTimeout(() => inputRef.current?.focus(), 0);
       } else if (replyTo) {
         setReplyTo(null);
-        inputRef.current?.focus();
+        setTimeout(() => inputRef.current?.focus(), 0);
       }
     }
   };
@@ -603,7 +603,7 @@ export default function Chat() {
     setReplyTo(msg);
     setEditingMsg(null);
     setContextMenu(null);
-    inputRef.current?.focus();
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const handleEdit = (msg) => {
@@ -611,7 +611,7 @@ export default function Chat() {
     setReplyTo(null);
     setInput(msg.edited_content || msg.content || '');
     setContextMenu(null);
-    inputRef.current?.focus();
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const handleDeleteForMe = async (msg) => {

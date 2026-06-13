@@ -20,9 +20,12 @@ export function initTracker(userId, profileId) {
       const msg = payload.new;
       if (msg.sender_id === profileId) return;
 
-      unreadCounts[msg.conversation_id] = (unreadCounts[msg.conversation_id] || 0) + 1;
-      totalUnread = Object.values(unreadCounts).reduce((s, v) => s + v, 0);
-      notify();
+      // Track unique conversation IDs (people), not individual messages
+      if (!unreadCounts[msg.conversation_id]) {
+        unreadCounts[msg.conversation_id] = 1;
+        totalUnread = Object.keys(unreadCounts).length;
+        notify();
+      }
     })
     .subscribe();
 
@@ -42,7 +45,7 @@ export function addListener(fn) {
 
 export function markConversationRead(convId) {
   delete unreadCounts[convId];
-  totalUnread = Object.values(unreadCounts).reduce((s, v) => s + v, 0);
+  totalUnread = Object.keys(unreadCounts).length;
   notify();
 }
 
