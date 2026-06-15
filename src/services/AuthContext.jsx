@@ -409,6 +409,7 @@ export function AuthProvider({ children }) {
             isTempPassword: u.user_metadata?.temp_password === true,
             createdAt: u.created_at,
             avatar_url: userProfile?.avatar_url || null,
+            last_seen: userProfile?.last_seen || null,
           };
         });
     }

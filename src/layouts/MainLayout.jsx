@@ -105,6 +105,28 @@ export default function MainLayout() {
     };
   }, [refreshNotifications]);
 
+  // Presence heartbeat – update last_seen every 60s
+  useEffect(() => {
+    if (!user?.id) return;
+    const isDev = !import.meta.env.VITE_SUPABASE_URL;
+
+    const touch = async () => {
+      if (isDev) {
+        const profiles = JSON.parse(localStorage.getItem('optivian_dev_profiles') || '[]');
+        const idx = profiles.findIndex(p => p.user_id === user.id);
+        if (idx !== -1) {
+          profiles[idx].last_seen = new Date().toISOString();
+          localStorage.setItem('optivian_dev_profiles', JSON.stringify(profiles));
+        }
+      } else {
+        await supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('user_id', user.id);
+      }
+    };
+    touch();
+    const hb = setInterval(touch, 60000);
+    return () => clearInterval(hb);
+  }, [user?.id]);
+
   useEffect(() => {
     if (!showNotifications) return;
     const handleClick = (e) => {
@@ -136,8 +158,13 @@ export default function MainLayout() {
     navigate('/onboarding');
   };
 
-  const displayName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
-  const avatarUrl = user?.user_metadata?.avatar_url;
+  const displayName = user?.user_metadata?.name || (user?.email?.split('@')?.[0]) || 'User';
+  const avatarUrl = (() => {
+    const url = user?.user_metadata?.avatar_url;
+    if (!url) return '';
+    try { const p = new URL(url); return p.protocol === 'javascript:' ? '' : p.href; }
+    catch { return ''; }
+  })();
   const userInitial = (user?.email || 'User').charAt(0).toUpperCase();
   const userEmail = user?.email || '';
 
@@ -154,25 +181,25 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <div className={`relative flex flex-col transition-all duration-300 ease-out ${
         collapsed ? 'w-20' : 'w-64'
-      } bg-white border-r border-slate-200`}>
+      } bg-white border-r border-border`}>
         {/* Logo */}
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-slate-200`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-border`}>
           {!collapsed && (
-            <h1 className="text-xl font-bold text-slate-900">
-              Optivian<span className="text-blue-600">AI</span>
+            <h1 className="text-xl font-bold text-foreground">
+              Optivian<span className="text-primary">AI</span>
             </h1>
           )}
           {collapsed && (
-            <span className="text-xl font-bold text-blue-600">O</span>
+            <span className="text-xl font-bold text-primary">O</span>
           )}
           <button
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200 active:scale-95"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -189,16 +216,16 @@ export default function MainLayout() {
                 onClick={() => navigate(item.path)}
                 className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
                   isActive
-                    ? 'bg-blue-50 text-blue-700 font-medium'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                }`}
+                    ? 'bg-primary text-on-primary'
+                    : 'text-foreground hover:text-primary hover:bg-background'
+                } active:scale-95`}
               >
-                <Icon size={20} className={`shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                <Icon size={20} className={`shrink-0 ${isActive ? 'text-on-primary' : 'text-slate-400 group-hover:text-primary'}`} />
                 {!collapsed && (
                   <span className="text-sm">{item.label}</span>
                 )}
                 {item.label === 'Chat' && chatUnreadCount > 0 && (
-                  <span className={`absolute ${collapsed ? 'top-0 right-0' : 'right-3'} min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center`}>
+                  <span className={`absolute ${collapsed ? 'top-0 right-0' : 'right-3'} min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center`}>
                     {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
                   </span>
                 )}
@@ -208,10 +235,10 @@ export default function MainLayout() {
         </nav>
 
         {/* Bottom section */}
-        <div className="p-3 border-t border-slate-200">
+        <div className="p-3 border-t border-border">
           <button
             onClick={() => navigate('/app/settings')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 ${collapsed ? 'justify-center' : ''}`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-foreground hover:text-primary hover:bg-background transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-95`}
           >
             <Settings size={20} className="shrink-0 text-slate-400" />
             {!collapsed && <span className="text-sm">Settings</span>}
@@ -219,7 +246,7 @@ export default function MainLayout() {
 
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''}`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-destructive hover:text-destructive/80 hover:bg-red-50 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''} active:scale-95`}
           >
             <LogOut size={20} className="shrink-0" />
             {!collapsed && <span className="text-sm">Sign Out</span>}
@@ -230,14 +257,14 @@ export default function MainLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between px-8 py-3 border-b border-slate-200 bg-white">
+        <header className="flex items-center justify-between px-8 py-3 border-b border-border bg-white">
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1 max-w-md">
               <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search anything..."
-                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm"
               />
             </div>
           </div>
@@ -248,13 +275,13 @@ export default function MainLayout() {
                 onClick={handleBellClick}
                 className={`relative p-2 rounded-lg transition-all duration-200 ${
                   showNotifications
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
-                }`}
+                    ? 'bg-primary text-on-primary'
+                    : 'text-slate-400 hover:text-primary hover:bg-background'
+                } active:scale-95`}
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center bg-red-500 text-[9px] font-bold text-white rounded-full">
+                  <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center bg-destructive text-[9px] font-bold text-white rounded-full">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
@@ -263,14 +290,14 @@ export default function MainLayout() {
               {showNotifications && (
                 <div
                   ref={dropdownRef}
-                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-white border border-border rounded-lg shadow-lg overflow-hidden z-50"
                 >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                    <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
                     {notifications.length > 0 && (
                       <button
                         onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); setUnreadCount(0); setShowNotifications(false); }}
-                        className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
+                        className="text-xs text-primary hover:text-primary/80 transition-colors"
                       >
                         Clear all
                       </button>
@@ -286,15 +313,15 @@ export default function MainLayout() {
                       notifications.slice(0, 20).map((n) => (
                         <div
                           key={n.id}
-                          className={`px-4 py-3 border-b border-slate-100 last:border-0 ${
-                            !n.read ? 'bg-blue-50 border-l-2 border-l-blue-500' : 'hover:bg-slate-50'
+                          className={`px-4 py-3 border-b border-border last:border-0 ${
+                            !n.read ? 'bg-primary/10 border-l-2 border-l-primary' : 'hover:bg-background'
                           }`}
                         >
                           <div className="flex items-start gap-3">
                             <div className={`p-1.5 rounded-lg shrink-0 ${
-                              n.type === 'task_assigned' ? 'bg-emerald-100' : 'bg-blue-100'
+                              n.type === 'task_assigned' ? 'bg-emerald-100' : 'bg-primary/10'
                             }`}>
-                              <CheckSquare size={14} className={n.type === 'task_assigned' ? 'text-emerald-600' : 'text-blue-600'} />
+                              <CheckSquare size={14} className={n.type === 'task_assigned' ? 'text-emerald-600' : 'text-primary' } />
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="text-sm text-slate-700 leading-snug">{n.message}</p>
@@ -306,7 +333,7 @@ export default function MainLayout() {
                     )}
                   </div>
                   {notifications.length > 0 && (
-                    <div className="px-4 py-2.5 border-t border-slate-200 bg-slate-50">
+                    <div className="px-4 py-2.5 border-t border-border bg-slate-50">
                       <button
                         onClick={() => navigate('/app/tasks')}
                         className="w-full text-xs text-slate-500 hover:text-slate-700 text-center transition-colors"
@@ -319,16 +346,16 @@ export default function MainLayout() {
               )}
             </div>
 
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
+            <div className="flex items-center gap-3 pl-3 border-l border-border">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
               ) : (
-                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-sm font-bold">
                   {userInitial}
                 </div>
               )}
               <div className="text-left">
-                <p className="text-sm font-medium text-slate-900">{displayName}</p>
+                <p className="text-sm font-medium text-foreground">{displayName}</p>
                 <p className="text-xs text-slate-500">{userEmail}</p>
                 {isDevMode && (
                   <span className="text-[10px] text-amber-600 font-medium">Dev Mode</span>

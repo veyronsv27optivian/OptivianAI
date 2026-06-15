@@ -84,6 +84,7 @@ export default function Login() {
                     type={showNewPassword ? 'text' : 'password'}
                     required
                     minLength={6}
+                    maxLength={128}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
@@ -168,6 +169,7 @@ export default function Login() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
+                    maxLength={128}
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     className="w-full pl-11 pr-12 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
