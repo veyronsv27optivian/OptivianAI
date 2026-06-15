@@ -23,3 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.lock
+.claude
+release/
+*.exe
+*.dll
+*.pak
+*.bin
+*.dat
+*.json
+locales/
+resources/
+resources.pak

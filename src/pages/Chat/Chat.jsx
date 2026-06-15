@@ -15,6 +15,23 @@ import { getUnreadCounts } from '../../services/chatUnreadTracker';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
+function sanitizeUrl(url) {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'javascript:') return '';
+    return parsed.href;
+  } catch {
+    return '';
+  }
+}
+
+function safeEmailName(email) {
+  if (!email) return 'Unknown';
+  const parts = email.split('@');
+  return parts[0] || email;
+}
+
 function formatTime(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -45,7 +62,7 @@ function shouldShowDateHeading(prevDate, currentDate) {
 function getConversationName(conv, myProfileId) {
   if (conv.name) return conv.name;
   const other = (conv.participantsData || []).find(p => p.id !== myProfileId);
-  if (other) return other.email?.split('@')[0] || 'User';
+  if (other) return safeEmailName(other.email) || 'User';
   return 'Unknown';
 }
 
@@ -55,7 +72,7 @@ function getOtherProfiles(conv, myProfileId) {
 
 function senderEmail(senderId, messageSenders) {
   const p = messageSenders[senderId];
-  return p?.email?.split('@')[0] || 'Unknown';
+  return safeEmailName(p?.email) || 'Unknown';
 }
 
 function senderProfile(senderId, messageSenders) {
@@ -707,7 +724,7 @@ export default function Chat() {
     if (typingIds.length === 0) return null;
     const names = typingIds.map(id => {
       const p = messageSenders[id];
-      return p?.email?.split('@')[0] || 'Someone';
+      return safeEmailName(p?.email) || 'Someone';
     });
     if (names.length === 1) return `${names[0]} is typing`;
     if (names.length === 2) return `${names[0]} and ${names[1]} are typing`;
@@ -760,13 +777,13 @@ export default function Chat() {
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-200 transition-colors"
                     >
                       {member.avatar_url ? (
-                        <img src={member.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                        <img src={sanitizeUrl(member.avatar_url)} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
                       ) : (
                         <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                           {initial}
                         </div>
                       )}
-                      <span className="truncate">{member.email?.split('@')[0] || member.email}</span>
+                      <span className="truncate">{safeEmailName(member.email) || member.email}</span>
                     </button>
                   );
                 })
@@ -808,7 +825,7 @@ export default function Chat() {
                       const otherProfiles = getOtherProfiles(conv, myProfileId);
                       const avatarUrl = !conv.is_group && otherProfiles[0]?.avatar_url;
                       return avatarUrl ? (
-                        <img src={avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
+                        <img src={sanitizeUrl(avatarUrl)} alt="" className="w-10 h-10 rounded-full object-cover" />
                       ) : (
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
                           conv.is_group ? 'bg-violet-600' : 'bg-blue-600'
@@ -854,7 +871,7 @@ export default function Chat() {
                   const otherProfiles = getOtherProfiles(selectedConv, myProfileId);
                   const avatarUrl = !selectedConv.is_group && otherProfiles[0]?.avatar_url;
                   return avatarUrl ? (
-                    <img src={avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover" />
+                    <img src={sanitizeUrl(avatarUrl)} alt="" className="w-9 h-9 rounded-full object-cover" />
                   ) : (
                     <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
                       {getConversationName(selectedConv, myProfileId).charAt(0).toUpperCase()}
@@ -933,7 +950,22 @@ export default function Chat() {
                           className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-1`}
                           onContextMenu={(e) => handleContextMenu(e, msg)}
                         >
-                          <div className="max-w-[75%]">
+                          {!isMine && (
+                            <div className="w-6 shrink-0 mr-1.5 self-end">
+                              {showSender && (() => {
+                                const sp = senderProfile(msg.sender_id, messageSenders);
+                                const av = sp?.avatar_url;
+                                return av ? (
+                                  <img src={sanitizeUrl(av)} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">
+                                    {senderName.charAt(0).toUpperCase()}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          )}
+                          <div className={`max-w-[75%] ${!isMine && !showSender ? 'ml-[30px]' : ''}`}>
                             {showSender && !isMine && (
                               <p className="text-xs text-slate-500 mb-1 ml-1">{senderName}</p>
                             )}
@@ -953,12 +985,12 @@ export default function Chat() {
                             {/* File attachment */}
                             {hasFile && (
                               <div className={`mb-1 ${isMine ? 'text-right' : ''}`}>
-                                {isImg ? (
+                                  {isImg ? (
                                   <div className="relative group inline-block">
-                                    <img src={msg.file_url} alt={msg.file_name} className="max-w-64 max-h-64 rounded-lg object-cover border border-slate-200 cursor-pointer"
-                                      onClick={() => window.open(msg.file_url, '_blank')} />
+                                    <img src={sanitizeUrl(msg.file_url)} alt={msg.file_name} className="max-w-64 max-h-64 rounded-lg object-cover border border-slate-200 cursor-pointer"
+                                      onClick={() => window.open(sanitizeUrl(msg.file_url), '_blank')} />
                                     <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <a href={msg.file_url} download={msg.file_name || 'image'}
+                                      <a href={sanitizeUrl(msg.file_url)} download={msg.file_name || 'image'}
                                         className="p-1.5 bg-black/60 rounded text-white text-xs hover:bg-black/80"
                                         title="Download">
                                         <File size={12} />
@@ -967,14 +999,14 @@ export default function Chat() {
                                   </div>
                                 ) : (
                                   <div
-                                    onClick={() => window.open(msg.file_url, '_blank')}
+                                    onClick={() => window.open(sanitizeUrl(msg.file_url), '_blank')}
                                     className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer ${
                                       isMine ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
                                     }`}
                                   >
                                     <File size={16} />
                                     <span className="truncate max-w-40">{msg.file_name || 'File'}</span>
-                                    <a href={msg.file_url} download={msg.file_name}
+                                    <a href={sanitizeUrl(msg.file_url)} download={msg.file_name}
                                       className={`p-0.5 rounded ${isMine ? 'hover:bg-blue-400' : 'hover:bg-slate-200'}`}
                                       title="Download"
                                       onClick={e => e.stopPropagation()}>

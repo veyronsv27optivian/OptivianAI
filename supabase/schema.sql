@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
   is_temp_password BOOLEAN DEFAULT false,
   avatar_url TEXT,
+  last_seen TIMESTAMPTZ DEFAULT now(),
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

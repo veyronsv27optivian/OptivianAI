@@ -206,7 +206,7 @@ export default function Users() {
                   {/* Email */}
                   <div className="sm:col-span-5 flex items-center gap-3">
                     {member.avatar_url ? (
-                      <img src={member.avatar_url} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                      <img src={(() => { try { const u = new URL(member.avatar_url); return u.protocol === 'javascript:' ? '' : u.href; } catch { return ''; } })()} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0" />
                     ) : (
                       <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
                         {member.email?.charAt(0).toUpperCase() || '?'}
@@ -243,17 +243,21 @@ export default function Users() {
 
                   {/* Status */}
                   <div className="sm:col-span-2">
-                    {member.isTempPassword || member.is_temp_password ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                        Temp Password
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        Active
-                      </span>
-                    )}
+                    {(() => {
+                      const lastSeen = member.last_seen;
+                      const isOnline = lastSeen && (Date.now() - new Date(lastSeen).getTime() < 120000);
+                      return isOnline ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Online
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                          Offline
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   {/* Actions */}
@@ -313,6 +317,7 @@ export default function Users() {
                   <input
                     type="text"
                     required
+                    maxLength={128}
                     value={newStaff.password}
                     onChange={(e) => setNewStaff(prev => ({ ...prev, password: e.target.value }))}
                     className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"

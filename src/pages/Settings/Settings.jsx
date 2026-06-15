@@ -9,6 +9,17 @@ import { useNavigate } from 'react-router-dom';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
+function safeUrl(url) {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'javascript:') return '';
+    return parsed.href;
+  } catch {
+    return '';
+  }
+}
+
 export default function Settings() {
   const { user, signOut, isDevMode, updatePassword } = useAuth();
   const navigate = useNavigate();
@@ -119,7 +130,7 @@ export default function Settings() {
               <div className="flex items-center gap-4 pb-6 border-b border-slate-200">
                 <div className="relative shrink-0">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-14 h-14 rounded-lg object-cover" />
+                    <img src={safeUrl(avatarUrl)} alt="Avatar" className="w-14 h-14 rounded-lg object-cover" />
                   ) : (
                     <div className="w-14 h-14 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
                       {user?.email?.charAt(0).toUpperCase() || '?'}
@@ -284,6 +295,7 @@ export default function Settings() {
                       className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                       placeholder="At least 6 characters"
                       minLength={6}
+                      maxLength={128}
                     />
                     <button
                       type="button"
@@ -306,6 +318,7 @@ export default function Settings() {
                       className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                       placeholder="Re-enter new password"
                       minLength={6}
+                      maxLength={128}
                     />
                     <button
                       type="button"

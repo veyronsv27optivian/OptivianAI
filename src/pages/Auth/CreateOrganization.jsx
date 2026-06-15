@@ -180,6 +180,8 @@ export default function CreateOrganization() {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
+                      minLength={6}
+                      maxLength={128}
                       value={formData.adminPassword}
                       onChange={(e) => updateField('adminPassword', e.target.value)}
                       className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
