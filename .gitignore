@@ -26,12 +26,21 @@ dist-ssr
 .env.lock
 .claude
 release/
+
+# Electron build artifacts
 *.exe
 *.dll
 *.pak
 *.bin
 *.dat
-*.json
+snapshot_blob.bin
 locales/
 resources/
 resources.pak
+LICENSE.electron.txt
+LICENSES.chromium.html
+vk_swiftshader.dll
+vk_swiftshader_icd.json
+vulkan-1.dll
+chrome_100_percent.pak
+chrome_200_percent.pak
