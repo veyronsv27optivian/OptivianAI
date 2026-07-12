@@ -2,11 +2,15 @@ import { supabase } from './supabase';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
+let channelCounter = 0;
+
 export function initTracker(userId, profileId) {
   if (DEV_MODE) return () => {};
 
+  const channelName = `global-msgs-${userId}-${++channelCounter}`;
+
   const subscription = supabase
-    .channel(`global-msgs-${userId}`)
+    .channel(channelName)
     .on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',

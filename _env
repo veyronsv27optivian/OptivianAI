@@ -1,2 +1,23 @@
 VITE_SUPABASE_URL=https://hajvxegsjcjdeoukkkag.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhanZ4ZWdzamNqZGVvdWtra2FnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3Mjg0MDIsImV4cCI6MjA5NTMwNDQwMn0.J7idl_MsrW9gRZzS-q7ncNWzVVRerBcTkcWzCtvTCR8
+
+# ─── AI Provider API Keys ────────────────────────────────────────
+# Gemini is the DEFAULT provider. Set your API key below.
+# DeepSeek and Qwen use OpenRouter – you can reuse the same OpenRouter key or set separate ones.
+VITE_AI_DEFAULT_PROVIDER=gemini
+
+VITE_GEMINI_API_KEY=
+VITE_GEMINI_MODEL=gemini-2.0-flash
+
+VITE_DEEPSEEK_API_KEY=
+VITE_DEEPSEEK_MODEL=deepseek/deepseek-r1:free
+
+VITE_QWEN_API_KEY=
+VITE_QWEN_MODEL=qwen/qwen2.5-vl-72b-instruct:free
+
+# Optional: OpenAI via OpenRouter model override
+# VITE_OPENROUTER_OPENAI_MODEL=openai/gpt-4o
+
+# Optional: OpenRouter referrer info (for analytics on openrouter.ai)
+# VITE_OPENROUTER_REFERRER=https://yourapp.com
+# VITE_OPENROUTER_TITLE=OptivianAI

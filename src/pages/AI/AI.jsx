@@ -1,18 +1,161 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Brain, Send, Target, ShieldAlert,
-  BarChart3, Lightbulb, AlertTriangle,
-  MessageSquare, Clock, Lock
+  Brain, Target, ShieldAlert, BarChart3, Lightbulb, AlertTriangle,
+  MessageSquare, Clock, Lock, FileText, Users, TrendingUp,
+  DollarSign, HeartHandshake, BadgeCheck, Package, UserCircle,
+  Palette, Search, PenTool, Presentation, Mail, Zap,
+  Sliders, History, Server, ScrollText,
+  FileSearch, FileSignature, FileSpreadsheet,
+  Globe, Video, ChevronRight, Sparkles, List,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { AI_TOOL_TYPES, getToolInfo } from '../../services/ai';
+import AIToolView from './AIToolView';
+import AISettings from './AISettings';
+import AIHistory from './AIHistory';
+import AIProviders from './AIProviders';
+
+// ─── Tool Categories & Definitions ────────────────────────────────
+
+const TOOL_CATEGORIES = [
+  {
+    id: 'advisory',
+    label: 'Advisory & Strategy',
+    icon: Brain,
+    tools: [
+      { type: AI_TOOL_TYPES.BUSINESS_ADVISOR, label: 'Business Advisor', icon: Brain, color: 'text-blue-600', bg: 'bg-blue-50' },
+      { type: AI_TOOL_TYPES.STRATEGY_REPORT, label: 'SWOT Analysis', icon: Target, color: 'text-violet-600', bg: 'bg-violet-50' },
+      { type: AI_TOOL_TYPES.DECISION_SIMULATION, label: 'Decision Simulator', icon: BarChart3, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+      { type: AI_TOOL_TYPES.LAUNCH_READINESS, label: 'Launch Readiness', icon: BadgeCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { type: AI_TOOL_TYPES.RISK_DETECTION, label: 'Risk Assessment', icon: ShieldAlert, color: 'text-red-600', bg: 'bg-red-50' },
+    ],
+  },
+  {
+    id: 'analysis',
+    label: 'Analysis & Research',
+    icon: Search,
+    tools: [
+      { type: AI_TOOL_TYPES.REQUIREMENT_ANALYZER, label: 'Requirement Analyzer', icon: ScrollText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+      { type: AI_TOOL_TYPES.COMPETITIVE_ANALYSIS, label: 'Competitor Analysis', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50' },
+      { type: AI_TOOL_TYPES.MARKET_RESEARCH, label: 'Market Research', icon: Globe, color: 'text-teal-600', bg: 'bg-teal-50' },
+      { type: AI_TOOL_TYPES.PRODUCT_ANALYZER, label: 'Product Analyzer', icon: Package, color: 'text-pink-600', bg: 'bg-pink-50' },
+      { type: AI_TOOL_TYPES.SOCIAL_ANALYSIS, label: 'Social Media Analysis', icon: MessageSquare, color: 'text-sky-600', bg: 'bg-sky-50' },
+      { type: AI_TOOL_TYPES.SEO_ANALYSIS, label: 'SEO Analysis', icon: Search, color: 'text-green-600', bg: 'bg-green-50' },
+    ],
+  },
+  {
+    id: 'planning',
+    label: 'Planning & Forecasting',
+    icon: List,
+    tools: [
+      { type: AI_TOOL_TYPES.PERFORMANCE_ANALYSIS, label: 'Financial Forecast', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { type: AI_TOOL_TYPES.BUSINESS_PLAN, label: 'Business Plan Generator', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+      { type: AI_TOOL_TYPES.PREDICTIVE_ANALYTICS, label: 'Future Lab', icon: Lightbulb, color: 'text-amber-600', bg: 'bg-amber-50' },
+      { type: AI_TOOL_TYPES.STARTUP_VALIDATOR, label: 'Startup Validator', icon: BadgeCheck, color: 'text-purple-600', bg: 'bg-purple-50' },
+    ],
+  },
+  {
+    id: 'business',
+    label: 'Business Functions',
+    icon: TrendingUp,
+    tools: [
+      { type: AI_TOOL_TYPES.CONTENT_GENERATION, label: 'Marketing Strategy', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50' },
+      { type: AI_TOOL_TYPES.SALES_ADVISOR, label: 'Sales Advisor', icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
+      { type: AI_TOOL_TYPES.FINANCIAL_ADVISOR, label: 'Financial Advisor', icon: DollarSign, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+      { type: AI_TOOL_TYPES.HR_ADVISOR, label: 'HR Advisor', icon: Users, color: 'text-sky-600', bg: 'bg-sky-50' },
+      { type: AI_TOOL_TYPES.CUSTOMER_PERSONA, label: 'Customer Persona', icon: UserCircle, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+      { type: AI_TOOL_TYPES.BRAND_ANALYSIS, label: 'Brand Analysis', icon: Palette, color: 'text-fuchsia-600', bg: 'bg-fuchsia-50' },
+    ],
+  },
+  {
+    id: 'content',
+    label: 'Content Creation',
+    icon: PenTool,
+    tools: [
+      { type: AI_TOOL_TYPES.EMAIL_GENERATOR, label: 'AI Email Generator', icon: Mail, color: 'text-blue-600', bg: 'bg-blue-50' },
+      { type: AI_TOOL_TYPES.PROPOSAL_GENERATOR, label: 'AI Proposal Generator', icon: FileSignature, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+      { type: AI_TOOL_TYPES.PRESENTATION_GENERATOR, label: 'AI Presentation Generator', icon: Presentation, color: 'text-orange-600', bg: 'bg-orange-50' },
+      { type: AI_TOOL_TYPES.REPORT_GENERATION, label: 'Report Generator', icon: FileText, color: 'text-slate-600', bg: 'bg-slate-50' },
+      { type: AI_TOOL_TYPES.AI_BRAINSTORM, label: 'AI Brainstorm', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
+    ],
+  },
+  {
+    id: 'documents',
+    label: 'Document & File Analysis',
+    icon: FileSearch,
+    tools: [
+      { type: AI_TOOL_TYPES.DATA_EXTRACTION, label: 'Document Analyzer', icon: FileText, color: 'text-slate-600', bg: 'bg-slate-50' },
+      { type: AI_TOOL_TYPES.RESUME_ANALYZER, label: 'Resume Analyzer', icon: FileSearch, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+      { type: AI_TOOL_TYPES.CONTRACT_ANALYZER, label: 'Contract Analyzer', icon: FileSignature, color: 'text-red-600', bg: 'bg-red-50' },
+      { type: AI_TOOL_TYPES.PDF_ANALYZER, label: 'PDF Analyzer', icon: FileText, color: 'text-rose-600', bg: 'bg-rose-50' },
+      { type: AI_TOOL_TYPES.WORD_ANALYZER, label: 'Word Analyzer', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+      { type: AI_TOOL_TYPES.EXCEL_ANALYZER, label: 'Excel Analyzer', icon: FileSpreadsheet, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { type: AI_TOOL_TYPES.CSV_ANALYZER, label: 'CSV Analyzer', icon: FileSpreadsheet, color: 'text-green-600', bg: 'bg-green-50' },
+      { type: AI_TOOL_TYPES.POWERPOINT_ANALYZER, label: 'PowerPoint Analyzer', icon: Presentation, color: 'text-orange-600', bg: 'bg-orange-50' },
+    ],
+  },
+  {
+    id: 'web',
+    label: 'Web & Media Analysis',
+    icon: Globe,
+    tools: [
+      { type: AI_TOOL_TYPES.WEBSITE_ANALYZER, label: 'Website Analyzer', icon: Globe, color: 'text-blue-600', bg: 'bg-blue-50' },
+      { type: AI_TOOL_TYPES.YOUTUBE_ANALYZER, label: 'YouTube Analyzer', icon: Video, color: 'text-red-600', bg: 'bg-red-50' },
+      { type: AI_TOOL_TYPES.CUSTOM_ASSISTANT, label: 'Custom Assistant', icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-50' },
+    ],
+  },
+];
+
+// ─── Placeholder for meeting notes (uses SUMMARIZATION) ─────────--
+const MEETING_NOTES_CONFIG = {
+  type: AI_TOOL_TYPES.SUMMARIZATION,
+  label: 'Meeting Notes',
+  icon: MessageSquare,
+  color: 'text-teal-600',
+  bg: 'bg-teal-50',
+};
+
+// ─── Subpages ─────────────────────────────────────────────────────
+
+const SUBPAGES = [
+  { id: 'settings', label: 'AI Settings', icon: Sliders },
+  { id: 'history', label: 'AI History', icon: History },
+  { id: 'providers', label: 'Provider Management', icon: Server },
+];
+
+// ─── Main Component ───────────────────────────────────────────────
 
 export default function AI() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const userRole = user?.user_metadata?.role || 'staff';
-  const [prompt, setPrompt] = useState('');
-  const [selectedTab, setSelectedTab] = useState('advisor');
+  const [selectedTool, setSelectedTool] = useState(null);
+  const [selectedSubpage, setSelectedSubpage] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCategories, setExpandedCategories] = useState(
+    Object.fromEntries(TOOL_CATEGORIES.map(c => [c.id, true]))
+  );
+
+  // Parse route parameter for tool selection with useEffect
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.startsWith('/app/ai/settings')) {
+      setSelectedSubpage('settings');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/history')) {
+      setSelectedSubpage('history');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/providers')) {
+      setSelectedSubpage('providers');
+      setSelectedTool(null);
+    } else if (path === '/app/ai') {
+      // Reset to dashboard view if no subpage is selected
+      setSelectedSubpage(null);
+      setSelectedTool(null);
+    }
+  }, [location.pathname]);
 
   if (userRole !== 'admin') {
     return (
@@ -22,7 +165,7 @@ export default function AI() {
         </div>
         <h2 className="text-xl font-bold text-slate-900 mb-2">Access Restricted</h2>
         <p className="text-slate-500 text-center max-w-md text-sm">
-          The AI Advisor feature is only available to organization admins. Contact your admin for assistance.
+          The AI features are only available to organization admins. Contact your admin for assistance.
         </p>
         <button
           onClick={() => navigate('/app')}
@@ -34,122 +177,286 @@ export default function AI() {
     );
   }
 
+  const handleSelectTool = (toolType, toolLabel) => {
+    setSelectedTool({ type: toolType, label: toolLabel });
+    setSelectedSubpage(null);
+  };
+
+  const handleSelectSubpage = (pageId) => {
+    setSelectedSubpage(pageId);
+    setSelectedTool(null);
+  };
+
+  const handleBack = () => {
+    setSelectedTool(null);
+    setSelectedSubpage(null);
+  };
+
+  // Filter tools based on search
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery.trim()) return TOOL_CATEGORIES;
+    const q = searchQuery.toLowerCase();
+    return TOOL_CATEGORIES.map(cat => ({
+      ...cat,
+      tools: cat.tools.filter(t => t.label.toLowerCase().includes(q)),
+    })).filter(cat => cat.tools.length > 0);
+  }, [searchQuery]);
+
+  // Find the selected tool's category icon
+  const selectedToolIcon = useMemo(() => {
+    if (!selectedTool) return null;
+    for (const cat of TOOL_CATEGORIES) {
+      const found = cat.tools.find(t => t.type === selectedTool.type);
+      if (found) return found;
+    }
+    return null;
+  }, [selectedTool]);
+
+  const toggleCategory = (id) => {
+    setExpandedCategories(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // ── Render subpages ─────────────────────────────────────────────
+  if (selectedSubpage === 'settings') {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
+          <button
+            onClick={handleBack}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+          <div className="p-2 rounded-lg bg-slate-100">
+            <Sliders size={20} className="text-slate-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900">AI Settings</h2>
+        </div>
+        <div className="flex-1 overflow-auto">
+          <AISettings onClose={handleBack} />
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedSubpage === 'history') {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
+          <button
+            onClick={handleBack}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+          <div className="p-2 rounded-lg bg-slate-100">
+            <History size={20} className="text-slate-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900">AI History</h2>
+        </div>
+        <div className="flex-1 overflow-auto">
+          <AIHistory />
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedSubpage === 'providers') {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
+          <button
+            onClick={handleBack}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+          <div className="p-2 rounded-lg bg-slate-100">
+            <Server size={20} className="text-slate-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900">Provider Management</h2>
+        </div>
+        <div className="flex-1 overflow-auto">
+          <AIProviders />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Render tool view ────────────────────────────────────────────
+  if (selectedTool) {
+    const toolCfg = selectedToolIcon;
+    const getPlaceholder = () => {
+      const placeholders = {
+        [AI_TOOL_TYPES.BUSINESS_ADVISOR]: 'Describe your business challenge or question...',
+        [AI_TOOL_TYPES.REQUIREMENT_ANALYZER]: 'Paste your requirements document or describe them...',
+        [AI_TOOL_TYPES.DECISION_SIMULATION]: 'Describe the decision you need to simulate...',
+        [AI_TOOL_TYPES.RISK_DETECTION]: 'Describe the project or business context for risk assessment...',
+        [AI_TOOL_TYPES.LAUNCH_READINESS]: 'Describe your product or service launch plan...',
+        [AI_TOOL_TYPES.SOCIAL_ANALYSIS]: 'Describe your social media presence and strategy...',
+        [AI_TOOL_TYPES.STRATEGY_REPORT]: 'What would you like a SWOT analysis on?',
+        [AI_TOOL_TYPES.COMPETITIVE_ANALYSIS]: 'Describe your market and competitors...',
+        [AI_TOOL_TYPES.MARKET_RESEARCH]: 'What market would you like to research?',
+        [AI_TOOL_TYPES.PERFORMANCE_ANALYSIS]: 'Describe your business and financial data for forecasting...',
+        [AI_TOOL_TYPES.PREDICTIVE_ANALYTICS]: 'Describe your industry and business for future trend analysis...',
+        [AI_TOOL_TYPES.BUSINESS_PLAN]: 'Describe your business idea for a comprehensive business plan...',
+        [AI_TOOL_TYPES.SALES_ADVISOR]: 'Describe your sales challenge or situation...',
+        [AI_TOOL_TYPES.FINANCIAL_ADVISOR]: 'Describe your financial situation and goals...',
+        [AI_TOOL_TYPES.HR_ADVISOR]: 'Describe your HR challenge or question...',
+        [AI_TOOL_TYPES.STARTUP_VALIDATOR]: 'Describe your startup idea for validation...',
+        [AI_TOOL_TYPES.PRODUCT_ANALYZER]: 'Describe your product and target users...',
+        [AI_TOOL_TYPES.CUSTOMER_PERSONA]: 'Describe your business and target audience...',
+        [AI_TOOL_TYPES.BRAND_ANALYSIS]: 'Describe your brand and industry...',
+        [AI_TOOL_TYPES.SEO_ANALYSIS]: 'Describe your website and SEO goals...',
+        [AI_TOOL_TYPES.PROPOSAL_GENERATOR]: 'Describe the proposal context and client...',
+        [AI_TOOL_TYPES.PRESENTATION_GENERATOR]: 'Describe the presentation topic and audience...',
+        [AI_TOOL_TYPES.EMAIL_GENERATOR]: 'Describe the email context and purpose...',
+        [AI_TOOL_TYPES.AI_BRAINSTORM]: 'What topic would you like to brainstorm?',
+        [AI_TOOL_TYPES.CUSTOM_ASSISTANT]: 'Configure your custom assistant and ask your question...',
+        [AI_TOOL_TYPES.RESUME_ANALYZER]: 'Paste the resume content for analysis...',
+        [AI_TOOL_TYPES.CONTRACT_ANALYZER]: 'Paste the contract content for analysis...',
+        [AI_TOOL_TYPES.PDF_ANALYZER]: 'Paste the PDF document content for analysis...',
+        [AI_TOOL_TYPES.WORD_ANALYZER]: 'Paste the Word document content for analysis...',
+        [AI_TOOL_TYPES.EXCEL_ANALYZER]: 'Paste the spreadsheet data for analysis...',
+        [AI_TOOL_TYPES.CSV_ANALYZER]: 'Paste the CSV data for analysis...',
+        [AI_TOOL_TYPES.POWERPOINT_ANALYZER]: 'Paste the presentation content for analysis...',
+        [AI_TOOL_TYPES.WEBSITE_ANALYZER]: 'Paste the website content for analysis...',
+        [AI_TOOL_TYPES.YOUTUBE_ANALYZER]: 'Paste the video transcript or description for analysis...',
+        [AI_TOOL_TYPES.REPORT_GENERATION]: 'Describe the report topic and data...',
+        [AI_TOOL_TYPES.SUMMARIZATION]: 'Paste the content you want summarized...',
+        [AI_TOOL_TYPES.DATA_EXTRACTION]: 'Paste the document content for analysis...',
+      };
+      return placeholders[selectedTool.type] || 'Describe your request...';
+    };
+
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-200 bg-white">
+          <button
+            onClick={handleBack}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+          {toolCfg && (
+            <div className={`p-2 rounded-lg ${toolCfg.bg}`}>
+              <toolCfg.icon size={20} className={toolCfg.color} />
+            </div>
+          )}
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">{selectedTool.label}</h2>
+            <p className="text-xs text-slate-400">AI-powered analysis and insights</p>
+          </div>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <AIToolView
+            key={selectedTool.type}
+            toolType={selectedTool.type}
+            toolLabel={selectedTool.label}
+            placeholderText={getPlaceholder()}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Default: Tool Dashboard ─────────────────────────────────────
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">AI Advisor</h1>
-          <p className="text-slate-500 mt-1 text-sm">Intelligent insights and recommendations for your business</p>
+          <h1 className="text-2xl font-bold text-slate-900">AI Platform</h1>
+          <p className="text-slate-500 mt-1 text-sm">
+            {searchQuery ? `Search results for "${searchQuery}"` : 'Intelligent tools for analysis, planning, and content creation'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Subpage links */}
+          {SUBPAGES.map(sp => {
+            const Icon = sp.icon;
+            return (
+              <button
+                key={sp.id}
+                onClick={() => handleSelectSubpage(sp.id)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm"
+              >
+                <Icon size={16} />
+                <span className="hidden sm:inline">{sp.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex p-1 bg-slate-100 rounded-lg border border-slate-200 w-fit">
-        {[
-          { id: 'advisor', label: 'AI Advisor', icon: Brain },
-          { id: 'analysis', label: 'Social Analysis', icon: BarChart3 },
-          { id: 'future', label: 'Future Lab', icon: Lightbulb },
-        ].map((tab) => {
-          const Icon = tab.icon;
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search AI tools..."
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+        />
+      </div>
+
+      {/* Tool Categories */}
+      <div className="grid grid-cols-1 gap-6">
+        {filteredCategories.map((category) => {
+          const CatIcon = category.icon;
+          const isExpanded = expandedCategories[category.id];
           return (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all ${
-                selectedTab === tab.id
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Icon size={16} />
-              {tab.label}
-            </button>
+            <div key={category.id} className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+              {/* Category Header */}
+              <button
+                onClick={() => toggleCategory(category.id)}
+                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <CatIcon size={18} className="text-slate-500" />
+                  <h3 className="font-semibold text-slate-800">{category.label}</h3>
+                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                    {category.tools.length} tools
+                  </span>
+                </div>
+                <ChevronRight
+                  size={16}
+                  className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                />
+              </button>
+
+              {/* Tools Grid */}
+              {isExpanded && (
+                <div className="px-5 pb-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                  {category.tools.map((tool) => {
+                    const ToolIcon = tool.icon;
+                    return (
+                      <button
+                        key={tool.type}
+                        onClick={() => handleSelectTool(tool.type, tool.label)}
+                        className="flex flex-col items-center gap-2 p-3 rounded-lg border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all group"
+                      >
+                        <div className={`p-2 rounded-lg ${tool.bg} group-hover:scale-110 transition-transform`}>
+                          <ToolIcon size={18} className={tool.color} />
+                        </div>
+                        <span className="text-xs text-slate-600 text-center leading-tight">{tool.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main area */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Prompt input */}
-          <div className="bg-white border border-slate-200 rounded-lg p-5">
-            <h2 className="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <Brain size={18} className="text-blue-600" />
-              Ask the AI Advisor
-            </h2>
-            <div className="relative">
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe your business challenge or idea... e.g., 'Analyze our current social media strategy and suggest improvements'"
-                rows={4}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none text-sm"
-              />
-              <button
-                disabled={!prompt.trim()}
-                className="absolute bottom-3 right-3 p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send size={18} />
-              </button>
-            </div>
-            <p className="mt-2 text-xs text-slate-400">Powered by DeepSeek R1 + Qwen VL via OpenRouter</p>
+        {filteredCategories.length === 0 && (
+          <div className="text-center py-16">
+            <Search size={40} className="text-slate-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-700 mb-2">No tools found</h3>
+            <p className="text-sm text-slate-400">Try a different search term</p>
           </div>
-
-          {/* Recent analyses */}
-          <div className="bg-white border border-slate-200 rounded-lg p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                <Clock size={16} className="text-slate-400" />
-                Recent Analyses
-              </h2>
-            </div>
-            <div className="p-8 text-center">
-              <BarChart3 size={28} className="text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">No analyses yet</p>
-              <p className="text-xs text-slate-400 mt-1">Ask a question above to get started</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* AI Insights */}
-          <div className="bg-white border border-slate-200 rounded-lg p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Lightbulb size={18} className="text-violet-600" />
-              <h2 className="text-base font-semibold text-slate-900">AI Insights</h2>
-            </div>
-            <div className="p-4 text-center">
-              <p className="text-xs text-slate-400">Submit a query to receive AI-powered insights about your business.</p>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white border border-slate-200 rounded-lg p-5">
-            <h2 className="text-base font-semibold text-slate-900 mb-4">Quick Actions</h2>
-            <div className="space-y-2">
-              {[
-                { label: 'Run Risk Assessment', icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
-                { label: 'Analyze Social Media', icon: MessageSquare, color: 'text-blue-600', bg: 'bg-blue-50' },
-                { label: 'Generate Strategy Report', icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-              ].map((action) => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={action.label}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
-                  >
-                    <div className={`p-2 rounded-lg ${action.bg}`}>
-                      <Icon size={16} className={action.color} />
-                    </div>
-                    <span className="text-sm text-slate-700">{action.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LogOut, Home, Users, CheckSquare, Brain, MessageSquare,
-  ChevronLeft, ChevronRight, Bell, Search, Settings
+  ChevronLeft, ChevronRight, Bell, Search, Settings,
+  Sliders, History, Server, Building2, BarChart3, Clock,
+  Target, Activity,
 } from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
 import { supabase } from '../services/supabase';
@@ -15,11 +17,21 @@ import { initTracker, addListener } from '../services/chatUnreadTracker';
 
 function getNavItems(role) {
   const items = [
-    { icon: Home, label: 'Dashboard', path: '/app', badge: null, roles: ['admin', 'manager', 'staff'] },
-    { icon: Users, label: 'Users & Roles', path: '/app/users', badge: null, roles: ['admin', 'manager'] },
-    { icon: CheckSquare, label: 'Tasks', path: '/app/tasks', badge: null, roles: ['admin', 'manager', 'staff'] },
-    { icon: MessageSquare, label: 'Chat', path: '/app/chat', badge: null, roles: ['admin', 'manager', 'staff'] },
-    { icon: Brain, label: 'AI Advisor', path: '/app/ai', badge: null, roles: ['admin'] },
+    { icon: Home, label: 'Dashboard', path: '/app', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
+    { icon: Users, label: 'Users & Roles', path: '/app/users', badge: null, roles: ['admin', 'owner', 'manager'] },
+    { icon: CheckSquare, label: 'Tasks', path: '/app/tasks', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
+    { icon: MessageSquare, label: 'Chat', path: '/app/chat', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
+    { icon: Building2, label: 'Organization', path: '/app/org', badge: null, roles: ['admin', 'owner', 'manager'], submenu: [
+      { icon: Settings, label: 'Org Settings', path: '/app/org' },
+      { icon: BarChart3, label: 'Analytics', path: '/app/org/analytics' },
+      { icon: Target, label: 'Structure', path: '/app/org/structure' },
+      { icon: Clock, label: 'Activity', path: '/app/org/activity' },
+    ]},
+    { icon: Brain, label: 'AI Platform', path: '/app/ai', badge: null, roles: ['admin', 'owner'], submenu: [
+      { icon: Settings, label: 'AI Settings', path: '/app/ai/settings' },
+      { icon: History, label: 'History', path: '/app/ai/history' },
+      { icon: Server, label: 'Providers', path: '/app/ai/providers' },
+    ]},
   ];
   return items.filter(item => item.roles.includes(role));
 }
@@ -38,6 +50,7 @@ export default function MainLayout() {
 
   const userRole = user?.user_metadata?.role || 'staff';
   const navItems = getNavItems(userRole);
+  const [expandedNavItem, setExpandedNavItem] = useState(null);
 
   // Compute initial unread count from localStorage
   function computeLocalUnread() {
@@ -68,6 +81,8 @@ export default function MainLayout() {
   // Init chat unread tracker (Survives tab switches in Supabase mode)
   useEffect(() => {
     if (!user) return;
+    const isDev = !import.meta.env.VITE_SUPABASE_URL;
+    if (isDev) return;
     let cleanup;
     (async () => {
       const { data: profile } = await supabase
@@ -211,9 +226,15 @@ export default function MainLayout() {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
+              <div key={item.label}>
               <button
-                key={item.label}
-                onClick={() => navigate(item.path)}
+                onClick={() => {
+                  if (item.submenu && !collapsed) {
+                    setExpandedNavItem(expandedNavItem === item.label ? null : item.label);
+                  } else {
+                    navigate(item.path);
+                  }
+                }}
                 className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
                   isActive
                     ? 'bg-primary text-on-primary'
@@ -230,6 +251,30 @@ export default function MainLayout() {
                   </span>
                 )}
               </button>
+              {/* Submenu */}
+              {item.submenu && !collapsed && expandedNavItem === item.label && (
+                <div className="ml-8 mt-1 space-y-0.5">
+                  {item.submenu.map((sub) => {
+                    const SubIcon = sub.icon;
+                    const isSubActive = location.pathname === sub.path;
+                    return (
+                      <button
+                        key={sub.label}
+                        onClick={() => navigate(sub.path)}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${
+                          isSubActive
+                            ? 'bg-primary/10 text-primary font-medium'
+                            : 'text-slate-500 hover:text-primary hover:bg-slate-50'
+                        }`}
+                      >
+                        <SubIcon size={14} />
+                        {sub.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
             );
           })}
         </nav>

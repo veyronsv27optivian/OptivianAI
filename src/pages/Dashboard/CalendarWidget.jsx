@@ -1,0 +1,176 @@
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+  Calendar, Clock, AlertTriangle, CheckSquare,
+  ChevronLeft, ChevronRight,
+} from 'lucide-react';
+import Card, { CardHeader } from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+export default function CalendarWidget({ upcomingDeadlines = [] }) {
+  const navigate = useNavigate();
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // Generate calendar grid
+  const calendarDays = useMemo(() => {
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const days = [];
+
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+
+    // Day cells
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day);
+    }
+
+    return days;
+  }, [currentMonth, currentYear]);
+
+  // Get events for a specific day
+  const getEventsForDay = (day) => {
+    if (!day) return [];
+    const dateStr = new Date(currentYear, currentMonth, day).toDateString();
+    return upcomingDeadlines.filter(t => {
+      if (!t.due_date) return false;
+      return new Date(t.due_date).toDateString() === dateStr;
+    });
+  };
+
+  // Count deadlines by priority
+  const todayEvents = useMemo(() => getEventsForDay(today.getDate()), [today, upcomingDeadlines]);
+  const urgentCount = upcomingDeadlines.filter(t => t.priority === 'urgent' && new Date(t.due_date) >= new Date()).length;
+
+  return (
+    <Card variant="default" padding="p-5">
+      <CardHeader title="Calendar" subtitle="Upcoming deadlines" icon={Calendar} color="primary" />
+
+      {/* Month Header */}
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-sm font-semibold text-foreground">
+          {MONTHS[currentMonth]} {currentYear}
+        </h4>
+        <div className="flex items-center gap-1">
+          <button className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+            <ChevronLeft size={14} />
+          </button>
+          <button className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Day Headers */}
+      <div className="grid grid-cols-7 gap-0.5 mb-1">
+        {DAYS.map(d => (
+          <div key={d} className="text-center text-[10px] font-medium text-slate-400 py-1">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 gap-0.5 mb-4">
+        {calendarDays.map((day, i) => {
+          if (day === null) return <div key={`empty-${i}`} />;
+          const events = getEventsForDay(day);
+          const isToday = day === today.getDate() &&
+            currentMonth === today.getMonth() &&
+            currentYear === today.getFullYear();
+          const hasUrgent = events.some(t => t.priority === 'urgent');
+          const hasEvents = events.length > 0;
+
+          return (
+            <motion.button
+              key={day}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className={`
+                relative flex flex-col items-center justify-center py-1.5 rounded-lg text-xs
+                transition-all duration-200
+                ${isToday
+                  ? 'bg-primary text-white font-bold shadow-sm'
+                  : hasEvents
+                    ? 'hover:bg-slate-100 text-foreground'
+                    : 'text-slate-400 hover:bg-slate-50'
+                }
+              `}
+            >
+              <span>{day}</span>
+              {hasEvents && (
+                <div className="flex gap-0.5 mt-0.5">
+                  {hasUrgent && <span className="w-1 h-1 rounded-full bg-rose-500" />}
+                  <span className={`w-1 h-1 rounded-full ${isToday ? 'bg-white/80' : 'bg-primary'}`} />
+                </div>
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Today's Events */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+            <Clock size={12} /> Today
+          </h4>
+          {todayEvents.length > 0 && (
+            <Badge color={todayEvents.some(t => t.priority === 'urgent') ? 'rose' : 'primary'} size="xs">
+              {todayEvents.length} event{todayEvents.length !== 1 ? 's' : ''}
+            </Badge>
+          )}
+        </div>
+
+        {todayEvents.length > 0 ? (
+          <div className="space-y-1">
+            {todayEvents.slice(0, 3).map((t, i) => (
+              <motion.div
+                key={t.id || i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+                onClick={() => navigate('/app/tasks')}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full ${
+                  t.priority === 'urgent' ? 'bg-rose-500' :
+                  t.priority === 'high' ? 'bg-orange-500' :
+                  t.priority === 'medium' ? 'bg-amber-500' : 'bg-slate-400'
+                }`} />
+                <span className="text-xs text-slate-700 truncate flex-1">{t.title}</span>
+                {t.priority === 'urgent' && <AlertTriangle size={10} className="text-rose-500 shrink-0" />}
+              </motion.div>
+            ))}
+            {todayEvents.length > 3 && (
+              <p className="text-[10px] text-slate-400 text-center">+{todayEvents.length - 3} more</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 text-center py-2">No events today</p>
+        )}
+      </div>
+
+      {/* Urgent Count */}
+      {urgentCount > 0 && (
+        <div className="mt-3 pt-3 border-t border-border">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-rose-50 border border-rose-200">
+            <AlertTriangle size={14} className="text-rose-600 shrink-0" />
+            <span className="text-xs text-rose-700">
+              {urgentCount} urgent deadline{urgentCount !== 1 ? 's' : ''} ahead
+            </span>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
