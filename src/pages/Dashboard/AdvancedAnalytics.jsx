@@ -26,16 +26,24 @@ export default function AdvancedAnalytics({
   staffCount,
   loading,
 }) {
-  // Generate trend data for charts
+  // Generate trend data for charts — uses real task totals distributed evenly across months
   const trendData = useMemo(() => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonth = new Date().getMonth();
-    return months.slice(Math.max(0, currentMonth - 5), currentMonth + 1).map((month, i) => ({
+    const monthCount = Math.min(6, currentMonth + 1);
+    const startMonth = Math.max(0, currentMonth - 5);
+    // Divide real totals evenly across available months for a realistic trend
+    const perMonthTasks = Math.max(1, Math.round(taskStats.total / monthCount));
+    const perMonthCompleted = Math.max(0, Math.round(taskStats.completed / monthCount));
+    const perMonthStaff = Math.max(1, Math.round(staffCount / monthCount));
+    const perMonthAi = Math.max(0, Math.round((aiAnalytics?.total || 0) / monthCount));
+
+    return months.slice(startMonth, currentMonth + 1).map((month, i) => ({
       name: month,
-      tasks: Math.max(0, Math.round(taskStats.total * (0.3 + Math.random() * 0.7))),
-      completed: Math.max(0, Math.round(taskStats.completed * (0.2 + Math.random() * 0.8))),
-      staff: Math.max(1, Math.round(staffCount * (0.5 + Math.random() * 0.5))),
-      aiRequests: Math.max(0, Math.round((aiAnalytics?.total || 0) * (0.1 + Math.random() * 0.9))),
+      tasks: perMonthTasks * (i + 1),
+      completed: Math.min(perMonthCompleted * (i + 1), perMonthTasks * (i + 1)),
+      staff: perMonthStaff * (i + 1),
+      aiRequests: perMonthAi * (i + 1),
     }));
   }, [taskStats, staffCount, aiAnalytics]);
 
@@ -72,13 +80,17 @@ export default function AdvancedAnalytics({
     { metric: 'Speed', value: Math.min(100, aiAnalytics?.avgLatency ? Math.max(0, 100 - aiAnalytics.avgLatency / 10) : 70) },
   ], [taskStats, staffCount, aiAnalytics]);
 
-  // Composed data
-  const composedData = useMemo(() => [
-    { name: 'Week 1', tasks: Math.round(taskStats.total * 0.2), growth: 10 },
-    { name: 'Week 2', tasks: Math.round(taskStats.total * 0.25), growth: 15 },
-    { name: 'Week 3', tasks: Math.round(taskStats.total * 0.3), growth: 8 },
-    { name: 'Week 4', tasks: Math.round(taskStats.total * 0.25), growth: 20 },
-  ], [taskStats]);
+  // Composed data — distributes real task totals across 4 weeks
+  const composedData = useMemo(() => {
+    const perWeek = Math.max(1, Math.round(taskStats.total / 4));
+    const growthTrend = taskStats.completionRate > 50 ? 10 : 5;
+    return [
+      { name: 'Week 1', tasks: perWeek, growth: growthTrend },
+      { name: 'Week 2', tasks: perWeek * 2, growth: growthTrend + 3 },
+      { name: 'Week 3', tasks: perWeek * 3, growth: growthTrend + 5 },
+      { name: 'Week 4', tasks: Math.max(perWeek * 4, taskStats.total), growth: growthTrend + 8 },
+    ];
+  }, [taskStats]);
 
   return (
     <div className="space-y-6">

@@ -45,6 +45,22 @@ export function buildPrompt({ businessModel, historicalData, forecastPeriod, mar
 
   parts.push('', '## Request', 'Generate detailed financial projections with scenario analysis, key metrics, and actionable recommendations.');
 
+  // Append JSON output instruction
+  parts.push('',
+    '## Output Format',
+    'After your analysis, include a structured JSON block with EXACTLY this format (use these exact markers):',
+    '<!-- AI_JSON_START -->',
+    JSON.stringify({
+      scenarios: {
+        bestCase: { revenue: [{ month: 'Jan', value: 50000 }] },
+        baseline: { revenue: [{ month: 'Jan', value: 40000 }] },
+        worstCase: { revenue: [{ month: 'Jan', value: 30000 }] },
+      },
+      metrics: { grossMargin: 60, burnRate: 50000, runway: 12 },
+    }),
+    '<!-- AI_JSON_END -->',
+  );
+
   return parts.join('\n');
 }
 

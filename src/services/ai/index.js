@@ -133,5 +133,18 @@ export {
   promptSanitizer,
 } from './utils';
 
+// ─── Action Registry (Phase B1) ───────────────────────────────
+export {
+  registerAction,
+  getActionsForTool,
+  executeAction,
+  rollbackAction,
+  getAllActions,
+  getAction,
+  getActionLog,
+  requiresApproval,
+  getSafetyLevel,
+} from './actions';
+
 // ─── Base Tool Class ───────────────────────────────────────────
 export { BaseTool } from './tools/_BaseTool';

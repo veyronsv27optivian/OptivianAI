@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -12,11 +12,38 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 
+const STORAGE_KEY = 'optivian_calendar_view';
+
+function loadSavedView() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch { /* ignore */ }
+  return null;
+}
+
+function saveView(month, year) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ month, year }));
+  } catch { /* ignore */ }
+}
+
 export default function CalendarWidget({ upcomingDeadlines = [] }) {
   const navigate = useNavigate();
   const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
+  const savedView = loadSavedView();
+  const [viewMonth, setViewMonth] = useState(savedView?.month ?? today.getMonth());
+  const [viewYear, setViewYear] = useState(savedView?.year ?? today.getFullYear());
+
+  const currentMonth = viewMonth;
+  const currentYear = viewYear;
+
+  const navigateMonth = (delta) => {
+    const newDate = new Date(currentYear, currentMonth + delta, 1);
+    setViewMonth(newDate.getMonth());
+    setViewYear(newDate.getFullYear());
+    saveView(newDate.getMonth(), newDate.getFullYear());
+  };
 
   // Generate calendar grid
   const calendarDays = useMemo(() => {
@@ -47,8 +74,13 @@ export default function CalendarWidget({ upcomingDeadlines = [] }) {
     });
   };
 
-  // Count deadlines by priority
-  const todayEvents = useMemo(() => getEventsForDay(today.getDate()), [today, upcomingDeadlines]);
+  // Get events for actual today's date
+  const todayEvents = useMemo(() => {
+    return upcomingDeadlines.filter(t => {
+      if (!t.due_date) return false;
+      return new Date(t.due_date).toDateString() === today.toDateString();
+    });
+  }, [upcomingDeadlines]);
   const urgentCount = upcomingDeadlines.filter(t => t.priority === 'urgent' && new Date(t.due_date) >= new Date()).length;
 
   return (
@@ -59,12 +91,11 @@ export default function CalendarWidget({ upcomingDeadlines = [] }) {
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-semibold text-foreground">
           {MONTHS[currentMonth]} {currentYear}
-        </h4>
-        <div className="flex items-center gap-1">
-          <button className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+        </h4>          <div className="flex items-center gap-1">
+          <button onClick={() => navigateMonth(-1)} className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
             <ChevronLeft size={14} />
           </button>
-          <button className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={() => navigateMonth(1)} className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
             <ChevronRight size={14} />
           </button>
         </div>

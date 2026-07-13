@@ -49,6 +49,19 @@ export function buildPrompt({ businessContext, scope, knownRisks, riskTolerance 
 
   parts.push('', '## Request', 'Perform a comprehensive risk assessment with prioritised risks and actionable mitigation strategies.');
 
+  // Append JSON output instruction
+  parts.push('',
+    '## Output Format',
+    'After your analysis, include a structured JSON block with EXACTLY this format (use these exact markers):',
+    '<!-- AI_JSON_START -->',
+    JSON.stringify({
+      risks: [
+        { category: 'Strategic', description: 'Risk description', probability: 'High', impact: 4, score: 12, mitigation: 'Mitigation strategy', contingency: 'Backup plan' },
+      ],
+    }),
+    '<!-- AI_JSON_END -->',
+  );
+
   return parts.join('\n');
 }
 

@@ -44,6 +44,24 @@ export function buildPrompt({ decision, context, options, constraints }) {
 
   parts.push('', '## Request', 'Simulate the outcomes of this decision across multiple scenarios. Provide probabilities, impacts, and a recommended course of action.');
 
+  // Append JSON output instruction
+  parts.push('',
+    '## Output Format',
+    'After your analysis, include a structured JSON block with EXACTLY this format (use these exact markers):',
+    '<!-- AI_JSON_START -->',
+    JSON.stringify({
+      decisionOverview: 'Summary of the decision being simulated',
+      scenarios: [
+        { name: 'Optimistic', probability: 20, impact: 'High', timeline: '6 months', description: 'Best case outcome' },
+        { name: 'Most Likely', probability: 55, impact: 'Medium', timeline: '9 months', description: 'Expected outcome' },
+        { name: 'Pessimistic', probability: 25, impact: 'Low', timeline: '12 months', description: 'Worst case outcome' },
+      ],
+      recommendation: 'Recommended course of action',
+      sensitivityFactors: ['Market demand', 'Competition response'],
+    }),
+    '<!-- AI_JSON_END -->',
+  );
+
   return parts.join('\n');
 }
 

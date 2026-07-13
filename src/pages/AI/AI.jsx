@@ -15,6 +15,9 @@ import AIToolView from './AIToolView';
 import AISettings from './AISettings';
 import AIHistory from './AIHistory';
 import AIProviders from './AIProviders';
+import BusinessAdvisorForm from '../../components/ai-visualizations/BusinessAdvisorForm';
+import AiUsageDashboard from '../../components/ai-visualizations/AiUsageDashboard';
+import ToolRecommender from '../../components/ai-visualizations/ToolRecommender';
 
 // ─── Tool Categories & Definitions ────────────────────────────────
 
@@ -76,8 +79,10 @@ const TOOL_CATEGORIES = [
       { type: AI_TOOL_TYPES.EMAIL_GENERATOR, label: 'AI Email Generator', icon: Mail, color: 'text-blue-600', bg: 'bg-blue-50' },
       { type: AI_TOOL_TYPES.PROPOSAL_GENERATOR, label: 'AI Proposal Generator', icon: FileSignature, color: 'text-indigo-600', bg: 'bg-indigo-50' },
       { type: AI_TOOL_TYPES.PRESENTATION_GENERATOR, label: 'AI Presentation Generator', icon: Presentation, color: 'text-orange-600', bg: 'bg-orange-50' },
+      { type: AI_TOOL_TYPES.PITCH_DECK_ASSISTANT, label: 'Pitch Deck Assistant', icon: Presentation, color: 'text-rose-600', bg: 'bg-rose-50' },
       { type: AI_TOOL_TYPES.REPORT_GENERATION, label: 'Report Generator', icon: FileText, color: 'text-slate-600', bg: 'bg-slate-50' },
       { type: AI_TOOL_TYPES.AI_BRAINSTORM, label: 'AI Brainstorm', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
+      { type: AI_TOOL_TYPES.MEETING_NOTES, label: 'Meeting Notes', icon: MessageSquare, color: 'text-teal-600', bg: 'bg-teal-50' },
     ],
   },
   {
@@ -107,14 +112,7 @@ const TOOL_CATEGORIES = [
   },
 ];
 
-// ─── Placeholder for meeting notes (uses SUMMARIZATION) ─────────--
-const MEETING_NOTES_CONFIG = {
-  type: AI_TOOL_TYPES.SUMMARIZATION,
-  label: 'Meeting Notes',
-  icon: MessageSquare,
-  color: 'text-teal-600',
-  bg: 'bg-teal-50',
-};
+
 
 // ─── Subpages ─────────────────────────────────────────────────────
 
@@ -122,6 +120,7 @@ const SUBPAGES = [
   { id: 'settings', label: 'AI Settings', icon: Sliders },
   { id: 'history', label: 'AI History', icon: History },
   { id: 'providers', label: 'Provider Management', icon: Server },
+  { id: 'usage', label: 'Usage Analytics', icon: BarChart3 },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────
@@ -137,6 +136,8 @@ export default function AI() {
   const [expandedCategories, setExpandedCategories] = useState(
     Object.fromEntries(TOOL_CATEGORIES.map(c => [c.id, true]))
   );
+  // ── Business Advisor Form state ────────────────────────────
+  const [showAdvisorForm, setShowAdvisorForm] = useState(false);
 
   // Parse route parameter for tool selection with useEffect
   useEffect(() => {
@@ -146,6 +147,9 @@ export default function AI() {
       setSelectedTool(null);
     } else if (path.startsWith('/app/ai/history')) {
       setSelectedSubpage('history');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/usage')) {
+      setSelectedSubpage('usage');
       setSelectedTool(null);
     } else if (path.startsWith('/app/ai/providers')) {
       setSelectedSubpage('providers');
@@ -283,13 +287,69 @@ export default function AI() {
     );
   }
 
+  // ── Usage Analytics ──────────────────────────────────────────────
+  if (selectedSubpage === 'usage') {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
+          <button
+            onClick={handleBack}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+          >
+            <ChevronRight size={20} className="rotate-180" />
+          </button>
+          <div className="p-2 rounded-lg bg-slate-100">
+            <BarChart3 size={20} className="text-slate-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900">AI Usage Analytics</h2>
+        </div>
+        <div className="flex-1 overflow-auto p-4">
+          <AiUsageDashboard />
+        </div>
+      </div>
+    );
+  }
+
   // ── Render tool view ────────────────────────────────────────────
   if (selectedTool) {
     const toolCfg = selectedToolIcon;
+
+    // Business Advisor shows the form first
+    if (selectedTool.type === AI_TOOL_TYPES.BUSINESS_ADVISOR && showAdvisorForm) {
+      return (
+        <div className="h-full flex flex-col">
+          <div className="flex items-center gap-3 p-4 border-b border-slate-200 bg-white">
+            <button
+              onClick={() => setShowAdvisorForm(false)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+            >
+              <ChevronRight size={20} className="rotate-180" />
+            </button>
+            <div className={`p-2 rounded-lg ${toolCfg?.bg || 'bg-blue-50'}`}>
+              <Brain size={20} className={toolCfg?.color || 'text-blue-600'} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Business Advisor</h2>
+              <p className="text-xs text-slate-400">Fill in details for tailored advice</p>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto p-4 max-w-2xl mx-auto w-full">
+            <BusinessAdvisorForm
+              onSubmit={(formData) => {
+                // Send structured data as the chat prompt
+                setSelectedTool(prev => ({ ...prev, formData }));
+                setShowAdvisorForm(false);
+              }}
+              onClose={() => setShowAdvisorForm(false)}
+            />
+          </div>
+        </div>
+      );
+    }
+
     const getPlaceholder = () => {
       const placeholders = {
-        [AI_TOOL_TYPES.BUSINESS_ADVISOR]: 'Describe your business challenge or question...',
-        [AI_TOOL_TYPES.REQUIREMENT_ANALYZER]: 'Paste your requirements document or describe them...',
+        [AI_TOOL_TYPES.BUSINESS_ADVISOR]: 'Describe your business challenge or question, or use the structured form above...',
         [AI_TOOL_TYPES.DECISION_SIMULATION]: 'Describe the decision you need to simulate...',
         [AI_TOOL_TYPES.RISK_DETECTION]: 'Describe the project or business context for risk assessment...',
         [AI_TOOL_TYPES.LAUNCH_READINESS]: 'Describe your product or service launch plan...',
@@ -313,6 +373,8 @@ export default function AI() {
         [AI_TOOL_TYPES.EMAIL_GENERATOR]: 'Describe the email context and purpose...',
         [AI_TOOL_TYPES.AI_BRAINSTORM]: 'What topic would you like to brainstorm?',
         [AI_TOOL_TYPES.CUSTOM_ASSISTANT]: 'Configure your custom assistant and ask your question...',
+        [AI_TOOL_TYPES.PITCH_DECK_ASSISTANT]: 'Describe your pitch deck needs and target investors...',
+        [AI_TOOL_TYPES.MEETING_NOTES]: 'Paste the meeting transcript or notes to summarize...',
         [AI_TOOL_TYPES.RESUME_ANALYZER]: 'Paste the resume content for analysis...',
         [AI_TOOL_TYPES.CONTRACT_ANALYZER]: 'Paste the contract content for analysis...',
         [AI_TOOL_TYPES.PDF_ANALYZER]: 'Paste the PDF document content for analysis...',
@@ -343,10 +405,20 @@ export default function AI() {
               <toolCfg.icon size={20} className={toolCfg.color} />
             </div>
           )}
-          <div>
+          <div className="flex-1">
             <h2 className="text-base font-semibold text-slate-900">{selectedTool.label}</h2>
             <p className="text-xs text-slate-400">AI-powered analysis and insights</p>
           </div>
+          {/* Structured form button for Business Advisor */}
+          {selectedTool.type === AI_TOOL_TYPES.BUSINESS_ADVISOR && (
+            <button
+              onClick={() => setShowAdvisorForm(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition-all"
+            >
+              <Target size={12} />
+              Structured Form
+            </button>
+          )}
         </div>
         <div className="flex-1 overflow-hidden">
           <AIToolView
@@ -354,6 +426,7 @@ export default function AI() {
             toolType={selectedTool.type}
             toolLabel={selectedTool.label}
             placeholderText={getPlaceholder()}
+            additionalParams={selectedTool.formData ? { ...selectedTool.formData } : undefined}
           />
         </div>
       </div>
@@ -388,6 +461,9 @@ export default function AI() {
           })}
         </div>
       </div>
+
+      {/* Tool Recommender — AI suggests the best specialist */}
+      <ToolRecommender onSelectTool={handleSelectTool} />
 
       {/* Search */}
       <div className="relative max-w-md">

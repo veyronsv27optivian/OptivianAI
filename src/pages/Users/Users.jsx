@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
   Users as UsersIcon, UserPlus, Search, X, Check, AlertCircle, Trash2,
-  ChevronDown, Filter, Ban, ShieldOff, Key, Shield,
+  ChevronDown, Filter, Ban, ShieldOff, Key, Shield, Download,
 } from 'lucide-react';
+import { exportUsersToCSV } from '../../services/dataExportService';
 import { useAuth } from '../../services/AuthContext';
 import { getRoleInfo, getLowerRoles } from '../../services/auth/roles';
 
@@ -148,20 +149,30 @@ export default function Users() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Users & Roles</h1>
-          <p className="text-slate-500 mt-1 text-sm">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Users & Roles</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
             {canManage ? "Manage your organization's team members" : 'View your team members'}
           </p>
         </div>
-        {canManage && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:bg-blue-800 transition-all"
+            onClick={() => exportUsersToCSV(members)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-xs font-medium transition-all"
+            title="Export CSV"
           >
-            <UserPlus size={18} />
-            Add Staff
+            <Download size={14} />
+            Export
           </button>
-        )}
+          {canManage && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:bg-blue-800 transition-all shadow-premium"
+            >
+              <UserPlus size={18} />
+              Add Staff
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Success/Error messages */}
@@ -187,23 +198,23 @@ export default function Users() {
       {/* Search & filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name or email..."
-            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
           />
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-600">
-          <Filter size={16} className="text-slate-400" />
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-lg text-sm text-slate-600 dark:text-slate-400">
+          <Filter size={16} className="text-slate-400 dark:text-slate-500" />
           <span className="text-xs">{filteredMembers.length} member{filteredMembers.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
       {/* Staff List */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
@@ -217,10 +228,9 @@ export default function Users() {
               {canManage ? 'Add your first team member to get started' : 'Ask your admin to add team members'}
             </p>
           </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
+        ) : (            <div className="divide-y divide-slate-100 dark:divide-slate-700/30">
             {/* Header row */}
-            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50">
               <div className="sm:col-span-4">Member</div>
               <div className="sm:col-span-3">Role</div>
               <div className="sm:col-span-2">Status</div>
@@ -232,7 +242,7 @@ export default function Users() {
               return (
                 <div
                   key={member.id || member.profileId}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-6 py-4 hover:bg-slate-50 transition-colors items-center"
+                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors items-center"
                 >
                   {/* Member info */}
                   <div className="sm:col-span-4 flex items-center gap-3">
@@ -244,10 +254,10 @@ export default function Users() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                         {member.full_name || member.email?.split('@')[0] || 'Unknown'}
                       </p>
-                      <p className="text-xs text-slate-400 truncate">{member.email}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{member.email}</p>
                     </div>
                   </div>
 
@@ -322,17 +332,17 @@ export default function Users() {
 
       {/* Add Staff Modal */}
       {showAddModal && canManage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-600">
                   <UserPlus size={20} className="text-white" />
                 </div>
-                <h2 className="text-base font-semibold text-slate-900">Add Staff Member</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Add Staff Member</h2>
               </div>
               <button onClick={() => { setShowAddModal(false); setActionError(''); }}
-                className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all">
+                className="p-1.5 rounded text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
                 <X size={20} />
               </button>
             </div>

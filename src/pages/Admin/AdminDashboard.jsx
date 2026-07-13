@@ -309,8 +309,8 @@ export default function AdminDashboard() {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-600">
@@ -405,8 +405,8 @@ export default function AdminDashboard() {
 
       {/* Remove Confirmation Modal */}
       {showRemoveModal && memberToAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl">
             <div className="p-6 text-center">
               <div className="mx-auto w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center mb-4">
                 <AlertCircle size={24} className="text-white" />
@@ -443,8 +443,8 @@ export default function AdminDashboard() {
 
       {/* Suspend Confirmation Modal */}
       {showSuspendModal && memberToAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl">
             <div className="p-6 text-center">
               <div className={`mx-auto w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
                 memberToAction.is_suspended ? 'bg-emerald-600' : 'bg-amber-600'

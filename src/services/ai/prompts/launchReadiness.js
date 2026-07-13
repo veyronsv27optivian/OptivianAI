@@ -45,6 +45,23 @@ export function buildPrompt({ productDescription, targetLaunchDate, checklist, t
 
   parts.push('', '## Request', 'Evaluate launch readiness across all dimensions. Provide scores, status, and specific action items to improve readiness before launch.');
 
+  // Append JSON output instruction
+  parts.push('',
+    '## Output Format',
+    'After your analysis, include a structured JSON block with EXACTLY this format (use these exact markers):',
+    '<!-- AI_JSON_START -->',
+    JSON.stringify({
+      overallScore: 72,
+      status: 'Yellow',
+      dimensions: [
+        { name: 'Product', score: 80, status: 'Green', actionItems: ['Finish testing', 'Fix bugs'] },
+        { name: 'Market', score: 65, status: 'Yellow', actionItems: ['Finalize messaging'] },
+      ],
+      criticalGaps: ['Missing compliance approval', 'Team not fully trained'],
+    }),
+    '<!-- AI_JSON_END -->',
+  );
+
   return parts.join('\n');
 }
 

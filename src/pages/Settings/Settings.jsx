@@ -4,7 +4,7 @@ import {
   Save, LogOut, Eye, EyeOff, Check, AlertCircle, Camera,
   Smartphone, Briefcase, Shield, Mail, Clock, History,
   Monitor, Globe, AlertTriangle, CheckCircle, XCircle, RefreshCw,
-  ShieldCheck,
+  ShieldCheck, Bell, BellOff, MessageSquare, AtSign, CheckSquare,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 import { getRoleInfo } from '../../services/auth/roles';
@@ -130,6 +130,7 @@ export default function Settings() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'security', label: 'Password', icon: Key },
     { id: '2fa', label: 'Two-Factor Auth', icon: ShieldCheck },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'organization', label: 'Organization', icon: Building2 },
     { id: 'login-history', label: 'Login History', icon: History },
   ];
@@ -138,8 +139,8 @@ export default function Settings() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-        <p className="text-slate-500 mt-1 text-sm">Manage your account and preferences</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Manage your account and preferences</p>
       </div>
 
       <div className="flex gap-6 flex-col lg:flex-row">
@@ -153,19 +154,19 @@ export default function Settings() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                 }`}
               >
-                <Icon size={18} className={activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'} />
+                <Icon size={18} className={activeTab === tab.id ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'} />
                 {tab.label}
               </button>
             );
           })}
-          <div className="pt-4 mt-4 border-t border-slate-200">
+          <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-700/50">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-all"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
             >
               <LogOut size={18} />
               Sign Out
@@ -174,7 +175,7 @@ export default function Settings() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 bg-white border border-slate-200 rounded-lg p-6">
+        <div className="flex-1 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-6">
           {/* ── Profile Tab ── */}
           {activeTab === 'profile' && (
             <div className="space-y-6">
@@ -209,14 +210,14 @@ export default function Settings() {
                   />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">{displayName}</h2>
-                  <p className="text-sm text-slate-500">{user?.email}</p>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{displayName}</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email}</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-medium ${roleInfo.bg} ${roleInfo.color}`}>
                       {roleInfo.label}
                     </span>
                     {isDevMode && (
-                      <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium">Dev Mode</span>
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded font-medium">Dev Mode</span>
                     )}
                   </div>
                 </div>
@@ -225,12 +226,12 @@ export default function Settings() {
               {/* Profile fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                    className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                     placeholder="Your full name"
                   />
                 </div>
@@ -240,12 +241,12 @@ export default function Settings() {
                     type="email"
                     value={user?.email || ''}
                     disabled
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 cursor-not-allowed text-sm"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-lg text-slate-500 dark:text-slate-400 cursor-not-allowed text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center gap-1.5">
-                    <Smartphone size={14} className="text-slate-400" />
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                    <Smartphone size={14} className="text-slate-400 dark:text-slate-500" />
                     Phone
                   </label>
                   <input
@@ -257,8 +258,8 @@ export default function Settings() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center gap-1.5">
-                    <Briefcase size={14} className="text-slate-400" />
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                    <Briefcase size={14} className="text-slate-400 dark:text-slate-500" />
                     Designation
                   </label>
                   <input
@@ -304,20 +305,19 @@ export default function Settings() {
           {activeTab === 'security' && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">Change Password</h2>
-                <p className="text-sm text-slate-500 mt-1">Update your password regularly to keep your account secure.</p>
+                <h2 className="text-lg font-semibold text-slate-900">Change Password</h2>                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Update your password regularly to keep your account secure.</p>
               </div>
 
               <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">New Password</label>
                   <div className="relative">
                     <input
                       type={showNewPassword ? 'text' : 'password'}
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                      className="w-full pr-12 pl-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                       placeholder="At least 6 characters"
                       minLength={6}
                       maxLength={128}
@@ -340,7 +340,7 @@ export default function Settings() {
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                      className="w-full pr-12 pl-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                       placeholder="Re-enter new password"
                       minLength={6}
                       maxLength={128}
@@ -388,12 +388,11 @@ export default function Settings() {
                 </button>
               </form>
 
-              {/* Security info */}
-              <div className="pt-6 border-t border-slate-200">
-                <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
-                  <Shield size={20} className="text-slate-400 shrink-0 mt-0.5" />
+              {/* Security info */}                  <div className="pt-6 border-t border-slate-200 dark:border-slate-700/50">
+                <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                  <Shield size={20} className="text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-medium text-slate-700">Security Tips</h4>
+                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Security Tips</h4>
                     <ul className="mt-2 space-y-1 text-xs text-slate-500">
                       <li>• Use a unique password that you don't use elsewhere</li>
                       <li>• Combine uppercase, lowercase, numbers, and symbols</li>
@@ -451,9 +450,178 @@ export default function Settings() {
           {/* ── 2FA Tab ── */}
           {activeTab === '2fa' && <MfaSetup />}
 
+          {/* ── Notifications Tab ── */}
+          {activeTab === 'notifications' && <NotificationPreferences />}
+
           {/* ── Login History Tab ── */}
           {activeTab === 'login-history' && <LoginHistoryView userId={user?.id} />}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Notification Preferences Component (Item 54) ─────────────────
+function NotificationPreferences() {
+  const { user, updateProfile } = useAuth();
+  const NOTIF_KEY = 'optivian_notification_prefs';
+
+  const defaultPrefs = {
+    email_notifications: true,
+    in_app_notifications: true,
+    task_assigned: true,
+    task_due_soon: true,
+    task_overdue: true,
+    chat_messages: true,
+    ai_reports: false,
+    weekly_digest: false,
+    mentions_only: false,
+  };
+
+  const [prefs, setPrefs] = useState(() => {
+    try {
+      const saved = localStorage.getItem(NOTIF_KEY);
+      return saved ? { ...defaultPrefs, ...JSON.parse(saved) } : defaultPrefs;
+    } catch {
+      return defaultPrefs;
+    }
+  });
+
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const togglePref = (key) => {
+    setPrefs(prev => {
+      const updated = { ...prev, [key]: !prev[key] };
+      localStorage.setItem(NOTIF_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(prefs));
+    if (!import.meta.env.VITE_SUPABASE_URL) {
+      setSaving(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+      return;
+    }
+    const { error } = await updateProfile({ notification_preferences: prefs });
+    if (!error) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+    setSaving(false);
+  };
+
+  const toggleGroups = [
+    {
+      title: 'Delivery Method',
+      items: [
+        { key: 'email_notifications', label: 'Email Notifications', desc: 'Receive notifications via email', icon: Mail },
+        { key: 'in_app_notifications', label: 'In-App Notifications', desc: 'Show notifications in the app', icon: Bell },
+      ],
+    },
+    {
+      title: 'Task Notifications',
+      items: [
+        { key: 'task_assigned', label: 'Task Assigned', desc: 'When a task is assigned to you', icon: CheckSquare },
+        { key: 'task_due_soon', label: 'Due Date Reminders', desc: 'Reminders before a task is due', icon: Clock },
+        { key: 'task_overdue', label: 'Overdue Alerts', desc: 'When a task becomes overdue', icon: AlertTriangle },
+      ],
+    },
+    {
+      title: 'Communication',
+      items: [
+        { key: 'chat_messages', label: 'Chat Messages', desc: 'New messages in conversations', icon: MessageSquare },
+        { key: 'mentions_only', label: 'Mentions Only', desc: 'Only notify when you are @mentioned', icon: AtSign },
+      ],
+    },
+    {
+      title: 'AI & Reports',
+      items: [
+        { key: 'ai_reports', label: 'AI Report Ready', desc: 'When an AI analysis report is ready', icon: Shield },
+        { key: 'weekly_digest', label: 'Weekly Digest', desc: 'Weekly summary of activity', icon: RefreshCw },
+      ],
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Notification Preferences</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Choose what notifications you receive and how.
+        </p>
+      </div>
+
+      {toggleGroups.map((group) => (
+        <div key={group.title}>
+          <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+            {group.title}
+          </h3>
+          <div className="space-y-2">
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const isOn = prefs[item.key];
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => togglePref(item.key)}
+                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg border transition-all ${
+                    isOn
+                      ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                      : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg ${
+                    isOn ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500'
+                  }`}>
+                    <Icon size={16} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className={`text-sm font-medium ${isOn ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>
+                      {item.label}
+                    </p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">{item.desc}</p>
+                  </div>
+                  <div className={`w-10 h-6 rounded-full transition-all relative ${
+                    isOn ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                  }`}>
+                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
+                      isOn ? 'left-[18px]' : 'left-0.5'
+                    }`} />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700/50">
+        <button
+          onClick={() => {
+            setPrefs(defaultPrefs);
+            localStorage.setItem(NOTIF_KEY, JSON.stringify(defaultPrefs));
+          }}
+          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all"
+        >
+          Reset to Defaults
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all disabled:opacity-50"
+        >
+          {saving ? (
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <Save size={16} />
+          )}
+          {saved ? 'Saved!' : 'Save Preferences'}
+        </button>
       </div>
     </div>
   );
@@ -524,9 +692,8 @@ function LoginHistoryView({ userId }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900">Login History</h2>
-        <p className="text-sm text-slate-500 mt-1">
+      <div>              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Login History</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Recent login attempts and activity for your account.
         </p>
       </div>
@@ -592,10 +759,10 @@ function LoginHistoryView({ userId }) {
 
       {/* Login history table */}
       {!loading && loginHistory.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-          <div className="divide-y divide-slate-100">
+        <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
+          <div className="divide-y divide-slate-100 dark:divide-slate-700/30">
             {/* Header */}
-            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50">
               <div className="sm:col-span-3">Date & Time</div>
               <div className="sm:col-span-2">Provider</div>
               <div className="sm:col-span-2">IP Address</div>

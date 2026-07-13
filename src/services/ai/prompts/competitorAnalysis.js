@@ -45,6 +45,22 @@ export function buildPrompt({ businessDescription, market, competitors, competit
 
   parts.push('', '## Request', 'Analyse the competitive landscape and provide strategic positioning recommendations.');
 
+  // Append JSON output instruction
+  parts.push('',
+    '## Output Format',
+    'After your analysis, include a structured JSON block with EXACTLY this format (use these exact markers):',
+    '<!-- AI_JSON_START -->',
+    JSON.stringify({
+      competitors: [
+        { name: 'Competitor A', strengths: ['Brand recognition', 'Distribution'], weaknesses: ['High pricing', 'Slow support'], marketShare: 30, pricing: 'Premium', positioning: 'Market leader', targetAudience: 'Enterprise' },
+        { name: 'Competitor B', strengths: ['Low price', 'Fast delivery'], weaknesses: ['Limited features'], marketShare: 20, pricing: 'Budget', positioning: 'Cost leader' },
+      ],
+      differentiators: ['Focus on customer experience', 'AI-powered features'],
+      gapAnalysis: 'Market gap in mid-tier segment',
+    }),
+    '<!-- AI_JSON_END -->',
+  );
+
   return parts.join('\n');
 }
 

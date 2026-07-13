@@ -1,6 +1,29 @@
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import AnimatedCounter from './AnimatedCounter';
+
+// Map KPI titles to navigation routes
+const kpiRouteMap = {
+  Staff: '/app/users',
+  Revenue: '/app/org/analytics',
+  Tasks: '/app/tasks',
+  Completed: '/app/tasks',
+  Pending: '/app/tasks',
+  Overdue: '/app/tasks',
+  'AI Requests': '/app/ai',
+  'AI Cost': '/app/ai/history',
+  'AI Tokens': '/app/ai/history',
+  'Risk Score': '/app/org/analytics',
+  'Health Score': '/app/org/analytics',
+  Growth: '/app/org/analytics',
+  'Launch Ready': '/app/ai',
+  Productivity: '/app/tasks',
+  'AI Confidence': '/app/ai/settings',
+  'Response Time': '/app/ai/providers',
+  Satisfaction: '/app/org/analytics',
+  'Decision Accuracy': '/app/ai',
+};
 
 export default function KPICard({
   title,
@@ -16,6 +39,7 @@ export default function KPICard({
   loading = false,
   delay = 0,
 }) {
+  const navigate = useNavigate();
   const colorMap = {
     blue: { bg: 'bg-blue-50', icon: 'text-blue-600', card: 'border-blue-100', gradient: 'from-blue-500/10' },
     emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', card: 'border-emerald-100', gradient: 'from-emerald-500/10' },
@@ -47,13 +71,16 @@ export default function KPICard({
     );
   }
 
+  const route = kpiRouteMap[title];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay, ease: 'easeOut' }}
       whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      className={`relative overflow-hidden rounded-xl border ${c.card} bg-white p-5 hover:shadow-lg transition-all duration-300 group`}
+      onClick={route ? () => navigate(route) : undefined}
+      className={`relative overflow-hidden rounded-xl border ${c.card} bg-white p-5 hover:shadow-lg transition-all duration-300 group ${route ? 'cursor-pointer' : ''}`}
     >
       {/* Gradient background */}
       <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />

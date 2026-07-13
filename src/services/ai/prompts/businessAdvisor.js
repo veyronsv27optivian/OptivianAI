@@ -45,6 +45,25 @@ export function buildPrompt({ businessContext, challenge, industry, goals }) {
 
   parts.push('', '## Request', 'Provide strategic business advice and actionable recommendations based on the above context.');
 
+  // Append JSON output instruction
+  parts.push('',
+    '## Output Format',
+    'After your analysis, include a structured JSON block with EXACTLY this format (use these exact markers):',
+    '<!-- AI_JSON_START -->',
+    JSON.stringify({
+      swot: {
+        strengths: ['Strong team', 'Good product'],
+        weaknesses: ['Limited funding'],
+        opportunities: ['Growing market'],
+        threats: ['New competitors'],
+      },
+      risks: [
+        { description: 'Cash flow issues', probability: 'Medium', impact: 4, mitigation: 'Build runway' },
+      ],
+    }),
+    '<!-- AI_JSON_END -->',
+  );
+
   return parts.join('\n');
 }
 

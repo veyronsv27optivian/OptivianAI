@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, ChevronDown, RefreshCw, Maximize2, Minimize2,
+  AlertCircle, X,  Info, AlertTriangle, CheckCircle,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 import { getTasks } from '../../services/taskService';
@@ -11,6 +12,8 @@ import { getUnreadCountAsync, getNotificationsAsync, markAllRead } from '../../s
 import { supabase } from '../../services/supabase';
 import DashboardSkeleton, { SectionSkeleton } from './Skeleton';
 import Badge from '../../components/ui/Badge';
+import ScrollReveal from '../../components/ui/ScrollReveal';
+import { getAnnouncements, dismissAnnouncement } from '../../services/announcementService';
 
 // Lazy load heavy sub-components for performance
 const ExecutiveStats = lazy(() => import('./ExecutiveStats'));
@@ -37,35 +40,37 @@ const itemVariants = {
 function Section({ id, title, subtitle, icon: Icon, children, defaultExpanded = true, className = '' }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   return (
-    <motion.div variants={itemVariants} id={id} className={`rounded-xl border border-border bg-white overflow-hidden ${className}`}>
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors group"
-      >
-        <div className="flex items-center gap-3">
-          {Icon && (
-            <div className="p-2 rounded-lg bg-slate-100 group-hover:bg-slate-200 transition-colors">
-              <Icon size={16} className="text-slate-600" />
+    <ScrollReveal variant="fade-up" className={className}>
+      <div className="rounded-xl border border-border dark:border-slate-700/50 bg-white dark:bg-slate-800/90 overflow-hidden transition-colors duration-300">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            {Icon && (
+              <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700/50 group-hover:bg-slate-200 dark:group-hover:bg-slate-600/50 transition-colors">
+                <Icon size={16} className="text-slate-600 dark:text-slate-400" />
+              </div>
+            )}
+            <div className="text-left">
+              <h2 className="text-sm font-semibold text-foreground dark:text-slate-100">{title}</h2>
+              {subtitle && <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{subtitle}</p>}
             </div>
-          )}
-          <div className="text-left">
-            <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-            {subtitle && <p className="text-[10px] text-slate-400 mt-0.5">{subtitle}</p>}
           </div>
-        </div>
-        <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown size={16} className="text-slate-400" />
+          <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+            <ChevronDown size={16} className="text-slate-400" />
+          </motion.div>
+        </button>
+        <motion.div
+          initial={false}
+          animate={{ height: expanded ? 'auto' : 0, opacity: expanded ? 1 : 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="overflow-hidden"
+        >
+          <div className="px-4 pb-4">{children}</div>
         </motion.div>
-      </button>
-      <motion.div
-        initial={false}
-        animate={{ height: expanded ? 'auto' : 0, opacity: expanded ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="overflow-hidden"
-      >
-        <div className="px-4 pb-4">{children}</div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </ScrollReveal>
   );
 }
 
@@ -87,34 +92,25 @@ export default function Dashboard() {
   const [recentMembers, setRecentMembers] = useState([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [fullscreen, setFullscreen] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
 
-  // Clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 10000);
     return () => clearInterval(timer);
   }, []);
 
-  // Helper: wrap a promise with a timeout so it cannot block rendering forever
   const withTimeout = useCallback((promise, ms = 8000) => {
-    return Promise.race([
-      promise,
-      new Promise(resolve => setTimeout(() => resolve(null), ms)),
-    ]);
+    return Promise.race([promise, new Promise(resolve => setTimeout(() => resolve(null), ms))]);
   }, []);
 
-  // Main data fetching
   const fetchData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
-    // Safety timeout: force loading to false after 12s if something hangs
-    const safetyTimer = setTimeout(() => {
-      setLoading(false);
-      setRefreshing(false);
-    }, 12000);
+    const safetyTimer = setTimeout(() => { setLoading(false); setRefreshing(false); }, 12000);
 
     try {
-      // Parallel data fetching with individual timeouts
       const [fetchedTasks, agg, provs, activeProv] = await Promise.all([
         withTimeout(getTasks(user).catch(() => []), 6000),
         withTimeout(getAnalytics({}).catch(() => null), 6000),
@@ -127,7 +123,6 @@ export default function Dashboard() {
       setProviders(Array.isArray(provs) ? provs : []);
       setActiveProviderName(typeof activeProv === 'string' ? activeProv : '');
 
-      // Notification data
       if (user?.id) {
         const [count, items] = await Promise.all([
           withTimeout(getUnreadCountAsync(user.id).catch(() => 0), 4000),
@@ -137,7 +132,6 @@ export default function Dashboard() {
         setNotifications(Array.isArray(items) ? items : []);
       }
 
-      // Staff data
       const isDev = !import.meta.env.VITE_SUPABASE_URL;
       if (isDev) {
         const stored = JSON.parse(localStorage.getItem('optivian_dev_profiles') || '[]');
@@ -150,10 +144,8 @@ export default function Dashboard() {
           withTimeout(supabase.from('profiles').select('*', { count: 'exact', head: true })
             .eq('organization_id', orgId)
             .gte('last_seen', new Date(Date.now() - 300000).toISOString()), 5000),
-          withTimeout(supabase.from('profiles').select('*')
-            .eq('organization_id', orgId)
-            .order('created_at', { ascending: false })
-            .limit(5), 5000),
+          withTimeout(supabase.from('profiles').select('*').eq('organization_id', orgId)
+            .order('created_at', { ascending: false }).limit(5), 5000),
         ]);
         setStaffCount(totalResult?.count || 0);
         setOnlineStaff(onlineResult?.count || 0);
@@ -161,6 +153,7 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error('Dashboard fetch error:', err);
+      setFetchError('Some data failed to load. Refreshing automatically...');
     } finally {
       clearTimeout(safetyTimer);
       setLoading(false);
@@ -168,43 +161,29 @@ export default function Dashboard() {
     }
   }, [user, orgId, withTimeout]);
 
-  // Initial load + refresh interval
+  // Load announcements (Item 58)
+  useEffect(() => {
+    getAnnouncements(user?.id).then(setAnnouncements);
+  }, [user?.id]);
+
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => fetchData(true), 30000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  // Real-time subscription for tasks and notifications
   useEffect(() => {
     if (!orgId || !import.meta.env.VITE_SUPABASE_URL) return;
-
-    const taskChannel = supabase
-      .channel('dashboard-tasks')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'tasks', filter: `organization_id=eq.${orgId}` },
-        () => fetchData(true)
-      )
+    const taskChannel = supabase.channel('dashboard-tasks')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `organization_id=eq.${orgId}` }, () => fetchData(true))
       .subscribe();
-
-    const notifChannel = supabase
-      .channel('dashboard-notifications')
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },
-        (payload) => {
-          setNotifications(prev => [payload.new, ...prev].slice(0, 20));
-          setUnreadCount(prev => prev + 1);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(taskChannel);
-      supabase.removeChannel(notifChannel);
-    };
+    const notifChannel = supabase.channel('dashboard-notifications')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },
+        (payload) => { setNotifications(prev => [payload.new, ...prev].slice(0, 20)); setUnreadCount(prev => prev + 1); }
+      ).subscribe();
+    return () => { supabase.removeChannel(taskChannel); supabase.removeChannel(notifChannel); };
   }, [orgId, user?.id, fetchData]);
 
-  // Task statistics
   const taskStats = useMemo(() => {
     const total = tasks.length;
     const completed = tasks.filter(t => t.status === 'done' || t.status === 'completed').length;
@@ -219,7 +198,6 @@ export default function Dashboard() {
     return { total, completed, pending, inProgress, overdue, urgent, high, medium, low, completionRate };
   }, [tasks]);
 
-  // Task priority data for charts
   const taskPriorityData = useMemo(() => {
     const items = [
       { name: 'Urgent', value: taskStats.urgent, color: '#ef4444' },
@@ -237,33 +215,21 @@ export default function Dashboard() {
     { name: 'Overdue', value: taskStats.overdue, color: '#ef4444' },
   ].filter(d => d.value > 0), [taskStats]);
 
-  // Upcoming deadlines
   const upcomingDeadlines = useMemo(() =>
-    tasks
-      .filter(t => t.due_date && t.status !== 'done' && t.status !== 'completed')
-      .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
-      .slice(0, 10),
-    [tasks]
-  );
+    tasks.filter(t => t.due_date && t.status !== 'done' && t.status !== 'completed')
+      .sort((a, b) => new Date(a.due_date) - new Date(b.due_date)).slice(0, 10), [tasks]);
 
-  // Provider usage data
   const providerUsageData = useMemo(() =>
-    providers.map(p => ({
-      name: p.label || p.name,
-      value: p.isActive ? 1 : 0,
-      color: p.isActive ? '#3b82f6' : '#94a3b8',
-    })),
-    [providers]
-  );
+    providers.map(p => ({ name: p.label || p.name, value: p.isActive ? 1 : 0, color: p.isActive ? '#3b82f6' : '#94a3b8' })), [providers]);
 
-  // Handler for marking all notifications read
   const handleMarkAllRead = useCallback(() => {
-    if (user?.id) {
-      markAllRead(user.id);
-      setNotifications([]);
-      setUnreadCount(0);
-    }
+    if (user?.id) { markAllRead(user.id); setNotifications([]); setUnreadCount(0); }
   }, [user?.id]);
+
+  const handleDismissAnnouncement = (id) => {
+    dismissAnnouncement(id);
+    setAnnouncements(prev => prev.filter(a => a.id !== id));
+  };
 
   if (loading) return <DashboardSkeleton />;
 
@@ -274,132 +240,124 @@ export default function Dashboard() {
       animate="visible"
       className={`space-y-5 transition-all duration-300 ${fullscreen ? 'max-w-7xl mx-auto' : ''}`}
     >
-      {/* Header */}
-      <motion.div variants={itemVariants}
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-      >
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <LayoutDashboard size={18} className="text-primary" />
+      {/* Announcements banner (Item 58) */}
+      {announcements.map((announcement) => {
+        const announcementStyles = {
+          info: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-300', icon: Info },
+          warning: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-300', icon: AlertTriangle },
+          success: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-300', icon: CheckCircle },
+          alert: { bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', text: 'text-red-700 dark:text-red-300', icon: AlertCircle },
+        };
+        const style = announcementStyles[announcement.type] || announcementStyles.info;
+        const Icon = style.icon;
+        return (
+          <div key={announcement.id} className={`flex items-start gap-3 px-5 py-4 rounded-xl border ${style.bg} ${style.border}`}>
+            <div className={`p-1.5 rounded-lg ${style.bg} ${style.text} shrink-0`}>
+              <Icon size={18} />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">CEO Dashboard</h1>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                {' \u00b7 '}
-                {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-              </p>
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-semibold ${style.text}`}>{announcement.title}</p>
+              <p className={`text-xs mt-0.5 ${style.text} opacity-80`}>{announcement.message}</p>
+            </div>
+            <button
+              onClick={() => handleDismissAnnouncement(announcement.id)}
+              className={`p-1 rounded hover:bg-white/50 dark:hover:bg-black/20 transition-all ${style.text} shrink-0`}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        );
+      })}
+
+      {/* Fetch error banner */}
+      {fetchError && (
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 text-sm text-amber-700 dark:text-amber-300">
+          <AlertCircle size={16} className="shrink-0" />
+          <span className="flex-1">{fetchError}</span>
+          <button onClick={() => setFetchError(null)} className="p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-800/30 transition-colors">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Header */}
+      <ScrollReveal variant="fade-up">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-premium shadow-premium">
+                <LayoutDashboard size={20} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground dark:text-slate-100">CEO Dashboard</h1>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                  {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  {' \u00b7 '}
+                  {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => setFullscreen(!fullscreen)}
+              className="p-2 rounded-xl border border-border dark:border-slate-700/50 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
+              title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}>
+              {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => fetchData(true)}
+              className={`p-2 rounded-xl border border-border dark:border-slate-700/50 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all ${refreshing ? 'animate-spin' : ''}`}
+              title="Refresh">
+              <RefreshCw size={16} />
+            </motion.button>
+            <Badge color="emerald" dot pulse size="md">{onlineStaff} online</Badge>
+            <Badge color="slate" size="md">{staffCount} staff</Badge>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { setFullscreen(!fullscreen); }}
-            className="p-2 rounded-lg border border-border text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all"
-            title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          >
-            {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => fetchData(true)}
-            className={`p-2 rounded-lg border border-border text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all ${refreshing ? 'animate-spin' : ''}`}
-            title="Refresh"
-          >
-            <RefreshCw size={16} />
-          </motion.button>
-          <Badge color="emerald" dot pulse size="md">
-            {onlineStaff} online
-          </Badge>
-          <Badge color="slate" size="md">
-            {staffCount} staff
-          </Badge>
-        </div>
-      </motion.div>
+      </ScrollReveal>
 
       {/* Executive Statistics */}
       <Suspense fallback={<SectionSkeleton height={380} />}>
-        <ExecutiveStats
-          staffCount={staffCount}
-          onlineStaff={onlineStaff}
-          taskStats={taskStats}
-          aiAnalytics={aiAnalytics}
-          unreadCount={unreadCount}
-          loading={loading}
-        />
+        <ExecutiveStats staffCount={staffCount} onlineStaff={onlineStaff} taskStats={taskStats}
+          aiAnalytics={aiAnalytics} unreadCount={unreadCount} loading={loading} />
       </Suspense>
 
       {/* Advanced Analytics */}
       <Suspense fallback={<SectionSkeleton height={500} />}>
         <Section id="analytics" title="Advanced Analytics" subtitle="Interactive charts & metrics" icon={LayoutDashboard}>
-          <AdvancedAnalytics
-            taskStats={taskStats}
-            taskPriorityData={taskPriorityData}
-            taskStatusData={taskStatusData}
-            providerUsageData={providerUsageData}
-            aiAnalytics={aiAnalytics}
-            staffCount={staffCount}
-            loading={loading}
-          />
+          <AdvancedAnalytics taskStats={taskStats} taskPriorityData={taskPriorityData}
+            taskStatusData={taskStatusData} providerUsageData={providerUsageData}
+            aiAnalytics={aiAnalytics} staffCount={staffCount} loading={loading} />
         </Section>
       </Suspense>
 
       {/* 3-Column Middle Section */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left Column */}
         <div className="space-y-5 lg:col-span-1">
           <Suspense fallback={<SectionSkeleton height={300} />}>
-            <OrgOverview
-              staffCount={staffCount}
-              onlineStaff={onlineStaff}
-              loading={loading}
-              recentMembers={recentMembers}
-            />
+            <OrgOverview staffCount={staffCount} onlineStaff={onlineStaff} loading={loading} recentMembers={recentMembers} />
           </Suspense>
           <Suspense fallback={<SectionSkeleton height={300} />}>
-            <StaffOverview
-              staffCount={staffCount}
-              onlineStaff={onlineStaff}
-              loading={loading}
-            />
+            <StaffOverview staffCount={staffCount} onlineStaff={onlineStaff} loading={loading} />
           </Suspense>
         </div>
-
-        {/* Middle Column */}
         <div className="space-y-5 lg:col-span-1">
           <Suspense fallback={<SectionSkeleton height={300} />}>
-            <TaskCenter
-              taskStats={taskStats}
-              upcomingDeadlines={upcomingDeadlines}
-              loading={loading}
-            />
+            <TaskCenter taskStats={taskStats} upcomingDeadlines={upcomingDeadlines} loading={loading} />
           </Suspense>
           <Suspense fallback={<SectionSkeleton height={300} />}>
             <CalendarWidget upcomingDeadlines={upcomingDeadlines} />
           </Suspense>
         </div>
-
-        {/* Right Column */}
         <div className="space-y-5 lg:col-span-1">
           <Suspense fallback={<SectionSkeleton height={300} />}>
-            <NotificationCenter
-              notifications={notifications}
-              unreadCount={unreadCount}
-              onMarkAllRead={handleMarkAllRead}
-              loading={loading}
-            />
+            <NotificationCenter notifications={notifications} unreadCount={unreadCount}
+              onMarkAllRead={handleMarkAllRead} loading={loading} />
           </Suspense>
           <Suspense fallback={<SectionSkeleton height={300} />}>
-            <AIDashboard
-              aiAnalytics={aiAnalytics}
-              providers={providers}
-              activeProviderName={activeProviderName}
-              loading={loading}
-            />
+            <AIDashboard aiAnalytics={aiAnalytics} providers={providers}
+              activeProviderName={activeProviderName} loading={loading} />
           </Suspense>
         </div>
       </motion.div>
@@ -407,12 +365,8 @@ export default function Dashboard() {
       {/* AI Insights Panel */}
       <Suspense fallback={<SectionSkeleton height={300} />}>
         <Section id="ai-insights" title="AI Insights Panel" subtitle="Live AI health & recommendations" icon={LayoutDashboard}>
-          <AIPanel
-            aiAnalytics={aiAnalytics}
-            providers={providers}
-            activeProviderName={activeProviderName}
-            loading={loading}
-          />
+          <AIPanel aiAnalytics={aiAnalytics} providers={providers}
+            activeProviderName={activeProviderName} loading={loading} />
         </Section>
       </Suspense>
 
@@ -424,20 +378,20 @@ export default function Dashboard() {
       </Suspense>
 
       {/* Footer Data Status */}
-      <motion.div variants={itemVariants}
-        className="flex items-center justify-between px-4 py-3 rounded-lg bg-slate-50 border border-border text-[10px] text-slate-400"
-      >
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
-            {refreshing ? 'Refreshing...' : 'Live'}
-          </span>
-          <span>{tasks.length} tasks</span>
-          <span>{notifications.length} notifications</span>
-          {aiAnalytics?.total > 0 && <span>{aiAnalytics.total} AI requests</span>}
+      <ScrollReveal variant="fade-up">
+        <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-border dark:border-slate-700/50 text-[10px] text-slate-400 dark:text-slate-500">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+              {refreshing ? 'Refreshing...' : 'Live'}
+            </span>
+            <span>{tasks.length} tasks</span>
+            <span>{notifications.length} notifications</span>
+            {aiAnalytics?.total > 0 && <span>{aiAnalytics.total} AI requests</span>}
+          </div>
+          <span>Updated {new Date().toLocaleTimeString()}</span>
         </div>
-        <span>Updated {new Date().toLocaleTimeString()}</span>
-      </motion.div>
+      </ScrollReveal>
     </motion.div>
   );
 }

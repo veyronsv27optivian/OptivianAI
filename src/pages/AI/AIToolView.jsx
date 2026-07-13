@@ -1,96 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Copy, Check, RefreshCw, X, Loader2, Brain, User } from 'lucide-react';
+import { Send, Copy, Check, RefreshCw, X, Loader2, Brain, User, Download, FileText, Upload, File, FileSpreadsheet, FileType, Globe, Video, Link } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
-import { generateText, generateStream, getActiveProviderName, getAvailableProviders, getToolInfo, saveAnalysis } from '../../services/ai';
-
-// ─── Simple Markdown Renderer ─────────────────────────────────────
-
-function SimpleMarkdown({ content }) {
-  if (!content) return null;
-
-  // Process code blocks first
-  const parts = content.split(/(```[\s\S]*?```)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('```')) {
-      const match = part.match(/```(\w*)\n?([\s\S]*?)```/);
-      if (match) {
-        const [, lang, code] = match;
-        return (
-          <div key={i} className="relative group my-3">
-            <div className="flex items-center justify-between px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-t-lg border-b border-slate-700">
-              <span>{lang || 'code'}</span>
-              <button
-                onClick={() => navigator.clipboard.writeText(code.trim())}
-                className="hover:text-white transition-colors"
-              >
-                <Copy size={14} />
-              </button>
-            </div>
-            <pre className="bg-slate-900 text-slate-100 p-4 rounded-b-lg overflow-x-auto text-sm leading-relaxed">
-              <code>{code.trim()}</code>
-            </pre>
-          </div>
-        );
-      }
-    }
-    // Render inline markdown
-    return <InlineMarkdown key={i} text={part} />;
-  });
-}
-
-function InlineMarkdown({ text }) {
-  // Process inline formatting
-  const elements = [];
-  let remaining = text;
-
-  // Bold **text**
-  const boldRegex = /\*\*(.*?)\*\*/g;
-  let lastIndex = 0;
-  let match;
-  let key = 0;
-
-  while ((match = boldRegex.exec(remaining)) !== null) {
-    if (match.index > lastIndex) {
-      elements.push(<span key={key++}>{remaining.slice(lastIndex, match.index)}</span>);
-    }
-    elements.push(<strong key={key++} className="font-semibold">{match[1]}</strong>);
-    lastIndex = match.index + match[0].length;
-  }
-  if (lastIndex < remaining.length) {
-    elements.push(<span key={key++}>{remaining.slice(lastIndex)}</span>);
-  }
-
-  // If no bold found, process for other formatting
-  if (elements.length === 0) {
-    // Italic
-    const italicParts = text.split(/(\*[^*\n]+\*)/g);
-    return italicParts.map((part, i) => {
-      if (part.startsWith('*') && part.endsWith('*') && part.length > 1) {
-        return <em key={i} className="italic">{part.slice(1, -1)}</em>;
-      }
-      // Inline code
-      const codeParts = part.split(/(`[^`\n]+`)/g);
-      return codeParts.map((cp, j) => {
-        if (cp.startsWith('`') && cp.endsWith('`') && cp.length > 1) {
-          return <code key={`${i}-${j}`} className="px-1.5 py-0.5 bg-slate-100 rounded text-sm font-mono text-rose-600">{cp.slice(1, -1)}</code>;
-        }
-        // Check for links [text](url)
-        const linkParts = cp.split(/(\[[^\]]*\]\([^)]*\))/g);
-        return linkParts.map((lp, k) => {
-          const linkMatch = lp.match(/\[([^\]]*)\]\(([^)]*)\)/);
-          if (linkMatch) {
-            return <a key={`${i}-${j}-${k}`} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{linkMatch[1]}</a>;
-          }
-          return <span key={`${i}-${j}-${k}`}>{lp}</span>;
-        });
-      });
-    });
-  }
-
-  return elements;
-}
-
-// ─── Typing Animation ─────────────────────────────────────────────
+import { generateText, generateStream, getAvailableProviders, getToolInfo, saveAnalysis } from '../../services/ai';
+import { parseFile, getFileUploadConfig } from '../../services/ai/fileParser';
+import { fetchWebsiteContent, fetchYouTubeMetadata, getUrlInputConfig } from '../../services/ai/webFetcher';
+import AiVisualRenderer from '../../components/ai-visualizations/AiVisualRenderer';
 
 function TypingIndicator() {
   return (
@@ -105,8 +19,6 @@ function TypingIndicator() {
   );
 }
 
-// ─── Loading Skeleton ─────────────────────────────────────────────
-
 function LoadingSkeleton() {
   return (
     <div className="animate-pulse space-y-3 p-4">
@@ -117,8 +29,6 @@ function LoadingSkeleton() {
     </div>
   );
 }
-
-// ─── Message Bubble ───────────────────────────────────────────────
 
 function MessageBubble({ message, onCopy }) {
   const [copied, setCopied] = useState(false);
@@ -134,23 +44,15 @@ function MessageBubble({ message, onCopy }) {
 
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
-        isUser ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'
-      }`}>
+      <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${isUser ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
         {isUser ? <User size={16} /> : <Brain size={16} />}
       </div>
       <div className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
-        <div className={`rounded-lg px-4 py-3 ${
-          isUser
-            ? 'bg-blue-600 text-white'
-            : 'bg-white border border-slate-200 text-slate-800'
-        }`}>
+        <div className={`rounded-lg px-4 py-3 ${isUser ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-800'}`}>
           {isUser ? (
             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
           ) : (
-            <div className="text-sm leading-relaxed prose prose-sm max-w-none">
-              <SimpleMarkdown content={message.content} />
-            </div>
+            <AiVisualRenderer content={message.content} toolType={message.metadata?.toolType} />
           )}
         </div>
         <div className={`flex items-center gap-2 mt-1 ${isUser ? 'justify-end' : ''}`}>
@@ -175,8 +77,6 @@ function MessageBubble({ message, onCopy }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────
-
 export default function AIToolView({ toolType, toolLabel, placeholderText, systemPrompt, additionalParams }) {
   const { user } = useAuth();
   const [input, setInput] = useState('');
@@ -187,17 +87,41 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
 
+  // File upload state (for document analyzers)
+  const [fileState, setFileState] = useState({
+    file: null,
+    parsing: false,
+    parsed: false,
+    content: '',
+    fileName: '',
+    fileError: null,
+    dragOver: false,
+  });
+
+  const fileUploadConfig = getFileUploadConfig(toolType);
+  const supportsFileUpload = fileUploadConfig.supported;
+
+  // URL input state (for Website/YouTube analyzers)
+  const urlInputConfig = getUrlInputConfig(toolType);
+  const supportsUrlInput = urlInputConfig.supported;
+  const [urlState, setUrlState] = useState({
+    url: '',
+    fetching: false,
+    fetched: false,
+    content: '',
+    urlError: null,
+  });
+
   const toolInfo = getToolInfo(toolType);
-  const providerName = getActiveProviderName();
   const providers = getAvailableProviders();
   const activeProvider = providers.find(p => p.isActive);
 
-  // Auto-scroll to bottom
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, streaming]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -205,42 +129,68 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     }
   }, [input]);
 
-  // ─── Submit Handler ───────────────────────────────────────────
-  const handleSubmit = useCallback(async () => {
-    const prompt = input.trim();
-    if (!prompt || streaming) return;
+  // ─── Core submission logic (takes prompt text directly) ──────
+  const hasAutoSubmitted = useRef(false);
+
+  const buildContextPrompt = (params) => {
+    if (!params || !params.businessContext) return '';
+    const lines = [`Business Context: ${params.businessContext}`];
+    if (params.industry) lines.push(`Industry: ${params.industry}`);
+    if (params.companySize) lines.push(`Company Size: ${params.companySize}`);
+    if (params.stage) lines.push(`Business Stage: ${params.stage}`);
+    if (params.goals) lines.push(`Goals: ${params.goals}`);
+    lines.push('');
+    lines.push(`My Challenge: ${params.challenge || 'See above'}`);
+    lines.push('');
+    lines.push('Based on the above, please provide strategic business advice and actionable recommendations.');
+    return lines.join('\n');
+  };
+
+  const buildEffectivePrompt = (rawText, params) => {
+    if (!params || !params.businessContext) return rawText;
+    // If structured context already in the text, use as-is
+    if (rawText.includes(params.businessContext)) return rawText;
+    // Prepend structured context
+    const lines = [`Business Context: ${params.businessContext}`];
+    if (params.industry) lines.push(`Industry: ${params.industry}`);
+    if (params.stage) lines.push(`Stage: ${params.stage}`);
+    if (params.goals) lines.push(`Goals: ${params.goals}`);
+    lines.push('');
+    lines.push(`Challenge: ${params.challenge || 'See context above'}`);
+    lines.push('');
+    lines.push(rawText);
+    return lines.join('\n');
+  };
+
+  const submitPrompt = useCallback(async (promptText) => {
+    if (!promptText || streaming) return;
 
     setError(null);
-    const userMessage = {
+    const effective = buildEffectivePrompt(promptText, additionalParams);
+
+    const userMsg = {
       role: 'user',
-      content: prompt,
+      content: effective,
       timestamp: new Date().toLocaleTimeString(),
     };
-
-    const assistantMessage = {
+    const assistantMsg = {
       role: 'assistant',
       content: '',
       timestamp: '',
       metadata: { provider: activeProvider?.label || 'AI', toolType },
     };
 
-    setMessages(prev => [...prev, userMessage, assistantMessage]);
+    setMessages(prev => prev.concat([userMsg, assistantMsg]));
     setInput('');
     setStreaming(true);
     streamingRef.current = true;
 
-    const params = {
-      ...(additionalParams || {}),
-      prompt,
-    };
-
-    // Determine if we use streaming or non-streaming
     const useStreaming = activeProvider?.supportsStreaming !== false;
 
     if (useStreaming) {
       let fullText = '';
       try {
-        await generateStream(toolType, prompt, {
+        await generateStream(toolType, effective, {
           systemPrompt,
           onChunk: (chunk) => {
             if (!streamingRef.current) return;
@@ -248,23 +198,22 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
             setMessages(prev => {
               const updated = [...prev];
               const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.role === 'assistant') {
+              if (lastMsg?.role === 'assistant') {
                 lastMsg.content = fullText;
                 lastMsg.timestamp = new Date().toLocaleTimeString();
               }
               return updated;
             });
           },
-          onComplete: async (result) => {
+          onComplete: (result) => {
             if (!streamingRef.current) return;
             setMessages(prev => {
               const updated = [...prev];
               const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.role === 'assistant') {
+              if (lastMsg?.role === 'assistant') {
                 lastMsg.content = result.text || fullText;
                 lastMsg.timestamp = new Date().toLocaleTimeString();
                 lastMsg.metadata = {
-                  ...lastMsg.metadata,
                   provider: result.provider || activeProvider?.label,
                   model: result.modelUsed,
                 };
@@ -274,14 +223,13 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
             setStreaming(false);
             streamingRef.current = false;
 
-            // Save analysis
             const orgId = user?.user_metadata?.organization_id;
             if (orgId) {
-              await saveAnalysis({
+              saveAnalysis({
                 organizationId: orgId,
                 profileId: user?.id,
                 type: toolType,
-                inputData: { prompt },
+                inputData: { prompt: effective },
                 outputData: { text: result.text || fullText, provider: result.provider, model: result.modelUsed },
                 modelUsed: result.modelUsed,
               });
@@ -292,8 +240,8 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
             setMessages(prev => {
               const updated = [...prev];
               const lastMsg = updated[updated.length - 1];
-              if (lastMsg && lastMsg.role === 'assistant') {
-                lastMsg.content = `⚠️ Error: ${err.message || 'Request failed'}`;
+              if (lastMsg?.role === 'assistant') {
+                lastMsg.content = err.message || 'Request failed';
               }
               return updated;
             });
@@ -312,7 +260,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
       }
     } else {
       try {
-        const result = await generateText(toolType, prompt, {
+        const result = await generateText(toolType, effective, {
           systemPrompt,
           analytics: {
             organizationId: user?.user_metadata?.organization_id,
@@ -322,10 +270,10 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
         setMessages(prev => {
           const updated = [...prev];
           const lastMsg = updated[updated.length - 1];
-          if (lastMsg && lastMsg.role === 'assistant') {
+          if (lastMsg?.role === 'assistant') {
             lastMsg.content = result.text;
             lastMsg.timestamp = new Date().toLocaleTimeString();
-            lastMsg.metadata = { ...lastMsg.metadata, provider: result.provider, model: result.modelUsed };
+            lastMsg.metadata = { provider: result.provider, model: result.modelUsed };
           }
           return updated;
         });
@@ -335,18 +283,32 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
         setStreaming(false);
       }
     }
-  }, [input, streaming, toolType, systemPrompt, activeProvider, user]);
+  }, [streaming, toolType, systemPrompt, activeProvider, user, additionalParams]);
 
-  // ─── Cancel Stream ────────────────────────────────────────────
+  // ─── Auto-submit when structured form data arrives ──────────
+  useEffect(() => {
+    if (additionalParams?.businessContext && messages.length === 0 && !hasAutoSubmitted.current && !streaming) {
+      hasAutoSubmitted.current = true;
+      submitPrompt(buildContextPrompt(additionalParams));
+    }
+  }, [additionalParams, submitPrompt]);
+
+  const handleSubmit = useCallback(async () => {
+    // Priority: typed input > parsed file content > fetched URL content
+    const textToSubmit = input.trim()
+      || (fileState.parsed ? fileState.content : '')
+      || (urlState.fetched ? urlState.content : '');
+    if (!textToSubmit) return;
+    return submitPrompt(textToSubmit);
+  }, [input, submitPrompt, fileState.parsed, fileState.content, urlState.fetched, urlState.content]);
+
   const handleCancel = () => {
     streamingRef.current = false;
     setStreaming(false);
   };
 
-  // ─── Retry ────────────────────────────────────────────────────
   const handleRetry = () => {
     setError(null);
-    // Remove the last assistant message and retry
     setMessages(prev => {
       const updated = [...prev];
       if (updated.length >= 2 && updated[updated.length - 1].role === 'assistant') {
@@ -360,13 +322,14 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     });
   };
 
-  // ─── Clear Chat ───────────────────────────────────────────────
   const handleClear = () => {
     setMessages([]);
     setError(null);
+    setFileState({ file: null, parsing: false, parsed: false, content: '', fileName: '', fileError: null, dragOver: false });
+    setUrlState({ url: '', fetching: false, fetched: false, content: '', urlError: null });
+    setInput('');
   };
 
-  // ─── Export Chat ──────────────────────────────────────────────
   const handleExport = () => {
     const text = messages
       .map(m => `[${m.role.toUpperCase()}] ${m.timestamp}\n${m.content}\n`)
@@ -380,7 +343,56 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     URL.revokeObjectURL(url);
   };
 
-  // ─── Keyboard shortcut ────────────────────────────────────────
+  const handleExportPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      handleExport();
+      return;
+    }
+
+    const chatRows = messages
+      .map(m => {
+        const role = m.role === 'user' ? 'user-msg' : 'ai-msg';
+        const header = `[${m.role.toUpperCase()}] ${m.timestamp || ''}`;
+        const text = (m.content || '')
+          .split('<').join('&lt;')
+          .split('>').join('&gt;')
+          .split('\n').join('<br/>');
+        return `<div class="message ${role}"><div class="header">${header}</div><div class="content">${text}</div></div>`;
+      })
+      .join('<hr/>');
+
+    const label = toolLabel || 'AI Chat';
+    const dateStr = new Date().toLocaleDateString();
+    const html = [
+      '<!DOCTYPE html><html><head>',
+      `<title>${label} - Export</title>`,
+      '<style>',
+      'body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:20px;max-width:800px;margin:0 auto;color:#1e293b;}',
+      'h1{font-size:18px;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:10px;}',
+      '.message{margin:12px 0;padding:12px;border-radius:8px;}',
+      '.user-msg{background:#eff6ff;border-left:3px solid #3b82f6;}',
+      '.ai-msg{background:#f8fafc;border-left:3px solid #10b981;}',
+      '.header{font-size:11px;color:#94a3b8;margin-bottom:6px;font-weight:600;text-transform:uppercase;}',
+      '.content{font-size:13px;line-height:1.6;}',
+      'hr{border:none;border-top:1px solid #e2e8f0;margin:16px 0;}',
+      '.footer{margin-top:30px;font-size:10px;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:15px;}',
+      '</style></head><body>',
+      `<h1>${label} - Export</h1>`,
+      `<p style="font-size:11px;color:#94a3b8;">Exported on ${dateStr}</p>`,
+      chatRows,
+      '<div class="footer">Generated by OptivianAI</div>',
+      '</body></html>',
+    ].join('\n');
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+
+    setTimeout(() => {
+      try { printWindow.print(); } catch (e) { /* ignore */ }
+    }, 250);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
@@ -388,9 +400,105 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     }
   };
 
+  // ─── File upload handlers ────────────────────────────────────
+  const handleFileSelect = useCallback(async (file) => {
+    if (!file) return;
+
+    setFileState(prev => ({ ...prev, file, parsing: true, fileError: null, parsed: false }));
+
+    const result = await parseFile(file);
+
+    if (result.error) {
+      setFileState(prev => ({
+        ...prev,
+        parsing: false,
+        fileError: result.error,
+        parsed: false,
+        fileName: result.fileName,
+      }));
+      return;
+    }
+
+    const fileContent = result.content;
+    const promptWithFile = `I've uploaded a document titled "${result.fileName}" for analysis. Here is the extracted content:\n\n---\n${fileContent.slice(0, 100000)}---\n\nPlease provide a thorough analysis of this ${result.fileType} document.`;
+
+    setFileState(prev => ({
+      ...prev,
+      parsing: false,
+      parsed: true,
+      content: promptWithFile,
+      fileName: result.fileName,
+    }));
+    setInput(promptWithFile);
+  }, []);
+
+  const handleFileInputChange = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileSelect(file);
+    // Reset input value so same file can be selected again
+    e.target.value = '';
+  }, [handleFileSelect]);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setFileState(prev => ({ ...prev, dragOver: false }));
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleFileSelect(file);
+  }, [handleFileSelect]);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    setFileState(prev => ({ ...prev, dragOver: true }));
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setFileState(prev => ({ ...prev, dragOver: false }));
+  }, []);
+
+  const fileInputRef = useRef(null);
+
+  // ─── URL input handlers ─────────────────────────────────────
+  const handleUrlFetch = useCallback(async () => {
+    const url = urlState.url.trim();
+    if (!url) return;
+
+    setUrlState(prev => ({ ...prev, fetching: true, urlError: null }));
+
+    let result;
+    if (toolType === 'website_analyzer') {
+      result = await fetchWebsiteContent(url);
+    } else if (toolType === 'youtube_analyzer') {
+      result = await fetchYouTubeMetadata(url);
+    } else {
+      return;
+    }
+
+    if (result.error) {
+      setUrlState(prev => ({ ...prev, fetching: false, urlError: result.error }));
+      return;
+    }
+
+    const config = urlInputConfig.config;
+    const promptWithUrl = `${config.promptPrefix}---\nURL: ${result.url || url}\n${result.title ? `Title: ${result.title}\n` : ''}---\n\n${result.content}\n\n---\n\nPlease provide a thorough analysis.`;
+
+    setUrlState(prev => ({
+      ...prev,
+      fetching: false,
+      fetched: true,
+      content: promptWithUrl,
+    }));
+    setInput(promptWithUrl);
+  }, [urlState.url, toolType, urlInputConfig]);
+
+  const handleUrlKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleUrlFetch();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-blue-50">
@@ -410,47 +518,236 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
               {activeProvider.label}
             </span>
           )}
+          {supportsUrlInput && messages.length === 0 && !urlState.fetched && (
+            <button
+              onClick={() => document.getElementById('url-input-field')?.focus()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 text-xs font-medium hover:bg-purple-100 transition-all"
+            >
+              <Link size={14} />
+              Enter URL
+            </button>
+          )}
+          {supportsFileUpload && messages.length === 0 && !fileState.parsed && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition-all"
+            >
+              <Upload size={14} />
+              Upload File
+            </button>
+          )}
           {messages.length > 0 && (
             <>
-              <button
-                onClick={handleClear}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-                title="Clear chat"
-              >
+              <button onClick={handleClear} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all" title="Clear chat">
                 <X size={16} />
               </button>
-              <button
-                onClick={handleExport}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-                title="Export chat"
-              >
-                <Copy size={16} />
+              <button onClick={handleExport} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all" title="Export as text">
+                <Download size={16} />
+              </button>
+              <button onClick={handleExportPDF} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all" title="Export as PDF">
+                <FileText size={16} />
               </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
         {messages.length === 0 && !streaming && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Brain size={48} className="text-slate-200 mb-4" />
-            <h3 className="text-lg font-medium text-slate-700 mb-2">{toolLabel}</h3>
-            <p className="text-sm text-slate-400 max-w-md">
-              {placeholderText || `Describe your request and the AI will provide insights and recommendations.`}
-            </p>
-            <div className="mt-6 grid grid-cols-2 gap-2 w-full max-w-md">
-              {examplePrompts[toolType]?.slice(0, 4).map((ep, i) => (
-                <button
-                  key={i}
-                  onClick={() => setInput(ep)}
-                  className="text-xs text-left p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50 transition-all text-slate-600"
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            {/* ── URL Input Zone (for Website/YouTube analyzers) ── */}
+            {supportsUrlInput && !urlState.fetched && (
+              <div className="w-full max-w-lg mb-6">
+                <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2.5 rounded-lg ${toolType === 'youtube_analyzer' ? 'bg-red-50' : 'bg-blue-50'}`}>
+                      {toolType === 'youtube_analyzer' ? (
+                        <Video size={24} className="text-red-500" />
+                      ) : (
+                        <Globe size={24} className="text-blue-500" />
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-700">
+                        {toolType === 'youtube_analyzer' ? 'Analyze a YouTube Video' : 'Analyze a Website'}
+                      </h4>
+                      <p className="text-xs text-slate-400">
+                        Enter the URL below to fetch content for analysis
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      id="url-input-field"
+                      type="url"
+                      value={urlState.url}
+                      onChange={(e) => setUrlState(prev => ({ ...prev, url: e.target.value }))}
+                      onKeyDown={handleUrlKeyDown}
+                      placeholder={toolType === 'youtube_analyzer' ? 'https://youtube.com/watch?v=...' : 'https://example.com'}
+                      disabled={urlState.fetching}
+                      className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                    />
+                    <button
+                      onClick={handleUrlFetch}
+                      disabled={!urlState.url.trim() || urlState.fetching}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {urlState.fetching ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Send size={16} />
+                      )}
+                      {urlState.fetching ? 'Fetching...' : 'Fetch'}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-[10px] text-slate-400">
+                    Press Enter to fetch {toolType === 'youtube_analyzer' ? 'video metadata' : 'website content'}
+                  </p>
+                </div>
+
+                {/* URL fetch error */}
+                {urlState.urlError && (
+                  <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200">
+                    <p className="text-sm text-red-700">{urlState.urlError}</p>
+                    <button
+                      onClick={() => setUrlState(prev => ({ ...prev, urlError: null }))}
+                      className="mt-1 text-xs text-red-600 hover:text-red-800 underline"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Fetched URL preview ── */}
+            {supportsUrlInput && urlState.fetched && (
+              <div className="w-full max-w-lg mb-6">
+                <div className="p-4 rounded-xl bg-purple-50 border border-purple-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    {toolType === 'youtube_analyzer' ? (
+                      <Video size={18} className="text-purple-600" />
+                    ) : (
+                      <Globe size={18} className="text-purple-600" />
+                    )}
+                    <span className="text-sm font-semibold text-purple-800 truncate">
+                      {urlState.url}
+                    </span>
+                    <span className="shrink-0 px-2 py-0.5 rounded-full bg-purple-100 text-[10px] font-medium text-purple-700">
+                      Fetched ✓
+                    </span>
+                  </div>
+                  <p className="text-xs text-purple-600 mt-2">
+                    Content fetched successfully. Click <strong>Send</strong> below to analyze.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── File Upload Zone (for document analyzers) ── */}
+            {supportsFileUpload && !fileState.parsed && (
+              <div className="w-full max-w-lg mb-6">
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`
+                    relative border-2 border-dashed rounded-xl p-10 text-center cursor-pointer
+                    transition-all duration-200 group
+                    ${fileState.dragOver
+                      ? 'border-blue-400 bg-blue-50/50 shadow-lg shadow-blue-100'
+                      : 'border-slate-300 hover:border-blue-300 hover:bg-slate-50/50'
+                    }
+                  `}
                 >
-                  {ep}
-                </button>
-              ))}
+                  <div className={`p-3 rounded-xl inline-block mb-4 transition-all ${
+                    fileState.dragOver ? 'bg-blue-100 scale-110' : 'bg-slate-100 group-hover:bg-blue-50'
+                  }`}>
+                    <Upload size={32} className={fileState.dragOver ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-500'} />
+                  </div>
+                  <h4 className="text-base font-semibold text-slate-700 mb-1">
+                    {fileState.dragOver ? 'Drop your file here' : 'Upload a document'}
+                  </h4>
+                  <p className="text-sm text-slate-400 mb-3">
+                    Drag & drop or click to browse
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-xs text-slate-500 font-medium">
+                    <FileType size={14} />
+                    {fileUploadConfig.config.label} files ({fileUploadConfig.config.accept})
+                  </span>
+                </div>
+
+                {/* Parsing indicator */}
+                {fileState.parsing && (
+                  <div className="flex items-center justify-center gap-2 mt-4 p-3 rounded-lg bg-blue-50 border border-blue-100">
+                    <Loader2 size={18} className="text-blue-500 animate-spin" />
+                    <span className="text-sm text-blue-700 font-medium">Parsing document...</span>
+                  </div>
+                )}
+
+                {/* File error */}
+                {fileState.fileError && (
+                  <div className="mt-4 p-3 rounded-lg bg-red-50 border border-red-200">
+                    <p className="text-sm text-red-700">
+                      <span className="font-medium">{fileState.fileName}:</span> {fileState.fileError}
+                    </p>
+                    <button
+                      onClick={() => setFileState(prev => ({ ...prev, fileError: null }))}
+                      className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Parsed file preview ── */}
+            {supportsFileUpload && fileState.parsed && (
+              <div className="w-full max-w-lg mb-6">
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <File size={18} className="text-emerald-600" />
+                      <span className="text-sm font-semibold text-emerald-800">{fileState.fileName}</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-[10px] font-medium text-emerald-700">
+                      Parsed ✓
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-600">
+                    Document parsed successfully. Click <strong>Send</strong> below to analyze.
+                  </p>
+                </div>
+              {/* Hidden file input — kept outside conditional so ref stays alive */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={fileUploadConfig.config.accept}
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
             </div>
+          )}
+
+            {/* ── Empty state (for all tools except file-upload-only tools before parse) ── */}
+            {(!supportsFileUpload || fileState.parsed) && (
+              <>
+                <Brain size={48} className="text-slate-200 mb-4" />
+                <h3 className="text-lg font-medium text-slate-700 mb-2">{toolLabel}</h3>
+                <p className="text-sm text-slate-400 max-w-md">
+                  {placeholderText || 'Describe your request and the AI will provide insights and recommendations.'}
+                </p>
+                <div className="mt-6 grid grid-cols-2 gap-2 w-full max-w-md">
+                  {examplePrompts[toolType]?.slice(0, 4).map((ep, i) => (
+                    <button key={i} onClick={() => setInput(ep)} className="text-xs text-left p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50 transition-all text-slate-600">
+                      {ep}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -467,14 +764,10 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
             <span>{error}</span>
-            <button
-              onClick={handleRetry}
-              className="flex items-center gap-1 px-2.5 py-1 rounded bg-red-100 hover:bg-red-200 text-red-800 text-xs font-medium transition-colors"
-            >
+            <button onClick={handleRetry} className="flex items-center gap-1 px-2.5 py-1 rounded bg-red-100 hover:bg-red-200 text-red-800 text-xs font-medium transition-colors">
               <RefreshCw size={12} />
               Retry
             </button>
@@ -484,7 +777,6 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input */}
       <div className="p-4 border-t border-slate-200 bg-white">
         <div className="relative">
           <textarea
@@ -499,34 +791,23 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
           />
           <div className="absolute bottom-2 right-2 flex items-center gap-1">
             {streaming ? (
-              <button
-                onClick={handleCancel}
-                className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all"
-                title="Cancel"
-              >
+              <button onClick={handleCancel} className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all" title="Cancel">
                 <X size={16} />
               </button>
             ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={!input.trim()}
-                className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Send (Ctrl+Enter)"
-              >
+              <button onClick={handleSubmit} disabled={!input.trim()} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title="Send (Ctrl+Enter)">
                 <Send size={16} />
               </button>
             )}
           </div>
         </div>
         <p className="mt-1.5 text-[10px] text-slate-400">
-          Press Ctrl+Enter to send · Powered by {activeProvider?.label || 'AI'} {activeProvider?.model ? `(${activeProvider.model})` : ''}
+          Press Ctrl+Enter to send - Powered by {activeProvider?.label || 'AI'} {activeProvider?.model ? `(${activeProvider.model})` : ''}
         </p>
       </div>
     </div>
   );
 }
-
-// ─── Example prompts for each tool type ──────────────────────────
 
 const examplePrompts = {
   business_advisor: [
@@ -708,5 +989,11 @@ const examplePrompts = {
     'Summarize this report for executives',
     'What are the main risks in this document?',
     'Extract key data points from this analysis',
+  ],
+  pitch_deck_assistant: [
+    'Help me structure my startup pitch deck',
+    'Review my slide deck for investor readiness',
+    'What slides should I include in a Series A pitch?',
+    'How do I tell our story compellingly in a pitch?',
   ],
 };

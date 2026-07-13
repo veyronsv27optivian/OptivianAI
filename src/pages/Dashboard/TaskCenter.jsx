@@ -129,27 +129,41 @@ export default function TaskCenter({
             <Calendar size={12} /> Upcoming Deadlines
           </h4>
           <div className="space-y-1">
-            {upcomingDeadlines.slice(0, 5).map((t, i) => (
-              <motion.div
-                key={t.id || i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
-                onClick={() => navigate('/app/tasks')}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <StatusDot status={t.priority || 'medium'} size="md" />
-                  <span className="text-xs text-slate-700 truncate">{t.title}</span>
-                </div>
-                <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className={`text-[10px] font-medium ${new Date(t.due_date) < new Date() ? 'text-rose-500' : 'text-slate-400'}`}>
-                    {t.due_date ? new Date(t.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
-                  </span>
-                  {t.priority === 'urgent' && <Badge color="rose" size="xs">Urgent</Badge>}
-                </div>
-              </motion.div>
-            ))}
+            {upcomingDeadlines.slice(0, 5).map((t, i) => {
+              const updatedAt = t.updated_at || t.created_at;
+              const timeAgo = updatedAt ? (() => {
+                const diff = Date.now() - new Date(updatedAt).getTime();
+                const mins = Math.floor(diff / 60000);
+                if (mins < 1) return 'just now';
+                if (mins < 60) return `${mins}m ago`;
+                const hrs = Math.floor(mins / 60);
+                if (hrs < 24) return `${hrs}h ago`;
+                const days = Math.floor(hrs / 24);
+                return `${days}d ago`;
+              })() : '';
+              return (
+                <motion.div
+                  key={t.id || i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+                  onClick={() => navigate('/app/tasks')}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <StatusDot status={t.priority || 'medium'} size="md" />
+                    <span className="text-xs text-slate-700 truncate">{t.title}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    <span className={`text-[10px] font-medium ${new Date(t.due_date) < new Date() ? 'text-rose-500' : 'text-slate-400'}`}>
+                      {t.due_date ? new Date(t.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
+                    </span>
+                    {t.priority === 'urgent' && <Badge color="rose" size="xs">Urgent</Badge>}
+                    {timeAgo && <span className="text-[10px] text-slate-400 italic">updated {timeAgo}</span>}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       ) : (

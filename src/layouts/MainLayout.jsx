@@ -4,7 +4,7 @@ import {
   LogOut, Home, Users, CheckSquare, Brain, MessageSquare,
   ChevronLeft, ChevronRight, Bell, Search, Settings,
   Sliders, History, Server, Building2, BarChart3, Clock,
-  Target, Activity,
+  Target, Activity, Sun, Moon, Command,
 } from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
 import { supabase } from '../services/supabase';
@@ -14,6 +14,8 @@ import {
   getNotificationsAsync,
 } from '../services/notificationService';
 import { initTracker, addListener } from '../services/chatUnreadTracker';
+import { useTheme } from '../services/ThemeContext';
+import CommandPalette from '../components/ui/CommandPalette';
 
 function getNavItems(role) {
   const items = [
@@ -40,7 +42,9 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, isDevMode } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
@@ -120,6 +124,18 @@ export default function MainLayout() {
     };
   }, [refreshNotifications]);
 
+  // Command palette keyboard shortcut: Cmd+K / Ctrl+K
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   // Presence heartbeat – update last_seen every 60s
   useEffect(() => {
     if (!user?.id) return;
@@ -196,25 +212,35 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background dark:bg-slate-900">
+      {/* Command Palette */}
+      <CommandPalette isOpen={commandOpen} onClose={() => setCommandOpen(false)} />
+
       {/* Sidebar */}
       <div className={`relative flex flex-col transition-all duration-300 ease-out ${
         collapsed ? 'w-20' : 'w-64'
-      } bg-white border-r border-border`}>
+      } apple-sidebar dark:apple-sidebar`}>
         {/* Logo */}
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-border`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-border dark:border-slate-700/50`}>
           {!collapsed && (
-            <h1 className="text-xl font-bold text-foreground">
-              Optivian<span className="text-primary">AI</span>
-            </h1>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-premium flex items-center justify-center text-white text-xs font-bold shadow-premium">
+                O
+              </div>
+              <h1 className="text-lg font-bold text-foreground dark:text-slate-100">
+                Optivian<span className="gradient-text">AI</span>
+              </h1>
+            </div>
           )}
           {collapsed && (
-            <span className="text-xl font-bold text-primary">O</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-premium flex items-center justify-center text-white text-sm font-bold shadow-premium">
+              O
+            </div>
           )}
           <button
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200 active:scale-95"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/50 dark:hover:text-slate-300 transition-all duration-200 active:scale-95"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -235,13 +261,13 @@ export default function MainLayout() {
                     navigate(item.path);
                   }
                 }}
-                className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
+                className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
                   isActive
-                    ? 'bg-primary text-on-primary'
-                    : 'text-foreground hover:text-primary hover:bg-background'
-                } active:scale-95`}
+                    ? 'bg-primary text-white shadow-premium'
+                    : 'text-foreground dark:text-slate-300 hover:text-primary dark:hover:text-primary-light hover:bg-background dark:hover:bg-slate-800/50'
+                } active:scale-[0.97]`}
               >
-                <Icon size={20} className={`shrink-0 ${isActive ? 'text-on-primary' : 'text-slate-400 group-hover:text-primary'}`} />
+                <Icon size={20} className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-primary dark:group-hover:text-primary-light'}`} />
                 {!collapsed && (
                   <span className="text-sm">{item.label}</span>
                 )}
@@ -263,8 +289,8 @@ export default function MainLayout() {
                         onClick={() => navigate(sub.path)}
                         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${
                           isSubActive
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : 'text-slate-500 hover:text-primary hover:bg-slate-50'
+                            ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light font-medium'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light hover:bg-slate-50 dark:hover:bg-slate-800/50'
                         }`}
                       >
                         <SubIcon size={14} />
@@ -280,18 +306,28 @@ export default function MainLayout() {
         </nav>
 
         {/* Bottom section */}
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border dark:border-slate-700/50 space-y-1">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-foreground dark:hover:text-slate-100 hover:bg-background dark:hover:bg-slate-800/50 transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? <Sun size={20} className="shrink-0" /> : <Moon size={20} className="shrink-0" />}
+            {!collapsed && <span className="text-sm">{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
+          </button>
+
           <button
             onClick={() => navigate('/app/settings')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-foreground hover:text-primary hover:bg-background transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-95`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-foreground dark:hover:text-slate-100 hover:bg-background dark:hover:bg-slate-800/50 transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
           >
-            <Settings size={20} className="shrink-0 text-slate-400" />
+            <Settings size={20} className="shrink-0" />
             {!collapsed && <span className="text-sm">Settings</span>}
           </button>
 
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-destructive hover:text-destructive/80 hover:bg-red-50 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''} active:scale-95`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-destructive dark:text-red-400 hover:text-destructive/80 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
           >
             <LogOut size={20} className="shrink-0" />
             {!collapsed && <span className="text-sm">Sign Out</span>}
@@ -302,15 +338,20 @@ export default function MainLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between px-8 py-3 border-b border-border bg-white">
+        <header className="apple-header dark:apple-header flex items-center justify-between px-8 py-3">
           <div className="flex items-center gap-4 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="relative flex-1 max-w-md group">
+              <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               <input
                 type="text"
                 placeholder="Search anything..."
-                className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm"
+                onClick={() => setCommandOpen(true)}
+                readOnly
+                className="w-full pl-10 pr-20 py-2 bg-background dark:bg-slate-800/50 border border-border dark:border-slate-700/50 rounded-xl text-foreground dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
               />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500">
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 font-mono text-[9px]">⌘K</kbd>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -318,11 +359,11 @@ export default function MainLayout() {
               <button
                 aria-label="Notifications"
                 onClick={handleBellClick}
-                className={`relative p-2 rounded-lg transition-all duration-200 ${
+                className={`relative p-2 rounded-xl transition-all duration-200 ${
                   showNotifications
-                    ? 'bg-primary text-on-primary'
-                    : 'text-slate-400 hover:text-primary hover:bg-background'
-                } active:scale-95`}
+                    ? 'bg-primary text-white'
+                    : 'text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary-light hover:bg-background dark:hover:bg-slate-800/50'
+                } active:scale-[0.97]`}
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
@@ -335,10 +376,10 @@ export default function MainLayout() {
               {showNotifications && (
                 <div
                   ref={dropdownRef}
-                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-white border border-border rounded-lg shadow-lg overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-white dark:bg-slate-800 border border-border dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-lg overflow-hidden z-50"
                 >
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                    <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+                    <h3 className="text-sm font-semibold text-foreground dark:text-slate-100">Notifications</h3>
                     {notifications.length > 0 && (
                       <button
                         onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); setUnreadCount(0); setShowNotifications(false); }}
@@ -380,8 +421,7 @@ export default function MainLayout() {
                   {notifications.length > 0 && (
                     <div className="px-4 py-2.5 border-t border-border bg-slate-50">
                       <button
-                        onClick={() => navigate('/app/tasks')}
-                        className="w-full text-xs text-slate-500 hover:text-slate-700 text-center transition-colors"
+                        onClick={() => navigate('/app/tasks')}                          className="w-full text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-center transition-colors"
                       >
                         View all tasks
                       </button>
@@ -389,21 +429,19 @@ export default function MainLayout() {
                   )}
                 </div>
               )}
-            </div>
-
-            <div className="flex items-center gap-3 pl-3 border-l border-border">
+            </div>            <div className="flex items-center gap-3 pl-3 border-l border-border dark:border-slate-700/50">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                <img src={avatarUrl} alt="" className="w-8 h-8 rounded-xl object-cover" />
               ) : (
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-8 h-8 rounded-xl bg-gradient-premium flex items-center justify-center text-white text-sm font-bold shadow-premium">
                   {userInitial}
                 </div>
               )}
               <div className="text-left">
-                <p className="text-sm font-medium text-foreground">{displayName}</p>
-                <p className="text-xs text-slate-500">{userEmail}</p>
+                <p className="text-sm font-medium text-foreground dark:text-slate-100">{displayName}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
                 {isDevMode && (
-                  <span className="text-[10px] text-amber-600 font-medium">Dev Mode</span>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Dev Mode</span>
                 )}
               </div>
             </div>

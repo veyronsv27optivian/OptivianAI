@@ -28,19 +28,14 @@ export const AI_TOOL_TYPES = {
   LAUNCH_READINESS: 'launch_readiness',
   SOCIAL_ANALYSIS: 'social_analysis',
   STRATEGY_REPORT: 'strategy_report',
-  SENTIMENT_ANALYSIS: 'sentiment_analysis',
   COMPETITIVE_ANALYSIS: 'competitive_analysis',
   MARKET_RESEARCH: 'market_research',
   CONTENT_GENERATION: 'content_generation',
   PERFORMANCE_ANALYSIS: 'performance_analysis',
   PREDICTIVE_ANALYTICS: 'predictive_analytics',
-  CUSTOMER_INSIGHTS: 'customer_insights',
-  WORKFLOW_OPTIMIZATION: 'workflow_optimization',
-  COMPLIANCE_CHECK: 'compliance_check',
   REPORT_GENERATION: 'report_generation',
   DATA_EXTRACTION: 'data_extraction',
   SUMMARIZATION: 'summarization',
-  CODE_REVIEW: 'code_review',
   // ── New tools ──────────────────────────────────────────────
   BUSINESS_PLAN: 'business_plan',
   SALES_ADVISOR: 'sales_advisor',
@@ -65,6 +60,15 @@ export const AI_TOOL_TYPES = {
   POWERPOINT_ANALYZER: 'powerpoint_analyzer',
   WEBSITE_ANALYZER: 'website_analyzer',
   YOUTUBE_ANALYZER: 'youtube_analyzer',
+
+  // ── Direct tool type names (used by prompt resolution) ────
+  SWOT_ANALYSIS: 'swot_analysis',
+  FINANCIAL_FORECAST: 'financial_forecast',
+  FUTURE_LAB: 'future_lab',
+  MARKETING_STRATEGY: 'marketing_strategy',
+  MEETING_NOTES: 'meeting_notes',
+  DOCUMENT_ANALYZER: 'document_analyzer',
+  PITCH_DECK_ASSISTANT: 'pitch_deck_assistant',
 };
 
 // ─── Provider configuration ──────────────────────────────────────
@@ -177,12 +181,6 @@ export const AI_TOOL_REGISTRY = {
     description: 'Generate comprehensive strategy reports',
     requiredCapabilities: ['text'],
   },
-  [AI_TOOL_TYPES.SENTIMENT_ANALYSIS]: {
-    id: AI_TOOL_TYPES.SENTIMENT_ANALYSIS,
-    label: 'Sentiment Analysis',
-    description: 'Analyze sentiment from text or social media',
-    requiredCapabilities: ['text'],
-  },
   [AI_TOOL_TYPES.COMPETITIVE_ANALYSIS]: {
     id: AI_TOOL_TYPES.COMPETITIVE_ANALYSIS,
     label: 'Competitive Analysis',
@@ -213,24 +211,6 @@ export const AI_TOOL_REGISTRY = {
     description: 'Forecast trends and outcomes',
     requiredCapabilities: ['text'],
   },
-  [AI_TOOL_TYPES.CUSTOMER_INSIGHTS]: {
-    id: AI_TOOL_TYPES.CUSTOMER_INSIGHTS,
-    label: 'Customer Insights',
-    description: 'Extract actionable customer insights',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.WORKFLOW_OPTIMIZATION]: {
-    id: AI_TOOL_TYPES.WORKFLOW_OPTIMIZATION,
-    label: 'Workflow Optimization',
-    description: 'Analyze and optimize business workflows',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.COMPLIANCE_CHECK]: {
-    id: AI_TOOL_TYPES.COMPLIANCE_CHECK,
-    label: 'Compliance Check',
-    description: 'Review against regulatory requirements',
-    requiredCapabilities: ['text'],
-  },
   [AI_TOOL_TYPES.REPORT_GENERATION]: {
     id: AI_TOOL_TYPES.REPORT_GENERATION,
     label: 'Report Generation',
@@ -247,12 +227,6 @@ export const AI_TOOL_REGISTRY = {
     id: AI_TOOL_TYPES.SUMMARIZATION,
     label: 'Summarization',
     description: 'Summarize lengthy content',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.CODE_REVIEW]: {
-    id: AI_TOOL_TYPES.CODE_REVIEW,
-    label: 'Code Review',
-    description: 'Review and analyze code quality',
     requiredCapabilities: ['text'],
   },
   // ── New Tool Registrations ─────────────────────────────────
@@ -394,6 +368,50 @@ export const AI_TOOL_REGISTRY = {
     description: 'Analyze YouTube video content and metadata',
     requiredCapabilities: ['text'],
   },
+
+  // ── Direct / canonical tool type entries ───────────────────
+  [AI_TOOL_TYPES.SWOT_ANALYSIS]: {
+    id: AI_TOOL_TYPES.SWOT_ANALYSIS,
+    label: 'SWOT Analysis',
+    description: 'Analyze strengths, weaknesses, opportunities, and threats',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.FINANCIAL_FORECAST]: {
+    id: AI_TOOL_TYPES.FINANCIAL_FORECAST,
+    label: 'Financial Forecast',
+    description: 'Project revenue, expenses, and cash flow',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.FUTURE_LAB]: {
+    id: AI_TOOL_TYPES.FUTURE_LAB,
+    label: 'Future Lab',
+    description: 'Explore future trends and scenarios',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.MARKETING_STRATEGY]: {
+    id: AI_TOOL_TYPES.MARKETING_STRATEGY,
+    label: 'Marketing Strategy',
+    description: 'Develop marketing strategies and campaigns',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.MEETING_NOTES]: {
+    id: AI_TOOL_TYPES.MEETING_NOTES,
+    label: 'Meeting Notes',
+    description: 'Summarize meetings with action items',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.DOCUMENT_ANALYZER]: {
+    id: AI_TOOL_TYPES.DOCUMENT_ANALYZER,
+    label: 'Document Analyzer',
+    description: 'Extract key insights from documents',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.PITCH_DECK_ASSISTANT]: {
+    id: AI_TOOL_TYPES.PITCH_DECK_ASSISTANT,
+    label: 'Pitch Deck Assistant',
+    description: 'Create and refine investor pitch decks',
+    requiredCapabilities: ['text'],
+  },
 };
 
 // ─── Default generation parameters ───────────────────────────────
@@ -415,7 +433,6 @@ export const ENV_KEYS = {
   DEEPSEEK_MODEL: 'VITE_DEEPSEEK_MODEL',
   QWEN_API_KEY: 'VITE_QWEN_API_KEY',
   QWEN_MODEL: 'VITE_QWEN_MODEL',
-  OPENROUTER_OPENAI_MODEL: 'VITE_OPENROUTER_OPENAI_MODEL',
   OPENROUTER_OPENAI_MODEL: 'VITE_OPENROUTER_OPENAI_MODEL',
   OPENROUTER_REFERRER: 'VITE_OPENROUTER_REFERRER',
   OPENROUTER_TITLE: 'VITE_OPENROUTER_TITLE',

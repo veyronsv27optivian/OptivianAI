@@ -43,6 +43,22 @@ export function buildPrompt({ subject, context, industry, objectives }) {
 
   parts.push('', '## Request', 'Perform a comprehensive SWOT analysis with actionable strategies derived from cross-referencing the quadrants.');
 
+  // Append JSON output instruction
+  parts.push('',
+    '## Output Format',
+    'After your analysis, include a structured JSON block with EXACTLY this format (use these exact markers):',
+    '<!-- AI_JSON_START -->',
+    JSON.stringify({
+      swot: {
+        strengths: ['Strength 1 description', 'Strength 2 description'],
+        weaknesses: ['Weakness 1 description', 'Weakness 2 description'],
+        opportunities: ['Opportunity 1 description', 'Opportunity 2 description'],
+        threats: ['Threat 1 description', 'Threat 2 description'],
+      },
+    }),
+    '<!-- AI_JSON_END -->',
+  );
+
   return parts.join('\n');
 }
 

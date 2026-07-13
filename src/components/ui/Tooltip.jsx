@@ -28,9 +28,9 @@ export default function Tooltip({ children, content, position = 'top', className
       {children}
       {visible && content && (
         <div className={`absolute z-50 ${positions[position] || positions.top}`}>
-          <div className="bg-slate-900 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap">
+          <div className="bg-slate-900 dark:bg-slate-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-lg dark:shadow-glass-lg whitespace-nowrap">
             {content}
-            <div className={`absolute w-2 h-2 bg-slate-900 transform rotate-45 ${
+            <div className={`absolute w-2 h-2 bg-slate-900 dark:bg-slate-700 transform rotate-45 ${
               position === 'top' ? 'top-full left-1/2 -translate-x-1/2 -mt-1' :
               position === 'bottom' ? 'bottom-full left-1/2 -translate-x-1/2 mb-[-4px]' :
               position === 'left' ? 'left-full top-1/2 -translate-y-1/2 ml-[-4px]' :
