@@ -9,14 +9,13 @@ import {
 import { useAuth } from '../../services/AuthContext';
 import { getRoleInfo } from '../../services/auth/roles';
 import { getLoginHistory, getLoginHistoryStats } from '../../services/loginHistoryService';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useToast } from '../../components/ui/Toast';
 import MfaSetup from './MfaSetup';
 import SessionsPage from './SessionsPage';
 
 export default function Settings() {
   const { user, profile, signOut, isDevMode, updatePassword, updateProfile, uploadAvatar } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const avatarInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState(() => {
@@ -57,7 +56,8 @@ export default function Settings() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/onboarding');
+    // Use window.location to ensure redirect works even after ProtectedRoute unmounts
+    window.location.href = '/';
   };
 
   const handlePasswordChange = async (e) => {

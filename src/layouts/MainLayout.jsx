@@ -200,7 +200,8 @@ export default function MainLayout() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/onboarding');
+    // Use window.location to ensure redirect works even after ProtectedRoute unmounts
+    window.location.href = '/';
   };
 
   const displayName = user?.user_metadata?.name || (user?.email?.split('@')?.[0]) || 'User';
