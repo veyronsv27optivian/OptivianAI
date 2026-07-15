@@ -27,6 +27,11 @@ dist-ssr
 .claude
 release/
 
+# Windows reserved filenames
+nul
+NUL
+Nul*
+
 # Electron build artifacts
 *.exe
 *.dll
