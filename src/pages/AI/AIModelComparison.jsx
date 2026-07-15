@@ -11,7 +11,7 @@ import {
   Clock, FileText,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
-import { getAvailableProviders, generateText, getActiveProviderName } from '../../services/ai/aiService';
+import { getAvailableProviders, generateText, getActiveProviderName } from '../../services/ai';
 
 const PROVIDER_MODELS = {
   openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],

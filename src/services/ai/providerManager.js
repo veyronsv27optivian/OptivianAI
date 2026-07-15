@@ -84,19 +84,30 @@ export function getActiveProvider() {
     initProviderManager();
   }
 
-  const provider = providers.get(activeProviderName);
-  if (!provider) {
-    throw new AiConfigurationError(
-      `Provider "${activeProviderName}" is not registered.`,
-    );
+  // If the active provider is configured and available, use it
+  const activeProvider = providers.get(activeProviderName);
+  if (activeProvider?.isAvailable()) {
+    return activeProvider;
   }
-  if (!provider.isAvailable()) {
-    throw new AiConfigurationError(
-      `Provider "${provider.getProviderInfo().name}" is not configured. ` +
-      `Set ${PROVIDER_CONFIGS[activeProviderName]?.envKey || 'the appropriate'} environment variable.`,
-    );
+
+  // Auto-fallback to the first available provider
+  for (const [name, p] of providers.entries()) {
+    if (p.isAvailable()) {
+      console.warn(
+        `[AI] Provider "${activeProviderName}" is not configured. ` +
+        `Auto-falling back to "${name}".`
+      );
+      activeProviderName = name;
+      return p;
+    }
   }
-  return provider;
+
+  // No providers are configured — throw with helpful message
+  const missingKey = PROVIDER_CONFIGS[activeProviderName]?.envKey || 'the appropriate';
+  throw new AiConfigurationError(
+    `No AI providers are configured. Set ${missingKey} in your .env file. ` +
+    `You can also set VITE_AI_DEFAULT_PROVIDER to one of: ${Object.values(AI_PROVIDERS).join(', ')}`,
+  );
 }
 
 /**

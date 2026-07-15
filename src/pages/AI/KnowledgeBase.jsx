@@ -79,47 +79,7 @@ function KnowledgeEntry({ entry, onDelete }) {
   );
 }
 
-// ─── Sample Knowledge Data ───────────────────────────────────────
-function getSampleEntries() {
-  return [
-    {
-      id: '1', title: 'Q3 Market Expansion Analysis',
-      summary: 'Comprehensive analysis of market opportunities in Southeast Asia including competitor landscape, regulatory considerations, and recommended entry strategy.',
-      category: 'analysis', toolType: 'Market Research',
-      icon: Target, created_at: Date.now() - 3600000, favorite: true,
-    },
-    {
-      id: '2', title: 'Product Launch Risk Assessment',
-      summary: 'Risk evaluation for the upcoming product launch identifying 7 key risks with mitigation strategies across technical, market, and operational domains.',
-      category: 'risk', toolType: 'Risk Assessment',
-      icon: FileText, created_at: Date.now() - 7200000, favorite: true,
-    },
-    {
-      id: '3', title: 'Financial Forecast Q4-Q1',
-      summary: 'Revenue projections, expense analysis, and cash flow forecasts for the next two quarters based on current growth trajectory and market conditions.',
-      category: 'forecast', toolType: 'Financial Forecast',
-      icon: FileText, created_at: Date.now() - 86400000, favorite: false,
-    },
-    {
-      id: '4', title: 'Competitive Landscape Report',
-      summary: 'Detailed competitor analysis covering 5 major competitors with feature comparison, pricing analysis, and strategic positioning recommendations.',
-      category: 'analysis', toolType: 'Competitor Analysis',
-      icon: FileText, created_at: Date.now() - 172800000, favorite: false,
-    },
-    {
-      id: '5', title: 'SWOT Analysis — Organisational Review',
-      summary: 'Internal strengths and weaknesses assessment combined with external opportunities and threats for the organization-wide strategic review.',
-      category: 'advisory', toolType: 'SWOT Analysis',
-      icon: Target, created_at: Date.now() - 259200000, favorite: true,
-    },
-    {
-      id: '6', title: 'Marketing Strategy Q4 Campaign',
-      summary: 'AI-generated marketing strategy for Q4 campaign including channel mix, budget allocation, content calendar, and KPI targets.',
-      category: 'content', toolType: 'Marketing Strategy',
-      icon: FileText, created_at: Date.now() - 345600000, favorite: false,
-    },
-  ];
-}
+// ─── Sample Knowledge Data (removed for production — no fake data) ──
 
 // ─── Main Component ──────────────────────────────────────────────
 export default function KnowledgeBase({ onClose }) {
@@ -139,20 +99,18 @@ export default function KnowledgeBase({ onClose }) {
           if (stored) {
             setEntries(JSON.parse(stored));
           } else {
-            // Seed with sample data
-            const samples = getSampleEntries();
-            localStorage.setItem('optivian_knowledge_base', JSON.stringify(samples));
-            setEntries(samples);
+            // No fake data — start with empty knowledge base
+            setEntries([]);
           }
         } else {
           // In production, fetch from Supabase `knowledge_base` table
           // const { data } = await supabase.from('knowledge_base').select('*').order('created_at', { ascending: false });
           // setEntries(data || []);
-          setEntries(getSampleEntries());
+          setEntries([]);
         }
       } catch (err) {
         console.warn('Failed to load knowledge base:', err);
-        setEntries(getSampleEntries());
+        setEntries([]);
       } finally {
         setLoading(false);
       }

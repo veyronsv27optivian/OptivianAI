@@ -29,6 +29,7 @@ export default function OrganizationStructure() {
 
   useEffect(() => {
     if (orgId) loadData();
+    else setLoading(false);
   }, [orgId]);
 
   const loadData = async () => {
@@ -82,6 +83,25 @@ export default function OrganizationStructure() {
 
   const getDeptTeams = (deptId) => teams.filter(t => t.department_id === deptId);
 
+  // ── No organization ──────────────────────────────────────────
+  if (!loading && !orgId) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Building2 size={48} className="text-slate-300 dark:text-slate-600 mb-4" />
+        <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No Organization Found</h2>
+        <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-md text-center">
+          You haven't created or joined an organization yet. Create one to get started with team structure and management.
+        </p>
+        <button
+          onClick={() => window.location.href = '/create-organization'}
+          className="px-6 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all"
+        >
+          Create Organization
+        </button>
+      </div>
+    );
+  }
+
   // ── Loading state ──────────────────────────────────────────────
   if (loading) {
     return (
@@ -117,8 +137,8 @@ export default function OrganizationStructure() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Organization Structure</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Organization Structure</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {org?.name} — {departments.length} departments, {teams.length} teams
           </p>
         </div>
@@ -140,10 +160,10 @@ export default function OrganizationStructure() {
 
       {/* Organization Tree */}
       {departments.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-slate-200 rounded-lg">
-          <Building2 size={40} className="text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-700 mb-2">No departments yet</h3>
-          <p className="text-sm text-slate-400">Create your first department to organize your team structure</p>
+        <div className="text-center py-16 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg">
+          <Building2 size={40} className="text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">No departments yet</h3>
+          <p className="text-sm text-slate-400 dark:text-slate-500">Create your first department to organize your team structure</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -165,9 +185,9 @@ export default function OrganizationStructure() {
       {/* Add Department Modal */}
       {showDeptModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-lg shadow-lg">
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">Add Department</h2>
+          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-lg shadow-lg">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Add Department</h2>
               <button onClick={() => setShowDeptModal(false)} className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"><X size={20} /></button>
             </div>
             <form onSubmit={handleAddDept} className="p-5 space-y-4">
@@ -205,9 +225,9 @@ export default function OrganizationStructure() {
       {/* Add Team Modal */}
       {showTeamModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-lg shadow-lg">
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">Add Team</h2>
+          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-lg shadow-lg">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Add Team</h2>
               <button onClick={() => setShowTeamModal(false)} className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"><X size={20} /></button>
             </div>
             <form onSubmit={handleAddTeam} className="p-5 space-y-4">
@@ -246,9 +266,9 @@ function DepartmentNode({ department, departments, teams, expanded, onToggle, is
   const hasChildren = childDepts.length > 0 || deptTeams.length > 0;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+    <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
       <div
-        className="flex items-center justify-between p-4 hover:bg-slate-50 cursor-pointer transition-colors"
+        className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
         onClick={onToggle}
         style={{ paddingLeft: `${16 + depth * 24}px` }}
       >
@@ -264,14 +284,14 @@ function DepartmentNode({ department, departments, teams, expanded, onToggle, is
             <Building2 size={16} className="text-violet-600" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-medium text-slate-800">{department.name}</h3>
+            <h3 className="text-sm font-medium text-slate-800 dark:text-slate-200">{department.name}</h3>
             {department.description && (
-              <p className="text-xs text-slate-400 truncate max-w-md">{department.description}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 truncate max-w-md">{department.description}</p>
             )}
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-400 dark:text-slate-500">
             {deptTeams.length} teams
           </span>
         </div>
@@ -283,15 +303,15 @@ function DepartmentNode({ department, departments, teams, expanded, onToggle, is
           {/* Teams */}
           {deptTeams.map((team) => (
             <div key={team.id}
-              className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100"
+              className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/30"
               style={{ marginLeft: `${24 + depth * 24}px` }}
             >
               <div className="p-1.5 rounded-lg bg-blue-50">
                 <Target size={14} className="text-blue-600" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-700">{team.name}</p>
-                {team.description && <p className="text-xs text-slate-400">{team.description}</p>}
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{team.name}</p>
+                {team.description && <p className="text-xs text-slate-400 dark:text-slate-500">{team.description}</p>}
               </div>
             </div>
           ))}
@@ -311,7 +331,7 @@ function DepartmentNode({ department, departments, teams, expanded, onToggle, is
           ))}
 
           {!hasChildren && (
-            <p className="text-xs text-slate-400 text-center py-2" style={{ marginLeft: `${24 + depth * 24}px` }}>
+            <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-2" style={{ marginLeft: `${24 + depth * 24}px` }}>
               No teams or sub-departments
             </p>
           )}

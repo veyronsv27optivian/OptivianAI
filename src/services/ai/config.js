@@ -78,18 +78,25 @@ export const AI_TOOL_TYPES = {
   WORKFLOW_AUTOMATION: 'workflow_automation',
   PREDICTIVE_ANALYTICS_TOOL: 'predictive_analytics_tool',
 
+  // ── UI-facing alias names (used by AI.jsx and ToolRecommender) ──
+  // These aliases map to the canonical tool types above through
+  // _resolvePromptModule in aiService.js. They MUST be defined here
+  // so that the UI can reference them as keys for rendering.
+  STRATEGY_REPORT: 'strategy_report',
+  MARKET_RESEARCH: 'market_research',
+  PERFORMANCE_ANALYSIS: 'performance_analysis',
+  PREDICTIVE_ANALYTICS: 'predictive_analytics',
+  CONTENT_GENERATION: 'content_generation',
+  SUMMARIZATION: 'summarization',
+  DATA_EXTRACTION: 'data_extraction',
+
   // ── Direct / canonical tool type names (used by prompt resolution) ──
-  // These are the canonical internal names. The UI in AI.jsx and
-  // ToolRecommender uses alias names (STRATEGY_REPORT, PERFORMANCE_ANALYSIS,
-  // etc.) that get mapped to these through _resolvePromptModule in aiService.js.
-  // This dual-key pattern allows the same tool to be accessed by both its
-  // alias (UI-facing) and canonical (internal) name without duplication.
-  SWOT_ANALYSIS: 'swot_analysis',               // Alias: STRATEGY_REPORT
-  FINANCIAL_FORECAST: 'financial_forecast',      // Alias: PERFORMANCE_ANALYSIS
-  FUTURE_LAB: 'future_lab',                      // Alias: PREDICTIVE_ANALYTICS
-  MARKETING_STRATEGY: 'marketing_strategy',      // Alias: CONTENT_GENERATION
-  MEETING_NOTES: 'meeting_notes',                // Alias: SUMMARIZATION
-  DOCUMENT_ANALYZER: 'document_analyzer',         // Alias: DATA_EXTRACTION — generic fallback, prefer specific (pdf, word, excel, csv, ppt)
+  SWOT_ANALYSIS: 'swot_analysis',
+  FINANCIAL_FORECAST: 'financial_forecast',
+  FUTURE_LAB: 'future_lab',
+  MARKETING_STRATEGY: 'marketing_strategy',
+  MEETING_NOTES: 'meeting_notes',
+  DOCUMENT_ANALYZER: 'document_analyzer',
   PITCH_DECK_ASSISTANT: 'pitch_deck_assistant',
 };
 

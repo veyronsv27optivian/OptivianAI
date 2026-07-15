@@ -72,28 +72,18 @@
 .dark .typing-dot { background-color: #64748b; }
 
 /* ═══ Shimmer / Glass Skeleton ═══ */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.05) 37%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.05) 43%, transparent 50%);
-  background-size: 200% 100%;
-  animation: shimmer 2.5s ease-in-out infinite;
-}
-.dark .animate-shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.02) 37%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.02) 43%, transparent 50%);
-  background-size: 200% 100%;
-}
 .skeleton-glass {
-  background: linear-gradient(90deg, rgba(226,232,240,0.4) 25%, rgba(226,232,240,0.7) 37%, rgba(226,232,240,0.9) 40%, rgba(226,232,240,0.7) 43%, rgba(226,232,240,0.4) 50%);
-  background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+  background: #e2e8f0;
   border-radius: 12px;
+  animation: pulse 2s ease-in-out infinite;
 }
 .dark .skeleton-glass {
-  background: linear-gradient(90deg, rgba(51,65,85,0.3) 25%, rgba(51,65,85,0.5) 37%, rgba(51,65,85,0.6) 40%, rgba(51,65,85,0.5) 43%, rgba(51,65,85,0.3) 50%);
-  background-size: 200% 100%;
+  background: #1e293b;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 /* ── Animated Fade In Up ──────────────────────────────────── */
@@ -105,66 +95,51 @@
   animation: fade-in-up 0.4s ease-out forwards;
 }
 
-/* ── Apple-Style Sidebar ──────────────────────────────────── */
+/* ── Simple Sidebar ───────────────────────────────────────── */
 .apple-sidebar {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-right: 1px solid rgba(226, 232, 240, 0.8);
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
 }
 .dark .apple-sidebar {
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-right: 1px solid rgba(51, 65, 85, 0.5);
+  background: #0f172a;
+  border-right: 1px solid #334155;
 }
 
-/* ── Apple-Style Header ───────────────────────────────────── */
+/* ── Simple Header ────────────────────────────────────────── */
 .apple-header {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
 }
 .dark .apple-header {
-  background: rgba(30, 41, 59, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
 }
 
-/* ── Glass Cards ──────────────────────────────────────────── */
+/* ── Simple Cards ─────────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
 }
 .dark .glass {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(100, 116, 139, 0.3);
+  background: #1e293b;
+  border: 1px solid #334155;
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
 }
 .dark .glass-card {
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(100, 116, 139, 0.25);
+  background: #1e293b;
+  border: 1px solid #334155;
 }
 
 .glass-dark {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(100, 116, 139, 0.25);
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 12px;
 }
 
 /* ── Apple Button ─────────────────────────────────────────── */
@@ -206,126 +181,51 @@
 
 /* ── Gradient Premium BG ──────────────────────────────────── */
 .bg-gradient-premium {
-  background: linear-gradient(135deg, #2563EB, #6366F1);
+  background: #6366F1;
 }
 
-/* ── Gradient Border ──────────────────────────────────────── */
-.gradient-border {
-  position: relative;
-  border: 1px solid transparent;
-  background-clip: padding-box;
-}
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, #2563EB, #6366F1);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
-/* ── Custom Shadows ───────────────────────────────────────── */
+/* ── Simple Shadows ───────────────────────────────────────── */
 .shadow-glass {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 .dark .shadow-glass {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .shadow-glass-lg {
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .dark .shadow-glass-lg {
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .shadow-premium {
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25), 0 1px 4px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 .dark .shadow-premium {
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4), 0 1px 4px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* ── Metallic Dark Cards ────────────────────────────────── */
+/* ── Dark Cards (simplified, no glare) ──────────────────────── */
 .dark-card-metallic {
-  position: relative;
-  background: linear-gradient(145deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.96));
+  background: rgba(30, 41, 59, 0.92);
   border: 1px solid rgba(100, 116, 139, 0.2);
-  box-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Metallic sheen overlay */
-.dark-card-metallic::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.02) 40%,
-    rgba(255, 255, 255, 0.07) 45%,
-    rgba(255, 255, 255, 0.12) 48%,
-    rgba(255, 255, 255, 0.07) 51%,
-    rgba(255, 255, 255, 0.02) 56%,
-    transparent 61%
-  );
-  background-size: 200% 100%;
-  background-position: 100% 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Subtle bottom highlight edge for depth */
-.dark-card-metallic::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.04),
-    transparent
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Hover: enhance border and add glow, trigger shimmer */
 .dark-card-metallic:hover {
   border-color: rgba(59, 130, 246, 0.25);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.35),
-    0 0 30px rgba(59, 130, 246, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.dark-card-metallic:hover::before {
-  animation: metallic-shimmer 2s ease-in-out infinite;
-}
-
-/* Shimmer animation for metallic sweep */
-@keyframes metallic-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* Gradient accent border variant */
 .dark-card-metallic-accent {
-  border-image: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.3)) 1;
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Interactive variant with stronger shimmer on hover */
+/* Interactive variant - simplified */
 .dark-card-metallic-interactive {
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease;
@@ -333,32 +233,19 @@
 .dark-card-metallic-interactive:hover {
   transform: translateY(-2px);
   border-color: rgba(59, 130, 246, 0.35);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(59, 130, 246, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 .dark-card-metallic-interactive:active {
   transform: translateY(0);
 }
 
-/* ═══ Premium Glass Card ═══ */
+/* ═══ Simple Card ═══ */
 .premium-card {
-  background: #ffffff; border: 1px solid rgba(226,232,240,0.8); border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
-  transition: all 0.3s ease;
-}
-.premium-card:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04);
-  border-color: rgba(37,99,235,0.15);
+  background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 .dark .premium-card {
-  background: rgba(30,41,59,0.7); backdrop-filter: blur(16px);
-  border: 1px solid rgba(100,116,139,0.2);
-}
-.dark .premium-card:hover {
-  border-color: rgba(59,130,246,0.25);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 30px rgba(59,130,246,0.04);
+  background: #1e293b; border: 1px solid #334155;
 }
 
 /* ═══ Apple-style Input ═══ */

@@ -198,10 +198,10 @@ export default function AdvancedAnalytics({
   if (loading) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-10 skeleton-glass rounded-lg w-1/3" />
+        <div className="h-10 bg-slate-200 dark:bg-slate-700/50 rounded-lg w-1/3" />
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-64 skeleton-glass rounded-xl" />
+            <div key={i} className="h-64 bg-slate-100 dark:bg-slate-800/50 rounded-xl" />
           ))}
         </div>
       </div>
@@ -283,7 +283,7 @@ export default function AdvancedAnalytics({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50">
               <span className="text-[10px] font-medium text-slate-400 uppercase">Quick Stats</span>
               <span className="text-xs text-slate-600 dark:text-slate-300">
                 <strong>{chartConfigs.length}</strong> charts displayed

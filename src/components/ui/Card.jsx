@@ -34,7 +34,7 @@ export default function Card({
       : {};
 
   const hoverClasses = hover
-    ? 'hover:shadow-card-hover hover:-translate-y-0.5 hover:border-primary/20 dark:hover:border-primary/20 hover-glow'
+    ? 'hover:shadow-card-hover hover:-translate-y-0.5 hover:border-primary/20 dark:hover:border-primary/20'
     : '';
 
   return (

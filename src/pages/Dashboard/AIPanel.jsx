@@ -164,8 +164,8 @@ export default function AIPanel({
   if (loading) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-24 bg-slate-100 dark:bg-slate-800/50 rounded-xl" />
-        <div className="h-48 bg-slate-100 dark:bg-slate-800/50 rounded-xl" />
+        <div className="h-24 bg-slate-200 dark:bg-slate-700/50 rounded-xl" />
+        <div className="h-48 bg-slate-200 dark:bg-slate-700/50 rounded-xl" />
       </div>
     );
   }

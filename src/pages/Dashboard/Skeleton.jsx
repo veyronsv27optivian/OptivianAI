@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 
-// ─── Premium Glass Skeleton Block ───────────────────────────────
+// ─── Theme-aware Skeleton Block ───────────────────────────────
 function GlassSkeleton({ className = '', height = 'auto', width = '100%' }) {
   return (
     <div
-      className={`rounded-xl bg-gradient-to-r from-white/[0.03] via-white/[0.08] to-white/[0.03] bg-[length:200%_100%] animate-shimmer ${className}`}
+      className={`rounded-xl bg-slate-200 dark:bg-slate-700/50 animate-pulse ${className}`}
       style={{ height, width }}
     />
   );
@@ -15,7 +15,7 @@ export function KPIGridSkeleton({ count = 12 }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-sm p-5 animate-pulse">
+        <div key={i} className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/90 p-5 animate-pulse">
           <div className="flex items-center justify-between mb-3">
             <GlassSkeleton className="h-2.5 w-16" />
             <GlassSkeleton className="w-8 h-8 rounded-xl" />
@@ -31,13 +31,10 @@ export function KPIGridSkeleton({ count = 12 }) {
 // ─── Chart Skeleton ─────────────────────────────────────────────
 export function ChartSkeleton({ height = 300 }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-sm p-5 animate-pulse">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/90 p-5 animate-pulse">
       <GlassSkeleton className="h-3 w-1/3 mb-1" />
       <GlassSkeleton className="h-2 w-1/4 mb-4" />
-      <div
-        className="rounded-xl bg-gradient-to-r from-white/[0.03] via-white/[0.07] to-white/[0.03] bg-[length:200%_100%] animate-shimmer"
-        style={{ height: height - 90 }}
-      />
+      <div className="rounded-xl bg-slate-100 dark:bg-slate-700/30 animate-pulse" style={{ height: height - 90 }} />
     </div>
   );
 }
@@ -45,7 +42,7 @@ export function ChartSkeleton({ height = 300 }) {
 // ─── Widget Skeleton ────────────────────────────────────────────
 export function WidgetSkeleton({ height = 200 }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-sm p-5 animate-pulse">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/90 p-5 animate-pulse">
       <div className="flex items-center justify-between mb-4">
         <GlassSkeleton className="h-3 w-24" />
         <GlassSkeleton className="w-8 h-8 rounded-xl" />
@@ -66,7 +63,7 @@ export function WidgetSkeleton({ height = 200 }) {
 // ─── Section Skeleton ───────────────────────────────────────────
 export function SectionSkeleton({ height = 200 }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-sm p-5 animate-pulse" style={{ height }}>
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/90 p-5 animate-pulse" style={{ height }}>
       <div className="flex items-center gap-3 mb-4">
         <GlassSkeleton className="w-8 h-8 rounded-xl" />
         <div>

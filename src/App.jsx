@@ -11,6 +11,7 @@ const CreateOrganization = lazy(() => import('./pages/Auth/CreateOrganization'))
 const Login = lazy(() => import('./pages/Auth/Login'));
 const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
 const SetupGuide = lazy(() => import('./pages/Auth/SetupGuide'));
+const PremiumOnboarding = lazy(() => import('./pages/Auth/PremiumOnboarding'));
 const MfaVerify = lazy(() => import('./pages/Auth/MfaVerify'));
 const MainLayout = lazy(() => import('./layouts/MainLayout'));
 const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
@@ -92,6 +93,7 @@ function AnimatedRoutes() {
           <Route path="/onboarding/reset-password" element={<LazyPage component={ResetPassword} />} />
           <Route path="/onboarding/update-password" element={<LazyPage component={ResetPassword} />} />
           <Route path="/onboarding/setup" element={<LazyPage component={SetupGuide} />} />
+          <Route path="/onboarding/premium" element={<LazyPage component={PremiumOnboarding} />} />
           <Route path="/onboarding/verify" element={
             <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
               <div className="text-center p-8">

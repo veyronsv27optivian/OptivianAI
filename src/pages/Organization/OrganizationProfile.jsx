@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Building2, Save, X, Check, AlertCircle, Camera, Globe, MapPin,
   Users as UsersIcon, Clock, Hash, Link, Upload, Trash2,
-  AlertTriangle, Plus, RefreshCw,
+  AlertTriangle, Plus,
 } from 'lucide-react';
 
 // Social brand icons — not available in lucide-react
@@ -92,6 +92,7 @@ export default function OrganizationProfile() {
 
   useEffect(() => {
     if (orgId) loadOrg();
+    else setLoading(false);
   }, [orgId]);
 
   const loadOrg = async () => {
@@ -179,6 +180,24 @@ export default function OrganizationProfile() {
     setBranches(b || []);
   };
 
+  if (!loading && !orgId) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Building2 size={48} className="text-slate-300 dark:text-slate-600 mb-4" />
+        <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No Organization Found</h2>
+        <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-md text-center">
+          You haven't created or joined an organization yet. Create one to manage your profile and settings.
+        </p>
+        <button
+          onClick={() => window.location.href = '/create-organization'}
+          className="px-6 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all"
+        >
+          Create Organization
+        </button>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -198,8 +217,8 @@ export default function OrganizationProfile() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Organization Profile</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage your organization details and settings</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Organization Profile</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your organization details and settings</p>
         </div>
         <div className="flex items-center gap-2">
           {saved && (
@@ -241,8 +260,8 @@ export default function OrganizationProfile() {
       )}
 
       {/* Organization Info Card */}
-      <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-6">
-        <div className="flex items-center gap-4 pb-6 border-b border-slate-200">
+      <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-6 space-y-6">
+        <div className="flex items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-700/50">
           <div className="relative shrink-0">
             {form.logoUrl ? (
               <img src={form.logoUrl} alt="Org logo" className="w-16 h-16 rounded-xl object-cover ring-2 ring-slate-100" />
@@ -269,10 +288,10 @@ export default function OrganizationProfile() {
             }} />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">{org?.name || 'Organization'}</h2>
-            <p className="text-sm text-slate-500">{org?.type || 'No type specified'}</p>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{org?.name || 'Organization'}</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{org?.type || 'No type specified'}</p>
             {org?.memberCount != null && (
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                 <UsersIcon size={12} className="inline mr-1" />
                 {org.memberCount} members · {org.activeMemberCount} active
               </p>
@@ -356,8 +375,8 @@ export default function OrganizationProfile() {
       </div>
 
       {/* Social Links */}
-      <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-4">
-        <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-6 space-y-4">
+        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
           <Globe size={18} className="text-blue-600" />
           Social Links
         </h3>
@@ -398,9 +417,9 @@ export default function OrganizationProfile() {
       </div>
 
       {/* Branch Offices */}
-      <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
             <Building2 size={18} className="text-amber-600" />
             Branch Offices
           </h3>
@@ -417,15 +436,15 @@ export default function OrganizationProfile() {
         ) : (
           <div className="space-y-2">
             {branches.map(b => (
-              <div key={b.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-100 hover:border-slate-200 transition-all">
+              <div key={b.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-100 dark:border-slate-700/30 hover:border-slate-200 dark:hover:border-slate-600 transition-all">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-medium text-slate-800">{b.name}</h4>
+                    <h4 className="text-sm font-medium text-slate-800 dark:text-slate-200">{b.name}</h4>
                     {b.is_headquarters && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">HQ</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">HQ</span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                     {[b.address, b.city, b.state, b.country].filter(Boolean).join(', ') || 'No address'}
                   </p>
                 </div>
@@ -444,9 +463,9 @@ export default function OrganizationProfile() {
       {/* Add Branch Modal */}
       {showBranchModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-lg shadow-lg">
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">Add Branch Office</h2>
+          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-lg shadow-lg">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Add Branch Office</h2>
               <button onClick={() => setShowBranchModal(false)} className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100">
                 <X size={20} />
               </button>
@@ -509,13 +528,13 @@ export default function OrganizationProfile() {
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-lg">
+          <div className="w-full max-w-md bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-lg shadow-lg">
             <div className="p-6 text-center">
               <div className="mx-auto w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center mb-4">
                 <AlertTriangle size={24} className="text-white" />
               </div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Delete Organization?</h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-4">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Delete Organization?</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-4">
                 This will permanently delete <strong>{org?.name}</strong> and all associated data.
                 This action cannot be undone.
               </p>

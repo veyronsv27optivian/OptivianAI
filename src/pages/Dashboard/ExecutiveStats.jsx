@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { useAuth } from '../../services/AuthContext';
 import { motion } from 'framer-motion';
 import {
-  Users, CheckSquare, AlertTriangle, Clock,
-  TrendingUp, DollarSign, Target, Shield,
+  Users, CheckSquare, AlertTriangle,
+  TrendingUp, Shield,
   Award, Heart, Gauge, Wallet,
 } from 'lucide-react';
 import KPICard from './KPICard';
@@ -68,33 +68,13 @@ export default function ExecutiveStats({
 
   const kpiCards = [
     {
-      title: 'Revenue',
-      value: Math.round((taskStats.completed || 0) * 247 + (Math.sin(Date.now() / 86400000) * 5000)),
-      prefix: '$',
-      icon: Wallet,
-      color: 'emerald',
-      subtitle: 'Est. from completed tasks',
-      trend: 'up',
-      delay: 0,
-    },
-    {
       title: 'Staff',
       value: staffCount,
       icon: Users,
       color: 'blue',
       subtitle: `${onlineStaff} online now`,
       trend: onlineStaff > 0 ? 'up' : 'down',
-      delay: 0.02,
-    },
-    {
-      title: 'Growth',
-      value: Math.min(99, Math.round((taskStats.completionRate || 0) * 0.8 + (taskStats.overdue > 0 ? 0 : 10) + (staffCount > 0 ? 5 : 0))),
-      suffix: '%',
-      icon: TrendingUp,
-      color: 'violet',
-      subtitle: 'Team momentum',
-      trend: 'up',
-      delay: 0.04,
+      delay: 0,
     },
     {
       title: 'Tasks',
@@ -103,7 +83,7 @@ export default function ExecutiveStats({
       color: 'cyan',
       subtitle: `${taskStats.completed} completed`,
       trend: taskStats.completed > 0 ? 'up' : 'down',
-      delay: 0.06,
+      delay: 0.04,
     },
     {
       title: 'Overdue',
@@ -115,6 +95,16 @@ export default function ExecutiveStats({
       delay: 0.08,
     },
     {
+      title: 'Completion',
+      value: taskStats.completionRate,
+      suffix: '%',
+      icon: Award,
+      color: taskStats.completionRate > 70 ? 'emerald' : 'amber',
+      subtitle: `${taskStats.completed} of ${taskStats.total} done`,
+      trend: taskStats.completionRate > 50 ? 'up' : 'down',
+      delay: 0.12,
+    },
+    {
       title: 'Health Score',
       value: metrics.businessHealth,
       suffix: '',
@@ -122,7 +112,7 @@ export default function ExecutiveStats({
       color: metrics.businessHealth > 70 ? 'emerald' : metrics.businessHealth > 40 ? 'amber' : 'rose',
       subtitle: 'Business health',
       trend: metrics.businessHealth > 60 ? 'up' : 'down',
-      delay: 0.10,
+      delay: 0.16,
     },
     {
       title: 'Risk Score',
@@ -132,7 +122,7 @@ export default function ExecutiveStats({
       color: metrics.riskScore > 50 ? 'rose' : metrics.riskScore > 25 ? 'amber' : 'emerald',
       subtitle: metrics.riskScore > 50 ? 'High risk' : metrics.riskScore > 25 ? 'Moderate' : 'Low risk',
       trend: metrics.riskScore > 30 ? 'down' : 'up',
-      delay: 0.12,
+      delay: 0.20,
     },
     {
       title: 'Productivity',
@@ -142,37 +132,7 @@ export default function ExecutiveStats({
       color: metrics.productivity > 70 ? 'emerald' : metrics.productivity > 40 ? 'amber' : 'rose',
       subtitle: 'Team productivity',
       trend: metrics.productivity > 50 ? 'up' : 'down',
-      delay: 0.14,
-    },
-    {
-      title: 'Completion',
-      value: taskStats.completionRate,
-      suffix: '%',
-      icon: Award,
-      color: taskStats.completionRate > 70 ? 'emerald' : 'amber',
-      subtitle: `${taskStats.completed} of ${taskStats.total} done`,
-      trend: taskStats.completionRate > 50 ? 'up' : 'down',
-      delay: 0.16,
-    },
-    {
-      title: 'Satisfaction',
-      value: metrics.satisfaction,
-      suffix: '',
-      icon: Heart,
-      color: metrics.satisfaction > 70 ? 'emerald' : 'amber',
-      subtitle: 'Customer satisfaction',
-      trend: 'up',
-      delay: 0.18,
-    },
-    {
-      title: 'Launch Ready',
-      value: metrics.launchReady,
-      suffix: '',
-      icon: Target,
-      color: metrics.launchReady > 70 ? 'emerald' : metrics.launchReady > 40 ? 'amber' : 'rose',
-      subtitle: 'Launch readiness',
-      trend: metrics.launchReady > 50 ? 'up' : 'down',
-      delay: 0.20,
+      delay: 0.24,
     },
     {
       title: 'AI Requests',
@@ -181,7 +141,7 @@ export default function ExecutiveStats({
       color: 'violet',
       subtitle: 'Total AI analyses',
       trend: aiAnalytics?.total > 0 ? 'up' : 'down',
-      delay: 0.22,
+      delay: 0.28,
     },
   ];
 
@@ -197,12 +157,12 @@ export default function ExecutiveStats({
         ].map((badge, i) => (
           <span
             key={i}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border backdrop-blur-sm ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border ${
               badge.color === 'emerald'
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                ? 'bg-emerald-100 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
                 : badge.color === 'amber'
-                ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                ? 'bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
+                : 'bg-rose-100 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400'
             } ${badge.pulse ? 'animate-pulse-soft' : ''}`}
           >
             {badge.pulse && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}

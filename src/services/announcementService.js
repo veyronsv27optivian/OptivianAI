@@ -84,14 +84,23 @@ export async function getAnnouncements(userId = null) {
     return announcements.filter(a => !dismissed.includes(a.id));
   }
 
-  const { data, error } = await supabase
-    .from('announcements')
-    .select('*')
-    .eq('active', true)
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('announcements')
+      .select('*')
+      .eq('active', true)
+      .order('created_at', { ascending: false });
 
-  if (error) return [];
-  return (data || []).filter(a => !dismissed.includes(a.id));
+    if (error) {
+      console.warn('Announcements fetch returned:', error.message);
+      return [];
+    }
+    return (data || []).filter(a => !dismissed.includes(a.id));
+  } catch (err) {
+    // Gracefully handle cases where the announcements table doesn't exist yet
+    console.warn('Could not fetch announcements (table may not exist):', err.message);
+    return [];
+  }
 }
 
 /**

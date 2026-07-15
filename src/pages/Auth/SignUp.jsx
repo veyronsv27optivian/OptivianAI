@@ -23,8 +23,8 @@ export default function SignUp() {
     try {
       const { error } = await signUp({ email: formData.email, password: formData.password, name: formData.name });
       if (error) throw error;
-      setSuccessMessage('Account created! Check your email for verification, or proceed to set up your organization.');
-      setTimeout(() => navigate('/onboarding'), 2000);
+      setSuccessMessage('Account created! Redirecting to setup...');
+      setTimeout(() => navigate('/onboarding/premium'), 1500);
     } catch (err) {
       setError(err.message || 'Failed to create account');
     } finally { setIsLoading(false); }

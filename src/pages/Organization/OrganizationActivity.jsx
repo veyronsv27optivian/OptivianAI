@@ -41,7 +41,10 @@ export default function OrganizationActivity() {
 
   const orgId = profile?.organization_id || user?.user_metadata?.organization_id;
 
-  useEffect(() => { if (orgId) fetchActivity(); }, [orgId]);
+  useEffect(() => {
+    if (orgId) fetchActivity();
+    else setLoading(false);
+  }, [orgId]);
 
   const fetchActivity = async () => {
     setLoading(true);
@@ -78,8 +81,8 @@ export default function OrganizationActivity() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Activity Timeline</h1>
-        <p className="text-sm text-slate-500 mt-1">Track all changes and events across your organization</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Activity Timeline</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Track all changes and events across your organization</p>
       </div>
 
       {/* Filters */}
@@ -88,10 +91,10 @@ export default function OrganizationActivity() {
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search activity..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}
-          className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          className="px-3 py-2.5 border border-slate-200 dark:border-slate-700/50 rounded-lg text-sm bg-white dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="all">All Severity</option>
           <option value="info">Info</option>
           <option value="warning">Warning</option>
@@ -99,19 +102,36 @@ export default function OrganizationActivity() {
           <option value="critical">Critical</option>
         </select>
         <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}
-          className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          className="px-3 py-2.5 border border-slate-200 dark:border-slate-700/50 rounded-lg text-sm bg-white dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="newest">Newest First</option>
           <option value="oldest">Oldest First</option>
         </select>
         <button onClick={fetchActivity} disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm transition-all">
+          className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition-all">
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           Refresh
         </button>
       </div>
 
+      {/* No organization */}
+      {!loading && !orgId && (
+        <div className="flex flex-col items-center justify-center py-20">
+          <Building2 size={48} className="text-slate-300 dark:text-slate-600 mb-4" />
+          <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No Organization Found</h2>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mb-6 max-w-md text-center">
+            You haven't created or joined an organization yet. Activity tracking will be available once you create one.
+          </p>
+          <button
+            onClick={() => window.location.href = '/create-organization'}
+            className="px-6 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all"
+          >
+            Create Organization
+          </button>
+        </div>
+      )}
+
       {/* Error state */}
-      {fetchError && !loading && (
+      {orgId && fetchError && !loading && (
         <div className="flex flex-col items-center justify-center py-16">
           <div className="p-4 rounded-xl bg-red-50 border border-red-200 max-w-md text-center">
             <AlertCircle size={32} className="text-red-400 mx-auto mb-3" />
@@ -134,16 +154,16 @@ export default function OrganizationActivity() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <Clock size={40} className="text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-700 mb-2">No activity found</h3>
-          <p className="text-sm text-slate-400">
+          <Clock size={40} className="text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">No activity found</h3>
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             {searchQuery || severityFilter !== 'all' ? 'Try different filters' : 'Activity will appear here as changes are made'}
           </p>
         </div>
       ) : (
         <div className="relative">
           {/* Timeline line */}
-          <div className="absolute left-6 top-0 bottom-0 w-px bg-slate-200" />
+          <div className="absolute left-6 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-700/50" />
 
           <div className="space-y-3">
             {filtered.map((a, i) => {
@@ -154,7 +174,7 @@ export default function OrganizationActivity() {
               return (
                 <div key={a.id || i} className="relative flex items-start gap-4 pl-14">
                   {/* Timeline dot */}
-                  <div className={`absolute left-4 w-5 h-5 rounded-full ${sevConfig.bg} border-2 border-white flex items-center justify-center`}>
+                  <div className={`absolute left-4 w-5 h-5 rounded-full ${sevConfig.bg} border-2 border-white dark:border-slate-800 flex items-center justify-center`}>
                     <div className={`w-2 h-2 rounded-full ${sevConfig.color.replace('text-', 'bg-')}`} />
                   </div>
 
@@ -165,10 +185,10 @@ export default function OrganizationActivity() {
                           <SevIcon size={14} className={sevConfig.color} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm text-slate-800">
+                          <p className="text-sm text-slate-800 dark:text-slate-200">
                             <span className="font-medium">{a.actor_name || 'System'}</span>
                             {' '}
-                            <span className="text-slate-500">
+                            <span className="text-slate-500 dark:text-slate-400">
                               {a.action?.replace(/_/g, ' ')}
                               {a.resource_type ? ` ${a.resource_type}` : ''}
                             </span>

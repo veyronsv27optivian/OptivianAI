@@ -28,8 +28,9 @@ import {
   MousePointerClick, Maximize2, Minimize2,
 } from 'lucide-react';
 
-// ─── Mock Journey Data ───────────────────────────────────────────
-// In production, this would come from an analytics API
+// ─── Demo Visualization Data ────────────────────────
+// ⚠️ Replace with real analytics API data for production use.
+// These are static examples showing the 3D visualization capability.
 
 const JOURNEY_NODES = [
   { id: 'login', label: 'Login', lat: 40.7128, lng: -74.0060, color: '#3B82F6', users: 1240, avgTime: '12s' },

@@ -44,24 +44,24 @@ function Section({ id, title, subtitle, icon: Icon, children, defaultExpanded = 
   };
   return (
     <ScrollReveal variant="fade-up" className={className}>
-      <div className={`relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-xl transition-all duration-300 ${accentBorders[accent] || accentBorders.blue}`}>
+      <div className={`relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/90 transition-all duration-300 ${accentBorders[accent] || accentBorders.blue}`}>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center justify-between p-5 hover:bg-white/[0.02] transition-colors group"
+          className="w-full flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors group"
         >
           <div className="flex items-center gap-3">
             {Icon && (
-              <div className="p-2.5 rounded-xl bg-white/[0.06] group-hover:bg-white/[0.1] transition-colors backdrop-blur-sm border border-white/[0.04]">
-                <Icon size={16} className="text-white/60" />
+              <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/50 group-hover:bg-slate-200 dark:group-hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-600/50">
+                <Icon size={16} className="text-slate-500 dark:text-slate-400" />
               </div>
             )}
             <div className="text-left">
-              <h2 className="text-sm font-semibold text-white/90">{title}</h2>
-              {subtitle && <p className="text-[10px] text-white/40 mt-0.5">{subtitle}</p>}
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
+              {subtitle && <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
             </div>
           </div>
           <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronDown size={16} className="text-white/30" />
+            <ChevronDown size={16} className="text-slate-400 dark:text-slate-500" />
           </motion.div>
         </button>
         <motion.div
@@ -346,28 +346,28 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={() => setShowCustomizer(true)}
-              className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10 transition-all backdrop-blur-sm"
+              className="p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
               title="Customize Dashboard">
               <Settings2 size={16} />
             </motion.button>
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={() => setFullscreen(!fullscreen)}
-              className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10 transition-all backdrop-blur-sm"
+              className="p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
               title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}>
               {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </motion.button>
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               onClick={() => fetchData(true)}
-              className={`p-2 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10 transition-all backdrop-blur-sm ${refreshing ? 'animate-spin' : ''}`}
+              className={`p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all ${refreshing ? 'animate-spin' : ''}`}
               title="Refresh">
               <RefreshCw size={16} />
             </motion.button>
-            <div className="flex items-center gap-2 ml-2 pl-3 border-l border-white/10">
+            <div className="flex items-center gap-2 ml-2 pl-3 border-l border-slate-200 dark:border-slate-700/50">
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 {onlineStaff} online
               </span>
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/50 text-xs font-medium">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-200/70 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 text-xs font-medium">
                 {staffCount} staff
               </span>
             </div>
@@ -504,7 +504,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <ScrollReveal variant="fade-up">
-        <div className="flex items-center justify-between px-5 py-3.5 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.02] border border-white/5 backdrop-blur-sm text-[10px] text-white/40">
+        <div className="flex items-center justify-between px-5 py-3.5 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 text-[10px] text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />

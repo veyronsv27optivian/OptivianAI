@@ -423,13 +423,21 @@ const PERMISSION_MAP = {
 /**
  * Normalise a role string to lowercase, underscored form.
  * e.g. "Assistant Manager" → "assistant_manager"
+ * e.g. "admin" → "administrator" (alias mapping)
  */
+const ROLE_ALIASES = {
+  admin: 'administrator',
+};
+
 function normalizeRole(role) {
-  return role
+  const normalized = role
     ?.toString()
     .toLowerCase()
     .replace(/\s+/g, '_')
     .replace(/[^a-z_]/g, '') || 'staff';
+  
+  // Resolve aliases so role strings like 'admin' map to known permission entries
+  return ROLE_ALIASES[normalized] || normalized;
 }
 
 /**
