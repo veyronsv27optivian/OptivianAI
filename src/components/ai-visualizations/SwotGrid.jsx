@@ -118,7 +118,7 @@ export default function SwotGrid({ data }) {
   ];
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white p-5 shadow-sm">
+    <div className="premium-card dark:dark-card-metallic p-5">
       <div className="flex items-center gap-2 mb-4">
         <h3 className="text-sm font-bold text-slate-800">SWOT Analysis</h3>
         <span className="text-xs text-slate-400">— Strategic review</span>

@@ -9,7 +9,7 @@ function CompetitorCard({ competitor, index, expanded, onToggle }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className={`rounded-lg border cursor-pointer transition-all ${
-        expanded ? 'border-slate-300 shadow-sm bg-white' : 'border-slate-100 hover:border-slate-200 bg-white'
+        expanded ? 'border-slate-300 dark:border-white/20 shadow-sm bg-white dark:bg-surface-raised/60' : 'border-slate-100 dark:border-white/5 hover:border-slate-200 dark:hover:border-white/20 bg-white dark:bg-surface-raised/40'
       }`}
       onClick={onToggle}
     >
@@ -123,7 +123,7 @@ export default function CompetitorTable({ data }) {
   if (!competitors || competitors.length === 0) return null;
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white p-5 shadow-sm">
+    <div className="premium-card dark:dark-card-metallic p-5">
       <div className="flex items-center gap-2 mb-4">
         <Target size={16} className="text-orange-500" />
         <h3 className="text-sm font-bold text-slate-800">Competitor Analysis</h3>

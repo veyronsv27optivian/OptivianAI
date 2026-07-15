@@ -60,7 +60,7 @@ export default function LaunchRadar({ data }) {
   const StatusIcon = STATUS_CONFIG[status]?.icon || BadgeCheck;
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white p-5 shadow-sm">
+    <div className="premium-card dark:dark-card-metallic p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

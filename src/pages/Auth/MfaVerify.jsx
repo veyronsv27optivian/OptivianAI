@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield, Mail, ArrowLeft, CheckCircle, AlertCircle,
-  Lock, RefreshCw, Clock,
+  Lock, RefreshCw, Clock, Laptop,
 } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 import { sendOtp, verifyOtp, isEmailMfaEnabled } from '../../services/emailOtpService';
@@ -30,6 +30,7 @@ export default function MfaVerify() {
   const [success, setSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
   const [devCode, setDevCode] = useState('');
+  const [trustDevice, setTrustDevice] = useState(false); // Item 69: Device fingerprinting
 
   useEffect(() => {
     initMfaCheck();
@@ -53,12 +54,53 @@ export default function MfaVerify() {
     return () => clearInterval(timer);
   }, [step, timeLeft]);
 
+  // Mark session as MFA-verified so we don't ask again
+  const markMfaVerified = async () => {
+    try {
+      const key = `optivian_mfa_verified_${userId}`;
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      data.verifiedAt = Date.now();
+      data.expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+      localStorage.setItem(key, JSON.stringify(data));
+
+      // Item 69: If user opted to trust this device, register fingerprint
+      if (trustDevice) {
+        try {
+          const { trustCurrentDevice } = await import('../../services/deviceFingerprint');
+          await trustCurrentDevice(userId);
+        } catch { /* silently fail - fingerprinting is optional */ }
+      }
+    } catch {}
+  };
+
   // Auto-submit when all digits are filled
+  const isMfaComplete = code.every(d => d !== '');
   useEffect(() => {
-    if (code.every(d => d !== '') && step === 'sent') {
-      handleVerify();
-    }
-  }, [code.join('')]);
+    const doVerify = async () => {
+      if (!isMfaComplete || step !== 'sent' || verifying) return;
+      const verificationCode = code.join('');
+      if (verificationCode.length !== CODE_LENGTH) return;
+
+      setVerifying(true);
+      setError('');
+
+      try {
+        await verifyOtp(userId, verificationCode);
+        await markMfaVerified();
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/app', { replace: true });
+        }, 800);
+      } catch (err) {
+        setError(err.message || 'Invalid code. Please try again.');
+        setCode(Array(CODE_LENGTH).fill(''));
+        if (inputRefs.current[0]) inputRefs.current[0].focus();
+      } finally {
+        setVerifying(false);
+      }
+    };
+    doVerify();
+  }, [isMfaComplete, step, verifying, userId, code, navigate]);
 
   const getEmailFromSession = async () => {
     if (DEV_MODE) {
@@ -128,10 +170,11 @@ export default function MfaVerify() {
 
     try {
       await verifyOtp(userId, verificationCode);
+      await markMfaVerified();
       setSuccess(true);
       setTimeout(() => {
         navigate('/app', { replace: true });
-      }, 1200);
+      }, 800);
     } catch (err) {
       setError(err.message || 'Invalid code. Please try again.');
       setCode(Array(CODE_LENGTH).fill(''));
@@ -204,26 +247,26 @@ export default function MfaVerify() {
 
   if (step === 'checking') {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-          <p className="text-slate-500 text-sm font-medium">Sending verification code...</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Sending verification code...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white border border-slate-200 rounded-lg p-8 shadow-sm">
+        <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-8 shadow-sm">
           {/* Logo */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-blue-600 mb-4">
               <Shield size={24} className="text-white" />
             </div>
-            <h1 className="text-xl font-bold text-slate-900 mb-1">Two-Factor Verification</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">Two-Factor Verification</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Enter the 6-digit code sent to your email
             </p>
           </div>
@@ -240,11 +283,11 @@ export default function MfaVerify() {
           ) : (
             <>
               {/* Email info */}
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 mb-6">
+              <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30 mb-6">
                 <Mail size={20} className="text-blue-600 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900">Code sent to</p>
-                  <p className="text-xs text-slate-500 truncate">{email}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Code sent to</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{email}</p>
                 </div>
               </div>
 
@@ -281,10 +324,10 @@ export default function MfaVerify() {
                     disabled={verifying}
                     className={`w-11 h-12 text-center text-lg font-bold border rounded-lg transition-all focus:outline-none focus:ring-2 focus:border-blue-500 ${
                       error
-                        ? 'border-red-300 focus:ring-red-500 bg-red-50'
+                        ? 'border-red-300 dark:border-red-600 focus:ring-red-500 bg-red-50 dark:bg-red-900/20'
                         : digit
-                        ? 'border-blue-300 focus:ring-blue-500 bg-blue-50'
-                        : 'border-slate-300 focus:ring-blue-500'
+                        ? 'border-blue-300 dark:border-blue-600 focus:ring-blue-500 bg-blue-50 dark:bg-blue-900/20 text-slate-900 dark:text-slate-100'
+                        : 'border-slate-300 dark:border-slate-600 focus:ring-blue-500 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-slate-100'
                     } disabled:opacity-50`}
                   />
                 ))}
@@ -292,11 +335,25 @@ export default function MfaVerify() {
 
               {/* Error */}
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 mb-4">
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 mb-4">
                   <AlertCircle size={16} className="text-red-600 shrink-0" />
-                  <p className="text-sm text-red-700">{error}</p>
+                  <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
                 </div>
               )}
+
+              {/* Item 69: Trust this device checkbox */}
+              <label className="flex items-center gap-2.5 mb-4 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={trustDevice}
+                  onChange={(e) => setTrustDevice(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+                />
+                <Laptop size={14} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+                <span className="text-xs text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+                  Trust this device for 30 days
+                </span>
+              </label>
 
               {/* Actions */}
               <div className="space-y-3">
@@ -320,11 +377,11 @@ export default function MfaVerify() {
 
                 <button
                   onClick={handleResend}
-                  disabled={resending || timeLeft > 240}
+                  disabled={resending || timeLeft > 295}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all disabled:opacity-50"
                 >
                   <RefreshCw size={16} className={resending ? 'animate-spin' : ''} />
-                  {resending ? 'Sending...' : timeLeft > 240 ? 'Resend code' : `Resend code (${formatTime(timeLeft)})`}
+                  {resending ? 'Sending...' : timeLeft > 295 ? 'Resend code' : `Resend code (${formatTime(timeLeft)})`}
                 </button>
               </div>
             </>
@@ -332,7 +389,7 @@ export default function MfaVerify() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
           Didn't receive the code? Check your spam folder or contact your administrator.
         </p>
       </div>

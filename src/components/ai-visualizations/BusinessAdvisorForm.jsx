@@ -76,9 +76,9 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
   };
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden">
+    <div className="premium-card dark:dark-card-metallic overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div className="p-4 border-b border-slate-200 dark:border-white/10 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-blue-100">
             <Brain size={20} className="text-blue-600" />

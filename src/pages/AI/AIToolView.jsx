@@ -22,10 +22,10 @@ function TypingIndicator() {
 function LoadingSkeleton() {
   return (
     <div className="animate-pulse space-y-3 p-4">
-      <div className="h-4 bg-slate-200 rounded w-3/4" />
-      <div className="h-4 bg-slate-200 rounded w-1/2" />
-      <div className="h-4 bg-slate-200 rounded w-5/6" />
-      <div className="h-4 bg-slate-200 rounded w-2/3" />
+      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-5/6" />
+      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
     </div>
   );
 }
@@ -48,7 +48,7 @@ function MessageBubble({ message, onCopy }) {
         {isUser ? <User size={16} /> : <Brain size={16} />}
       </div>
       <div className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
-        <div className={`rounded-lg px-4 py-3 ${isUser ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-800'}`}>
+        <div className={`rounded-lg px-4 py-3 ${isUser ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100'}`}>
           {isUser ? (
             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
           ) : (
@@ -60,7 +60,7 @@ function MessageBubble({ message, onCopy }) {
           {!isUser && (
             <button
               onClick={handleCopy}
-              className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
+              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
               title="Copy response"
             >
               {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
@@ -111,6 +111,18 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     content: '',
     urlError: null,
   });
+
+  // ── Load settings for streaming toggle (#62) ─────────────────
+  const [streamingEnabled, setStreamingEnabled] = useState(true);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('optivian_ai_settings') || '{}');
+      if (saved.streamingEnabled !== undefined) {
+        setStreamingEnabled(saved.streamingEnabled);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const toolInfo = getToolInfo(toolType);
   const providers = getAvailableProviders();
@@ -185,7 +197,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     setStreaming(true);
     streamingRef.current = true;
 
-    const useStreaming = activeProvider?.supportsStreaming !== false;
+    const useStreaming = streamingEnabled && activeProvider?.supportsStreaming !== false;
 
     if (useStreaming) {
       let fullText = '';
@@ -499,21 +511,21 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white">
+      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/10 bg-white dark:dark-card-metallic">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-50">
-            <Brain size={20} className="text-blue-600" />
+          <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+            <Brain size={20} className="text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">{toolLabel}</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{toolLabel}</h2>
             {toolInfo && (
-              <p className="text-xs text-slate-400">{toolInfo.description}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">{toolInfo.description}</p>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2">
           {activeProvider && (
-            <span className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+            <span className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
               <div className={`w-2 h-2 rounded-full ${activeProvider.available ? 'bg-emerald-500' : 'bg-red-400'}`} />
               {activeProvider.label}
             </span>
@@ -521,7 +533,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
           {supportsUrlInput && messages.length === 0 && !urlState.fetched && (
             <button
               onClick={() => document.getElementById('url-input-field')?.focus()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 text-xs font-medium hover:bg-purple-100 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-xs font-medium hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all"
             >
               <Link size={14} />
               Enter URL
@@ -530,7 +542,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
           {supportsFileUpload && messages.length === 0 && !fileState.parsed && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
             >
               <Upload size={14} />
               Upload File
@@ -538,13 +550,13 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
           )}
           {messages.length > 0 && (
             <>
-              <button onClick={handleClear} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all" title="Clear chat">
+              <button onClick={handleClear} className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all" title="Clear chat">
                 <X size={16} />
               </button>
-              <button onClick={handleExport} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all" title="Export as text">
+              <button onClick={handleExport} className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all" title="Export as text">
                 <Download size={16} />
               </button>
-              <button onClick={handleExportPDF} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all" title="Export as PDF">
+              <button onClick={handleExportPDF} className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all" title="Export as PDF">
                 <FileText size={16} />
               </button>
             </>
@@ -552,13 +564,13 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-slate-900/30">
         {messages.length === 0 && !streaming && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             {/* ── URL Input Zone (for Website/YouTube analyzers) ── */}
             {supportsUrlInput && !urlState.fetched && (
               <div className="w-full max-w-lg mb-6">
-                <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="p-6 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:dark-card-metallic shadow-sm">
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`p-2.5 rounded-lg ${toolType === 'youtube_analyzer' ? 'bg-red-50' : 'bg-blue-50'}`}>
                       {toolType === 'youtube_analyzer' ? (
@@ -585,7 +597,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                       onKeyDown={handleUrlKeyDown}
                       placeholder={toolType === 'youtube_analyzer' ? 'https://youtube.com/watch?v=...' : 'https://example.com'}
                       disabled={urlState.fetching}
-                      className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                      className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                     />
                     <button
                       onClick={handleUrlFetch}
@@ -623,7 +635,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
             {/* ── Fetched URL preview ── */}
             {supportsUrlInput && urlState.fetched && (
               <div className="w-full max-w-lg mb-6">
-                <div className="p-4 rounded-xl bg-purple-50 border border-purple-200">
+                <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
                   <div className="flex items-center gap-2 mb-1">
                     {toolType === 'youtube_analyzer' ? (
                       <Video size={18} className="text-purple-600" />
@@ -657,7 +669,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                     transition-all duration-200 group
                     ${fileState.dragOver
                       ? 'border-blue-400 bg-blue-50/50 shadow-lg shadow-blue-100'
-                      : 'border-slate-300 hover:border-blue-300 hover:bg-slate-50/50'
+                      : 'border-slate-300 hover:border-blue-300 hover:bg-slate-50/50 dark:bg-slate-900/30'
                     }
                   `}
                 >
@@ -706,7 +718,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
             {/* ── Parsed file preview ── */}
             {supportsFileUpload && fileState.parsed && (
               <div className="w-full max-w-lg mb-6">
-                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <File size={18} className="text-emerald-600" />
@@ -741,7 +753,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-2 w-full max-w-md">
                   {examplePrompts[toolType]?.slice(0, 4).map((ep, i) => (
-                    <button key={i} onClick={() => setInput(ep)} className="text-xs text-left p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50 transition-all text-slate-600">
+                    <button key={i} onClick={() => setInput(ep)} className="text-xs text-left p-3 rounded-lg border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/90 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all text-slate-600 dark:text-slate-400">
                       {ep}
                     </button>
                   ))}
@@ -777,7 +789,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
         <div ref={chatEndRef} />
       </div>
 
-      <div className="p-4 border-t border-slate-200 bg-white">
+      <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:dark-card-metallic">
         <div className="relative">
           <textarea
             ref={textareaRef}

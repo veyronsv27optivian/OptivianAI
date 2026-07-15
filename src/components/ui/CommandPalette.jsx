@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../services/ThemeContext';
+import GlobalSearch from '../../pages/Search/GlobalSearch';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/app', icon: Home, keywords: 'dashboard home main' },
@@ -37,6 +38,7 @@ export default function CommandPalette({ isOpen, onClose }) {
   const { isDark, toggleTheme } = useTheme();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [fullSearch, setFullSearch] = useState(false);
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
@@ -45,6 +47,7 @@ export default function CommandPalette({ isOpen, onClose }) {
     if (isOpen) {
       setQuery('');
       setSelectedIndex(0);
+      setFullSearch(false);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
@@ -109,19 +112,31 @@ export default function CommandPalette({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  // Full search mode
+  if (fullSearch) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh]">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <div className="relative w-full max-w-2xl mx-4 dropdown-premium overflow-hidden" style={{ maxHeight: '70vh' }}>
+          <GlobalSearch onClose={onClose} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Palette */}
-      <div className="relative w-full max-w-xl mx-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-scale-in">
+      <div className="relative w-full max-w-xl mx-4 dropdown-premium overflow-hidden animate-scale-in">
         {/* Search Input */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-          <Search size={20} className="text-slate-400 shrink-0" />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-white/10">
+          <Search size={20} className="text-slate-400 dark:text-text-tertiary shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -129,21 +144,18 @@ export default function CommandPalette({ isOpen, onClose }) {
             onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleKeyDown}
             placeholder="Search pages, tools, or actions..."
-            className="flex-1 bg-transparent text-base text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent text-base text-slate-900 dark:text-text-primary placeholder-slate-400 dark:placeholder-text-tertiary focus:outline-none"
           />
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
-            <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[10px]">esc</kbd>
+          <div className="flex items-center gap-1.5 text-[10px] text-text-tertiary">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] font-mono text-[10px] text-slate-400 dark:text-text-tertiary">esc</kbd>
           </div>
         </div>
 
         {/* Results */}
-        <div
-          ref={listRef}
-          className="max-h-80 overflow-y-auto p-2"
-        >
+        <div className="p-2" style={{ maxHeight: fullSearch ? '50vh' : '320px' }}>
           {results.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-400 dark:text-slate-500">
-              <Search size={24} className="mx-auto mb-2 opacity-50" />
+            <div className="p-8 text-center text-sm text-slate-400 dark:text-text-tertiary">
+              <Search size={24} className="mx-auto mb-2 opacity-30" />
               <p>No results for "{query}"</p>
             </div>
           ) : (
@@ -158,25 +170,25 @@ export default function CommandPalette({ isOpen, onClose }) {
                     onMouseEnter={() => setSelectedIndex(i)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
                       isSelected
-                        ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      ? 'bg-primary/10 text-primary dark:text-primary-light'
+                      : 'text-slate-600 dark:text-text-secondary hover:bg-slate-100 dark:hover:bg-white/[0.03]'
                     }`}
                   >
                     <div className={`p-1.5 rounded-lg ${
                       isSelected
-                        ? 'bg-primary/15 dark:bg-primary/25'
-                        : 'bg-slate-100 dark:bg-slate-800'
+                        ? 'bg-primary/15'
+                        : 'bg-slate-100 dark:bg-white/[0.04]'
                     }`}>
                       <Icon size={16} className={
-                        isSelected ? 'text-primary' : 'text-slate-500 dark:text-slate-400'
+                        isSelected ? 'text-primary dark:text-primary-light' : 'text-slate-400 dark:text-text-tertiary'
                       } />
                     </div>
                     <span className="flex-1 text-sm font-medium">{item.label}</span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 capitalize">
+                    <span className="text-[10px] text-slate-400 dark:text-text-tertiary capitalize">
                       {item.type || 'page'}
                     </span>
                     {isSelected && (
-                      <ArrowRight size={14} className="text-primary animate-fade-in" />
+                      <ArrowRight size={14} className="text-primary-light animate-fade-in" />
                     )}
                   </button>
                 );
@@ -186,21 +198,30 @@ export default function CommandPalette({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-4 px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
-            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono text-[9px]">↑↓</kbd>
+        <div className="flex items-center gap-4 px-5 py-3 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-text-tertiary">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/[0.06] font-mono text-[9px]">↑↓</kbd>
             <span>Navigate</span>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
-            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono text-[9px]">↵</kbd>
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-text-tertiary">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/[0.06] font-mono text-[9px]">↵</kbd>
             <span>Open</span>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
-            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono text-[9px]">⌘K</kbd>
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-text-tertiary">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/[0.06] font-mono text-[9px]">⌘K</kbd>
             <span>Toggle</span>
           </div>
-          {results.length > 0 && (
-            <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500">
+          {query.trim().length >= 2 && (
+            <button
+              onClick={() => setFullSearch(true)}
+              className="ml-auto flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium text-primary dark:text-primary-light hover:bg-primary/10 transition-all"
+            >
+              <Search size={10} />
+              Full Search ({NAV_ITEMS.length + ACTIONS.length}+ items)
+            </button>
+          )}
+          {results.length > 0 && query.trim().length < 2 && (
+            <span className="ml-auto text-[10px] text-slate-400 dark:text-text-tertiary">
               {results.length} result{results.length !== 1 ? 's' : ''}
             </span>
           )}

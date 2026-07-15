@@ -17,7 +17,7 @@ function ScenarioRow({ scenario, index, isBest }) {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={`${isBest ? 'bg-emerald-50/50' : index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}
+      className={`${isBest ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : index % 2 === 0 ? 'bg-white dark:bg-transparent' : 'bg-slate-50/50 dark:bg-white/[0.02]'}`}
     >
       <td className="py-2.5 px-3">
         <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export default function ScenarioTable({ data }) {
   }, { index: 0, score: -1 }).index;
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white p-5 shadow-sm">
+    <div className="premium-card dark:dark-card-metallic p-5">
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 size={16} className="text-cyan-500" />
         <h3 className="text-sm font-bold text-slate-800">Decision Simulation</h3>
@@ -83,7 +83,7 @@ export default function ScenarioTable({ data }) {
       </div>
 
       {decisionOverview && (
-        <p className="text-xs text-slate-500 mb-3 p-2.5 bg-slate-50 rounded-lg">{decisionOverview}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 p-2.5 bg-white/50 dark:bg-white/5 rounded-lg">{decisionOverview}</p>
       )}
 
       {/* Scenario Comparison Table */}

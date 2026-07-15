@@ -107,7 +107,7 @@ export default function AIProviders() {
         </div>
         <button
           onClick={refresh}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm transition-all"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition-all"
         >
           <RefreshCw size={14} />
           Refresh
@@ -127,8 +127,8 @@ export default function AIProviders() {
               key={p.name}
               className={`relative rounded-lg border-2 transition-all ${
                 isActive
-                  ? 'border-blue-300 bg-blue-50/30'
-                  : 'border-slate-200 bg-white hover:border-slate-300'
+              ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/10'
+              : 'border-slate-200 dark:border-white/10 bg-white dark:dark-card-metallic hover:border-slate-300 dark:hover:border-white/20'
               }`}
             >
               {/* Active indicator */}
@@ -147,7 +147,7 @@ export default function AIProviders() {
                       <span className={`text-lg font-bold ${icon.color}`}>{icon.label}</span>
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900">{p.label}</h3>
+                      <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{p.label}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
                           p.available
@@ -159,7 +159,7 @@ export default function AIProviders() {
                           }`} />
                           {p.available ? 'Available' : 'Not configured'}
                         </span>
-                        <span className="text-xs text-slate-400">{p.model}</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500">{p.model}</span>
                       </div>
                       <div className="flex items-center gap-3 mt-1.5">
                         <span className="flex items-center gap-1 text-xs text-slate-400">
@@ -180,7 +180,7 @@ export default function AIProviders() {
                       <button
                         onClick={() => handleSwitch(p.name)}
                         disabled={!p.available}
-                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ArrowRight size={14} />
                         Use Provider
@@ -189,7 +189,7 @@ export default function AIProviders() {
                     <button
                       onClick={() => handleTest(p.name)}
                       disabled={!p.available || isTesting}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm transition-all disabled:opacity-50"
                     >
                       {isTesting ? (
                         <RefreshCw size={14} className="animate-spin" />
@@ -240,14 +240,14 @@ export default function AIProviders() {
       </div>
 
       {/* Auto-fallback Info */}
-      <div className="p-5 rounded-lg bg-slate-50 border border-slate-200">
+      <div className="p-5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-slate-200 shrink-0">
-            <Shield size={16} className="text-slate-600" />
+          <div className="p-2 rounded-lg bg-slate-200 dark:bg-white/10 shrink-0">
+            <Shield size={16} className="text-slate-600 dark:text-slate-400" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-800">Automatic Fallback</h4>
-            <p className="text-xs text-slate-500 mt-1">
+            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Automatic Fallback</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               When a provider fails, the system automatically falls back to the next available provider in this order:
               Gemini → DeepSeek → Qwen VL → OpenAI. This ensures AI features remain operational even if one provider is unavailable.
             </p>

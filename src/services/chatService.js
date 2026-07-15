@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { sendNotificationEmail, isEmailConfigured } from './emailService';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 const DEV_CONVERSATIONS_KEY = 'optivian_dev_conversations';
@@ -181,6 +182,38 @@ export async function sendMessage(user, conversationId, content, opts = {}) {
       .single();
 
     if (error) throw error;
+
+    // Notify other conversation participants via email (fire-and-forget)
+    if (isEmailConfigured() && profile) {
+      const { data: participants } = await supabase
+        .from('conversation_participants')
+        .select('profile_id')
+        .eq('conversation_id', conversationId);
+
+      if (participants?.length > 0) {
+        const otherIds = participants
+          .filter(p => p.profile_id !== profile.id)
+          .map(p => p.profile_id);
+
+        if (otherIds.length > 0) {
+          const { data: otherProfiles } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .in('id', otherIds);
+
+          for (const op of otherProfiles || []) {
+            if (op.email) {
+              sendNotificationEmail('chat_message', op.email, {
+                senderName: user.email?.split('@')[0] || 'Someone',
+                messagePreview: (content?.trim() || '').slice(0, 200) || 'Sent a file',
+                chatUrl: `${window.location.origin}/#/app/chat`,
+              }).catch(() => {}); // Fire-and-forget
+            }
+          }
+        }
+      }
+    }
+
     return { data, error: null };
   } catch (err) {
     console.error('Failed to send message:', err);

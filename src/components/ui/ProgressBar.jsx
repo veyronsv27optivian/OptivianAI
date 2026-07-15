@@ -35,20 +35,20 @@ export default function ProgressBar({
     <div className={`w-full ${className}`}>
       {(label || showValue) && (
         <div className="flex items-center justify-between mb-1.5">
-          {label && <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{label}</span>}
+          {label && <span className="text-xs font-medium text-slate-600 dark:text-text-secondary">{label}</span>}
           {showValue && (
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">{Math.round(pct)}%</span>
+            <span className="text-xs font-semibold text-slate-900 dark:text-text-primary">{Math.round(pct)}%</span>
           )}
         </div>
       )}
-      <div className={`w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden ${sizes[size] || sizes.md}`}>
+      <div className={`w-full bg-slate-200/60 dark:bg-white/5 rounded-full overflow-hidden ${sizes[size] || sizes.md}`}>
         <motion.div
           initial={animated ? { width: 0 } : false}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
           className={`h-full rounded-full ${colors[color] || colors.primary} transition-all duration-500`}
           style={{
-            boxShadow: pct > 0 ? `0 0 8px ${color === 'emerald' ? 'rgba(16,185,129,0.4)' : 'rgba(37,99,235,0.3)'}` : 'none',
+            boxShadow: pct > 0 ? `0 0 8px ${color === 'emerald' ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.3)'}` : 'none',
           }}
         />
       </div>
@@ -78,7 +78,7 @@ export function MultiProgressBar({ segments = [], size = 'md', className = '' })
 
   return (
     <div className={`w-full ${className}`}>
-      <div className={`w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden flex ${sizes[size] || sizes.md}`}>
+      <div className={`w-full bg-slate-200/60 dark:bg-white/5 rounded-full overflow-hidden flex ${sizes[size] || sizes.md}`}>
         {segments.map((seg, i) => {
           const pct = (seg.value / total) * 100;
           if (pct < 1) return null;
@@ -99,7 +99,7 @@ export function MultiProgressBar({ segments = [], size = 'md', className = '' })
           {segments.map((seg, i) => (
             <div key={i} className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${colorMap[seg.color] || seg.color || 'bg-primary'}`} />
-              <span className="text-[10px] text-slate-500 dark:text-slate-400">
+              <span className="text-[10px] text-slate-500 dark:text-text-secondary">
                 {seg.label} ({Math.round((seg.value / total) * 100)}%)
               </span>
             </div>

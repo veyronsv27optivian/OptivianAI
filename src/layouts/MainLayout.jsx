@@ -4,7 +4,8 @@ import {
   LogOut, Home, Users, CheckSquare, Brain, MessageSquare,
   ChevronLeft, ChevronRight, Bell, Search, Settings,
   Sliders, History, Server, Building2, BarChart3, Clock,
-  Target, Activity, Sun, Moon, Command,
+  Target, Activity, Sun, Moon, Command, FileText,
+  Globe, Cpu,
 } from 'lucide-react';
 import { useAuth } from '../services/AuthContext';
 import { supabase } from '../services/supabase';
@@ -15,24 +16,30 @@ import {
 } from '../services/notificationService';
 import { initTracker, addListener } from '../services/chatUnreadTracker';
 import { useTheme } from '../services/ThemeContext';
+import { useSessionTimeout } from '../services/useSessionTimeout';
+import SessionTimeoutModal from '../components/ui/SessionTimeoutModal';
 import CommandPalette from '../components/ui/CommandPalette';
+import RecommendationsPanel from '../components/ui/RecommendationsPanel';
 
 function getNavItems(role) {
   const items = [
     { icon: Home, label: 'Dashboard', path: '/app', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
-    { icon: Users, label: 'Users & Roles', path: '/app/users', badge: null, roles: ['admin', 'owner', 'manager'] },
+    { icon: Users, label: 'Users & Roles', path: '/app/users', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
     { icon: CheckSquare, label: 'Tasks', path: '/app/tasks', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
     { icon: MessageSquare, label: 'Chat', path: '/app/chat', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
-    { icon: Building2, label: 'Organization', path: '/app/org', badge: null, roles: ['admin', 'owner', 'manager'], submenu: [
+    { icon: Building2, label: 'Organization', path: '/app/org', badge: null, roles: ['admin', 'owner', 'manager', 'staff'], submenu: [
       { icon: Settings, label: 'Org Settings', path: '/app/org' },
       { icon: BarChart3, label: 'Analytics', path: '/app/org/analytics' },
       { icon: Target, label: 'Structure', path: '/app/org/structure' },
       { icon: Clock, label: 'Activity', path: '/app/org/activity' },
     ]},
-    { icon: Brain, label: 'AI Platform', path: '/app/ai', badge: null, roles: ['admin', 'owner'], submenu: [
+    { icon: FileText, label: 'Files', path: '/app/files', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
+    { icon: Brain, label: 'AI Platform', path: '/app/ai', badge: null, roles: ['admin', 'owner', 'manager', 'staff'], submenu: [
       { icon: Settings, label: 'AI Settings', path: '/app/ai/settings' },
       { icon: History, label: 'History', path: '/app/ai/history' },
       { icon: Server, label: 'Providers', path: '/app/ai/providers' },
+      { icon: Cpu, label: 'AI Manager', path: '/app/ai-manager' },
+      { icon: Globe, label: 'Journey Map 3D', path: '/app/journey' },
     ]},
   ];
   return items.filter(item => item.roles.includes(role));
@@ -49,6 +56,13 @@ export default function MainLayout() {
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+
+  // Session timeout (Item 66)
+  const { showWarning, resetTimer } = useSessionTimeout({
+    timeoutMs: 30 * 60 * 1000,
+    enabled: !!user && !isDevMode,
+  });
   const bellRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -211,17 +225,26 @@ export default function MainLayout() {
     return `${days}d ago`;
   };
 
+  const handleExtendSession = () => {
+    resetTimer();
+  };
+
   return (
     <div className="flex h-screen bg-background dark:bg-slate-900">
       {/* Command Palette */}
       <CommandPalette isOpen={commandOpen} onClose={() => setCommandOpen(false)} />
 
+      {/* Session Timeout Warning (Item 66) */}
+      {showWarning && (
+        <SessionTimeoutModal onExtend={handleExtendSession} onLogout={handleLogout} />
+      )}
+
       {/* Sidebar */}
       <div className={`relative flex flex-col transition-all duration-300 ease-out ${
         collapsed ? 'w-20' : 'w-64'
-      } apple-sidebar dark:apple-sidebar`}>
+      } apple-sidebar z-10`}>
         {/* Logo */}
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-border dark:border-slate-700/50`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-5 border-b border-slate-200/80 dark:border-white/5`}>
           {!collapsed && (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-gradient-premium flex items-center justify-center text-white text-xs font-bold shadow-premium">
@@ -239,8 +262,7 @@ export default function MainLayout() {
           )}
           <button
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/50 dark:hover:text-slate-300 transition-all duration-200 active:scale-95"
+            onClick={() => setCollapsed(!collapsed)}                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-95"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -261,18 +283,18 @@ export default function MainLayout() {
                     navigate(item.path);
                   }
                 }}
-                className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
+                className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group nav-item-glow ${
                   isActive
-                    ? 'bg-primary text-white shadow-premium'
-                    : 'text-foreground dark:text-slate-300 hover:text-primary dark:hover:text-primary-light hover:bg-background dark:hover:bg-slate-800/50'
+                    ? 'bg-primary/15 dark:bg-primary/15 text-primary dark:text-primary-light shadow-glow-primary'
+                    : 'text-slate-500 dark:text-text-secondary hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/[0.03]'
                 } active:scale-[0.97]`}
               >
-                <Icon size={20} className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-primary dark:group-hover:text-primary-light'}`} />
+                <Icon size={20} className={`shrink-0 ${isActive ? 'text-primary dark:text-primary-light' : 'text-slate-400 dark:text-text-tertiary group-hover:text-slate-700 dark:group-hover:text-text-primary'}`} />
                 {!collapsed && (
                   <span className="text-sm">{item.label}</span>
                 )}
                 {item.label === 'Chat' && chatUnreadCount > 0 && (
-                  <span className={`absolute ${collapsed ? 'top-0 right-0' : 'right-3'} min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center`}>
+                  <span className={`absolute ${collapsed ? 'top-0 right-0' : 'right-3'} min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-glow-primary`}>
                     {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
                   </span>
                 )}
@@ -289,8 +311,8 @@ export default function MainLayout() {
                         onClick={() => navigate(sub.path)}
                         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all ${
                           isSubActive
-                            ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light font-medium'
-                            : 'text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                            ? 'bg-primary/10 text-primary dark:text-primary-light font-medium'
+                            : 'text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/[0.03]'
                         }`}
                       >
                         <SubIcon size={14} />
@@ -306,11 +328,11 @@ export default function MainLayout() {
         </nav>
 
         {/* Bottom section */}
-        <div className="p-3 border-t border-border dark:border-slate-700/50 space-y-1">
+        <div className="p-3 border-t border-slate-200/80 dark:border-white/5 space-y-1">
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-foreground dark:hover:text-slate-100 hover:bg-background dark:hover:bg-slate-800/50 transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/[0.03] transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
             title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDark ? <Sun size={20} className="shrink-0" /> : <Moon size={20} className="shrink-0" />}
@@ -319,7 +341,7 @@ export default function MainLayout() {
 
           <button
             onClick={() => navigate('/app/settings')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-foreground dark:hover:text-slate-100 hover:bg-background dark:hover:bg-slate-800/50 transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/[0.03] transition-all duration-200 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
           >
             <Settings size={20} className="shrink-0" />
             {!collapsed && <span className="text-sm">Settings</span>}
@@ -327,7 +349,7 @@ export default function MainLayout() {
 
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-destructive dark:text-red-400 hover:text-destructive/80 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 mt-1 ${collapsed ? 'justify-center' : ''} active:scale-[0.97]`}
           >
             <LogOut size={20} className="shrink-0" />
             {!collapsed && <span className="text-sm">Sign Out</span>}
@@ -347,13 +369,16 @@ export default function MainLayout() {
                 placeholder="Search anything..."
                 onClick={() => setCommandOpen(true)}
                 readOnly
-                className="w-full pl-10 pr-20 py-2 bg-background dark:bg-slate-800/50 border border-border dark:border-slate-700/50 rounded-xl text-foreground dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
+                className="w-full pl-10 pr-20 py-2 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] rounded-xl text-slate-900 dark:text-slate-100 placeholder-text-tertiary dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm cursor-pointer hover:border-slate-300 dark:hover:border-white/10"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500">
-                <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 font-mono text-[9px]">⌘K</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/[0.06] font-mono text-[9px] text-slate-400 dark:text-text-tertiary">⌘K</kbd>
               </div>
             </div>
           </div>
+          {/* Health & Recommendations (Phase C4) */}
+          <RecommendationsPanel compact />
+
           <div className="flex items-center gap-3">
             <div className="relative" ref={bellRef}>
               <button
@@ -361,8 +386,8 @@ export default function MainLayout() {
                 onClick={handleBellClick}
                 className={`relative p-2 rounded-xl transition-all duration-200 ${
                   showNotifications
-                    ? 'bg-primary text-white'
-                    : 'text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary-light hover:bg-background dark:hover:bg-slate-800/50'
+                    ? 'bg-primary text-white shadow-glow-primary'
+                    : 'text-slate-400 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/5'
                 } active:scale-[0.97]`}
               >
                 <Bell size={20} />
@@ -376,14 +401,14 @@ export default function MainLayout() {
               {showNotifications && (
                 <div
                   ref={dropdownRef}
-                  className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-white dark:bg-slate-800 border border-border dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-lg overflow-hidden z-50"
+                  className="dropdown-premium absolute right-0 top-full mt-2 w-80 max-h-96 overflow-hidden z-50"
                 >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                    <h3 className="text-sm font-semibold text-foreground dark:text-slate-100">Notifications</h3>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-white/5">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-text-primary">Notifications</h3>
                     {notifications.length > 0 && (
                       <button
                         onClick={() => { if (user?.id) markAllRead(user.id); setNotifications([]); setUnreadCount(0); setShowNotifications(false); }}
-                        className="text-xs text-primary hover:text-primary/80 transition-colors"
+                        className="text-xs text-primary-light hover:text-primary transition-colors"
                       >
                         Clear all
                       </button>
@@ -391,27 +416,27 @@ export default function MainLayout() {
                   </div>
                   <div className="overflow-y-auto max-h-80">
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-sm text-slate-400">
-                        <Bell size={24} className="mx-auto mb-2 text-slate-300" />
+                      <div className="p-8 text-center text-sm text-slate-400 dark:text-text-tertiary">
+                        <Bell size={24} className="mx-auto mb-2 opacity-30 text-slate-300 dark:text-text-tertiary" />
                         No notifications
                       </div>
                     ) : (
                       notifications.slice(0, 20).map((n) => (
                         <div
                           key={n.id}
-                          className={`px-4 py-3 border-b border-border last:border-0 ${
-                            !n.read ? 'bg-primary/10 border-l-2 border-l-primary' : 'hover:bg-background'
+                          className={`px-4 py-3 border-b border-slate-100 dark:border-white/5 last:border-0 ${
+                            !n.read ? 'bg-primary/10 border-l-2 border-l-primary' : 'hover:bg-slate-50 dark:hover:bg-white/[0.02]'
                           }`}
                         >
                           <div className="flex items-start gap-3">
                             <div className={`p-1.5 rounded-lg shrink-0 ${
-                              n.type === 'task_assigned' ? 'bg-emerald-100' : 'bg-primary/10'
+                              n.type === 'task_assigned' ? 'bg-emerald-900/30' : 'bg-primary/10'
                             }`}>
-                              <CheckSquare size={14} className={n.type === 'task_assigned' ? 'text-emerald-600' : 'text-primary' } />
+                              <CheckSquare size={14} className={n.type === 'task_assigned' ? 'text-emerald-400' : 'text-primary-light' } />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm text-slate-700 leading-snug">{n.message}</p>
-                              <p className="text-xs text-slate-400 mt-1">{timeAgo(n.created_at)}</p>
+                              <p className="text-sm text-slate-700 dark:text-text-primary leading-snug">{n.message}</p>
+                              <p className="text-xs text-slate-400 dark:text-text-tertiary mt-1">{timeAgo(n.created_at)}</p>
                             </div>
                           </div>
                         </div>
@@ -419,9 +444,10 @@ export default function MainLayout() {
                     )}
                   </div>
                   {notifications.length > 0 && (
-                    <div className="px-4 py-2.5 border-t border-border bg-slate-50">
+                    <div className="px-4 py-2.5 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-transparent">
                       <button
-                        onClick={() => navigate('/app/tasks')}                          className="w-full text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-center transition-colors"
+                        onClick={() => navigate('/app/tasks')}
+                        className="w-full text-xs text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-primary text-center transition-colors"
                       >
                         View all tasks
                       </button>
@@ -429,7 +455,7 @@ export default function MainLayout() {
                   )}
                 </div>
               )}
-            </div>            <div className="flex items-center gap-3 pl-3 border-l border-border dark:border-slate-700/50">
+            </div>            <div className="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-white/5">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" className="w-8 h-8 rounded-xl object-cover" />
               ) : (
@@ -438,8 +464,8 @@ export default function MainLayout() {
                 </div>
               )}
               <div className="text-left">
-                <p className="text-sm font-medium text-foreground dark:text-slate-100">{displayName}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-text-primary">{displayName}</p>
+                <p className="text-xs text-slate-500 dark:text-text-tertiary">{userEmail}</p>
                 {isDevMode && (
                   <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Dev Mode</span>
                 )}

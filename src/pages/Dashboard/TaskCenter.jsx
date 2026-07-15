@@ -70,12 +70,12 @@ export default function TaskCenter({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            className={`p-3 rounded-lg text-center border ${s.bg}`}
+            className={`p-3 rounded-lg text-center border ${s.bg} dark:dark-card-metallic`}
           >
-            <p className={`text-lg font-bold ${s.label === 'Overdue' && s.value > 0 ? 'text-rose-600' : 'text-foreground'}`}>
+            <p className={`text-lg font-bold ${s.label === 'Overdue' && s.value > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-foreground dark:text-slate-100'}`}>
               {s.value}
             </p>
-            <p className="text-[10px] text-slate-500 mt-0.5">{s.label}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{s.label}</p>
           </motion.div>
         ))}
       </div>
@@ -86,7 +86,7 @@ export default function TaskCenter({
           <h4 className="text-xs font-semibold text-slate-500 uppercase mb-2 flex items-center gap-1.5">
             <BarChart3 size={12} /> Priority Distribution
           </h4>
-          <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-slate-100">
+          <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700/50">
             {[
               { label: 'Urgent', count: taskStats.urgent, color: 'bg-rose-500' },
               { label: 'High', count: taskStats.high, color: 'bg-orange-500' },
@@ -147,12 +147,12 @@ export default function TaskCenter({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
                   onClick={() => navigate('/app/tasks')}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <StatusDot status={t.priority || 'medium'} size="md" />
-                    <span className="text-xs text-slate-700 truncate">{t.title}</span>
+                    <span className="text-xs text-slate-700 dark:text-slate-300 truncate">{t.title}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-2">
                     <span className={`text-[10px] font-medium ${new Date(t.due_date) < new Date() ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -167,8 +167,8 @@ export default function TaskCenter({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center py-6 text-slate-400">
-          <ListTodo size={28} className="mb-2 text-slate-300" />
+        <div className="flex flex-col items-center py-6 text-slate-400 dark:text-slate-500">
+          <ListTodo size={28} className="mb-2 text-slate-300 dark:text-slate-600" />
           <p className="text-xs">No upcoming deadlines</p>
         </div>
       )}
@@ -180,7 +180,7 @@ export default function TaskCenter({
           <Eye size={12} /> View All
         </button>
         <button onClick={() => navigate('/app/tasks')}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium hover:bg-slate-200 transition-colors">
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors">
           <UserPlus size={12} /> Assign Task
         </button>
       </div>

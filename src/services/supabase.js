@@ -3,7 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder');
+// When SUPABASE_URL is empty/missing, the app runs in DEV_MODE
+// with localStorage-based data. The client is still created to avoid
+// runtime errors, but all queries check DEV_MODE first.
+export const supabase = createClient(
+  supabaseUrl || window.location.origin + '/api',
+  supabaseAnonKey || 'dev-mode-fallback-key',
+);
 
 export const checkUsernameUnique = async (username) => {
   if (supabaseUrl === undefined || supabaseUrl === '') {

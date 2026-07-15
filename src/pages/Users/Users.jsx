@@ -207,14 +207,14 @@ export default function Users() {
             className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
           />
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-lg text-sm text-slate-600 dark:text-slate-400">
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-sm text-slate-600 dark:text-text-secondary">
           <Filter size={16} className="text-slate-400 dark:text-slate-500" />
           <span className="text-xs">{filteredMembers.length} member{filteredMembers.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
       {/* Staff List */}
-      <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
+      <div className="bg-white dark:dark-card-metallic border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
         {loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
@@ -230,7 +230,7 @@ export default function Users() {
           </div>
         ) : (            <div className="divide-y divide-slate-100 dark:divide-slate-700/30">
             {/* Header row */}
-            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50">
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-white/[0.03]">
               <div className="sm:col-span-4">Member</div>
               <div className="sm:col-span-3">Role</div>
               <div className="sm:col-span-2">Status</div>
@@ -242,7 +242,7 @@ export default function Users() {
               return (
                 <div
                   key={member.id || member.profileId}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors items-center"
+                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors items-center"
                 >
                   {/* Member info */}
                   <div className="sm:col-span-4 flex items-center gap-3">
@@ -332,9 +332,8 @@ export default function Users() {
 
       {/* Add Staff Modal */}
       {showAddModal && canManage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">            <div className="w-full max-w-lg bg-white dark:bg-surface-raised/95 border border-slate-200 dark:border-white/10 rounded-xl shadow-glass-lg dark:shadow-glass-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-600">
                   <UserPlus size={20} className="text-white" />
@@ -355,7 +354,7 @@ export default function Users() {
                   required
                   value={newStaff.email}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                   placeholder="staff@company.com"
                 />
               </div>
@@ -368,7 +367,7 @@ export default function Users() {
                     required
                     value={newStaff.password}
                     onChange={(e) => setNewStaff(prev => ({ ...prev, password: e.target.value }))}
-                    className="w-full pr-12 pl-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    className="w-full pr-12 pl-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                   <button
                     type="button"
@@ -387,7 +386,7 @@ export default function Users() {
                 <select
                   value={newStaff.role}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, role: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                 >
                   {availableRoles.map(r => (
                     <option key={r} value={r}>{getRoleInfo(r).label}</option>
@@ -406,7 +405,7 @@ export default function Users() {
                 <button
                   type="button"
                   onClick={() => { setShowAddModal(false); setActionError(''); }}
-                  className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-all text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
                 >
                   Cancel
                 </button>
@@ -429,23 +428,23 @@ export default function Users() {
 
       {/* Remove Staff Confirmation Modal */}
       {showRemoveModal && memberToAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
+          <div              className="w-full max-w-md bg-white dark:bg-surface-raised/95 border border-slate-200 dark:border-white/10 rounded-xl shadow-glass-lg dark:shadow-glass-xl overflow-hidden">
             <div className="p-6 text-center">
               <div className="mx-auto w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center mb-4">
                 <AlertCircle size={24} className="text-white" />
               </div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Remove Staff Member?</h2>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Remove Staff Member?</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                 Are you sure you want to remove{' '}
-                <span className="text-slate-900 font-medium">{memberToAction.full_name || memberToAction.email}</span>?
+                <span className="text-slate-900 dark:text-slate-100 font-medium">{memberToAction.full_name || memberToAction.email}</span>?
                 This action cannot be undone.
               </p>
             </div>
             <div className="flex gap-3 px-6 pb-6">
               <button
                 onClick={() => { setShowRemoveModal(false); setMemberToAction(null); }}
-                className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-all text-sm"
+                className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
               >
                 Cancel
               </button>
@@ -469,8 +468,8 @@ export default function Users() {
 
       {/* Suspend Confirmation Modal */}
       {showSuspendModal && memberToAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-surface-raised/95 border border-slate-200 dark:border-white/10 rounded-xl shadow-glass-lg dark:shadow-glass-xl">
             <div className="p-6 text-center">
               <div className={`mx-auto w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
                 memberToAction.is_suspended ? 'bg-emerald-600' : 'bg-amber-600'
@@ -480,10 +479,10 @@ export default function Users() {
                   : <Ban size={24} className="text-white" />
                 }
               </div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
                 {memberToAction.is_suspended ? 'Unsuspend' : 'Suspend'} Member?
               </h2>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                 {memberToAction.is_suspended
                   ? `Reactivate ${memberToAction.full_name || memberToAction.email}'s access?`
                   : `Prevent ${memberToAction.full_name || memberToAction.email} from accessing the workspace?`
@@ -493,7 +492,7 @@ export default function Users() {
             <div className="flex gap-3 px-6 pb-6">
               <button
                 onClick={() => { setShowSuspendModal(false); setMemberToAction(null); }}
-                className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-all text-sm"
+                className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
               >
                 Cancel
               </button>

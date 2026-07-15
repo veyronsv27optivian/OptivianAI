@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Building2, Plus, X, Edit3, Trash2, Users as UsersIcon,
-  ChevronRight, ChevronDown, UserCircle, Target,
+  ChevronRight, ChevronDown, UserCircle, Target, AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 import {
@@ -16,6 +16,7 @@ export default function OrganizationStructure() {
   const [departments, setDepartments] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [expandedDepts, setExpandedDepts] = useState({});
   const [showDeptModal, setShowDeptModal] = useState(false);
   const [showTeamModal, setShowTeamModal] = useState(false);
@@ -43,6 +44,7 @@ export default function OrganizationStructure() {
       setOrg(o);
     } catch (err) {
       console.error('Failed to load structure:', err);
+      setFetchError('Failed to load organization structure. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -80,12 +82,32 @@ export default function OrganizationStructure() {
 
   const getDeptTeams = (deptId) => teams.filter(t => t.department_id === deptId);
 
+  // ── Loading state ──────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-600 rounded-full animate-spin" />
           <p className="text-sm text-slate-400">Loading structure...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Error state ────────────────────────────────────────────────
+  if (fetchError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 max-w-md text-center">
+          <AlertCircle size={32} className="text-red-400 mx-auto mb-3" />
+          <p className="text-sm text-red-700 font-medium mb-1">Something went wrong</p>
+          <p className="text-xs text-red-500">{fetchError}</p>
+          <button
+            onClick={loadData}
+            className="mt-4 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-all"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );

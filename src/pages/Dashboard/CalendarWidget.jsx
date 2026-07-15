@@ -28,7 +28,7 @@ function saveView(month, year) {
   } catch { /* ignore */ }
 }
 
-export default function CalendarWidget({ upcomingDeadlines = [] }) {
+export default function CalendarWidget({ upcomingDeadlines = [], loading }) {
   const navigate = useNavigate();
   const today = new Date();
   const savedView = loadSavedView();
@@ -83,19 +83,34 @@ export default function CalendarWidget({ upcomingDeadlines = [] }) {
   }, [upcomingDeadlines]);
   const urgentCount = upcomingDeadlines.filter(t => t.priority === 'urgent' && new Date(t.due_date) >= new Date()).length;
 
+  if (loading) {
+    return (
+      <Card variant="default" padding="p-5">
+        <div className="animate-pulse space-y-3">
+          <div className="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-1/3" />
+          <div className="grid grid-cols-7 gap-0.5">
+            {Array.from({ length: 35 }).map((_, i) => (
+              <div key={i} className="h-8 bg-slate-100 dark:bg-slate-800/50 rounded" />
+            ))}
+          </div>
+          <div className="h-3 bg-slate-200 dark:bg-slate-700/50 rounded w-1/2" />
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card variant="default" padding="p-5">
       <CardHeader title="Calendar" subtitle="Upcoming deadlines" icon={Calendar} color="primary" />
 
       {/* Month Header */}
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-foreground">
+      <div className="flex items-center justify-between mb-3">          <h4 className="text-sm font-semibold text-foreground dark:text-slate-100">
           {MONTHS[currentMonth]} {currentYear}
         </h4>          <div className="flex items-center gap-1">
-          <button onClick={() => navigateMonth(-1)} className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={() => navigateMonth(-1)} className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <ChevronLeft size={14} />
           </button>
-          <button onClick={() => navigateMonth(1)} className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={() => navigateMonth(1)} className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <ChevronRight size={14} />
           </button>
         </div>
@@ -125,15 +140,14 @@ export default function CalendarWidget({ upcomingDeadlines = [] }) {
             <motion.button
               key={day}
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className={`
+              whileTap={{ scale: 0.95 }}                className={`
                 relative flex flex-col items-center justify-center py-1.5 rounded-lg text-xs
                 transition-all duration-200
                 ${isToday
                   ? 'bg-primary text-white font-bold shadow-sm'
                   : hasEvents
-                    ? 'hover:bg-slate-100 text-foreground'
-                    : 'text-slate-400 hover:bg-slate-50'
+                    ? 'hover:bg-slate-100 dark:hover:bg-slate-800/50 text-foreground dark:text-slate-200'
+                    : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/30'
                 }
               `}
             >
@@ -170,7 +184,7 @@ export default function CalendarWidget({ upcomingDeadlines = [] }) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
                 onClick={() => navigate('/app/tasks')}
               >
                 <div className={`w-1.5 h-1.5 rounded-full ${
@@ -178,7 +192,7 @@ export default function CalendarWidget({ upcomingDeadlines = [] }) {
                   t.priority === 'high' ? 'bg-orange-500' :
                   t.priority === 'medium' ? 'bg-amber-500' : 'bg-slate-400'
                 }`} />
-                <span className="text-xs text-slate-700 truncate flex-1">{t.title}</span>
+                <span className="text-xs text-slate-700 dark:text-slate-300 truncate flex-1">{t.title}</span>
                 {t.priority === 'urgent' && <AlertTriangle size={10} className="text-rose-500 shrink-0" />}
               </motion.div>
             ))}
@@ -194,9 +208,9 @@ export default function CalendarWidget({ upcomingDeadlines = [] }) {
       {/* Urgent Count */}
       {urgentCount > 0 && (
         <div className="mt-3 pt-3 border-t border-border">
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-rose-50 border border-rose-200">
-            <AlertTriangle size={14} className="text-rose-600 shrink-0" />
-            <span className="text-xs text-rose-700">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+            <AlertTriangle size={14} className="text-rose-600 dark:text-rose-400 shrink-0" />
+            <span className="text-xs text-rose-700 dark:text-rose-300">
               {urgentCount} urgent deadline{urgentCount !== 1 ? 's' : ''} ahead
             </span>
           </div>

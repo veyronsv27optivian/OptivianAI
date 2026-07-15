@@ -563,14 +563,14 @@ export async function getOrgAnalytics(user, orgId) {
       return Date.now() - new Date(p.last_seen).getTime() < 300000;
     }).length;
 
-    // Staff growth (mock data for chart)
+    // Staff growth (last 7 months, using actual totals)
     const staffGrowth = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
       staffGrowth.push({
         month: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-        count: Math.max(0, totalStaff - Math.floor(Math.random() * 5)),
+        count: totalStaff,
       });
     }
 

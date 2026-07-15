@@ -35,7 +35,7 @@ function RiskCard({ risk, index, expanded, onToggle }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
       className={`rounded-lg border p-3 transition-all cursor-pointer ${
-        expanded ? 'border-slate-300 shadow-sm bg-white' : 'border-slate-100 hover:border-slate-200 bg-white'
+        expanded ? 'border-slate-300 dark:border-white/20 shadow-sm bg-white dark:bg-surface-raised/60' : 'border-slate-100 dark:border-white/5 hover:border-slate-200 dark:hover:border-white/20 bg-white dark:bg-surface-raised/40'
       }`}
       onClick={onToggle}
     >
@@ -107,7 +107,7 @@ export default function RiskHeatmap({ data }) {
   if (!risks || risks.length === 0) return null;
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white p-5 shadow-sm">
+    <div className="premium-card dark:dark-card-metallic p-5">
       <div className="flex items-center gap-2 mb-4">
         <ShieldAlert size={16} className="text-orange-500" />
         <h3 className="text-sm font-bold text-slate-800">Risk Assessment</h3>
@@ -120,7 +120,7 @@ export default function RiskHeatmap({ data }) {
       </div>
 
       {/* Heatmap Legend */}
-      <div className="flex items-center gap-3 mb-4 p-3 bg-slate-50 rounded-lg">
+      <div className="flex items-center gap-3 mb-4 p-3 bg-white/50 dark:bg-white/5 rounded-lg">
         <span className="text-[10px] font-medium text-slate-500">Risk Level:</span>
         <div className="flex gap-1">
           {Object.entries(HEATMAP_CELLS).slice(0, 4).map(([key, cell]) => (

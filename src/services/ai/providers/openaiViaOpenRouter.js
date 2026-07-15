@@ -24,8 +24,12 @@ export class OpenAIViaOpenRouterProvider extends BaseProvider {
    */
   constructor(config = {}) {
     const cfg = PROVIDER_CONFIGS[AI_PROVIDERS.OPENAI_VIA_OPENROUTER];
+    // Try specific env var first, then shared OpenRouter key, then DeepSeek fallback, then empty
+    const specificKey = import.meta.env.VITE_OPENROUTER_OPENAI_MODEL; // Re-uses the model env var for clarity
+    const sharedKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+    const deepseekKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
     super({
-      apiKey: config.apiKey || import.meta.env.VITE_DEEPSEEK_API_KEY || '',
+      apiKey: config.apiKey || sharedKey || deepseekKey || '',
       model: config.model || import.meta.env.VITE_OPENROUTER_OPENAI_MODEL || cfg.defaultModel,
       endpoint: cfg.endpoint,
       timeout: config.timeout,
@@ -47,7 +51,7 @@ export class OpenAIViaOpenRouterProvider extends BaseProvider {
 
   /** @override */
   _envKeyName() {
-    return 'VITE_DEEPSEEK_API_KEY';
+    return 'VITE_OPENROUTER_API_KEY';
   }
 
   /** @override */

@@ -284,6 +284,115 @@ const TOOL_PROFILES = [
     keywords: ['custom', 'assistant', 'custom ai', 'personal assistant', 'customize', 'specific task', 'tailored', 'specialized', 'custom prompt', 'configure'],
     category: 'Web & Media Analysis',
   },
+
+  // ── Phase 9B: Role-Specific AI Assistants ────────────────────
+  {
+    type: AI_TOOL_TYPES.EXECUTIVE_AI,
+    label: 'Executive AI',
+    description: 'Virtual Chief Executive Advisor — strategy, market dynamics, organizational health',
+    keywords: ['executive', 'ceo', 'strategy', 'leadership', 'board', 'org health', 'strategic', 'vision', 'company direction', 'executive decision', 'c-suite', 'corporate strategy', 'business health'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.MANAGER_AI,
+    label: 'Manager AI',
+    description: 'Operations strategist & team coach — bottlenecks, resources, productivity',
+    keywords: ['manager', 'team', 'management', 'bottleneck', 'resource', 'productivity', 'team lead', 'supervisor', 'workload', 'department', 'operations', 'team performance'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.EMPLOYEE_AI,
+    label: 'Employee AI',
+    description: 'Personal workplace assistant — tasks, schedule, documents, collaboration',
+    keywords: ['employee', 'staff', 'workplace', 'task help', 'daily work', 'personal assistant', 'productivity help', 'collaboration', 'schedule', 'document help', 'workspace'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.FINANCE_AI,
+    label: 'Finance AI',
+    description: 'Financial advisor — budgets, forecasts, cost optimization, investment insights',
+    keywords: ['finance', 'cfo', 'budget', 'forecast', 'cost', 'investment', 'revenue', 'profit', 'financial planning', 'cash flow', 'expense', 'financial analysis', 'fiscal'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.HR_SPECIFIC_AI,
+    label: 'HR AI',
+    description: 'HR assistant — recruitment, performance reviews, satisfaction analysis',
+    keywords: ['hr', 'human resources', 'recruitment', 'hiring', 'performance review', 'employee satisfaction', 'people ops', 'talent', 'onboarding', 'culture', 'payroll', 'benefits'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.MARKETING_SPECIFIC_AI,
+    label: 'Marketing AI',
+    description: 'Marketing strategist — campaigns, content strategy, brand health',
+    keywords: ['marketing', 'cmo', 'campaign', 'brand', 'content strategy', 'growth', 'acquisition', 'digital marketing', 'social media marketing', 'marketing strategy', 'brand health'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.SALES_SPECIFIC_AI,
+    label: 'Sales AI',
+    description: 'Sales assistant — pipeline optimization, lead scoring, forecasting',
+    keywords: ['sales', 'cro', 'pipeline', 'lead scoring', 'forecast', 'revenue target', 'closing', 'outreach', 'cold outreach', 'sales process', 'quota', 'deal', 'negotiation'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.OPERATIONS_AI,
+    label: 'Operations AI',
+    description: 'Operations analyst — workflow efficiency, resource allocation',
+    keywords: ['operations', 'coo', 'workflow', 'efficiency', 'process', 'resource allocation', 'supply chain', 'logistics', 'operational', 'process improvement', 'optimization'],
+    category: 'Role-Specific AI',
+  },
+  {
+    type: AI_TOOL_TYPES.TECHNICAL_AI,
+    label: 'Technical AI',
+    description: 'Technical architect — infrastructure monitoring, security, system health',
+    keywords: ['technical', 'cto', 'infrastructure', 'security', 'architecture', 'system health', 'devops', 'monitoring', 'tech stack', 'engineering', 'cybersecurity', 'cloud', 'deployment'],
+    category: 'Role-Specific AI',
+  },
+
+  // ── Phase 9C: AI Project Orchestration ────────────────────
+  {
+    type: AI_TOOL_TYPES.INTELLIGENT_DELEGATION,
+    label: 'Intelligent Task Delegation',
+    description: 'AI assigns tasks based on skills, workload, and availability',
+    keywords: ['delegate', 'assign', 'task assignment', 'workload', 'skill match', 'team capacity', 'resource allocation', 'task distribution', 'delegation'],
+    category: 'AI Orchestration',
+  },
+  {
+    type: AI_TOOL_TYPES.DECISION_SUPPORT,
+    label: 'AI Decision Support',
+    description: 'AI presents options with probability analysis for executive decisions',
+    keywords: ['decision support', 'decision analysis', 'option analysis', 'probability', 'tradeoff', 'choose', 'decision help', 'executive decision', 'scenario analysis'],
+    category: 'AI Orchestration',
+  },
+  {
+    type: AI_TOOL_TYPES.RISK_DETECTION_AI,
+    label: 'AI Risk Detection',
+    description: 'Proactive identification of project, financial, and operational risks',
+    keywords: ['proactive risk', 'risk detection', 'early warning', 'risk monitoring', 'identify risk', 'project risk', 'operational risk', 'risk prevention'],
+    category: 'AI Orchestration',
+  },
+  {
+    type: AI_TOOL_TYPES.EXECUTIVE_INSIGHTS,
+    label: 'Executive Insights Engine',
+    description: 'AI distills complex data into actionable executive summaries',
+    keywords: ['executive insights', 'executive summary', 'data distillation', 'business summary', 'executive report', 'key metrics', 'strategic summary', 'business intelligence'],
+    category: 'AI Orchestration',
+  },
+  {
+    type: AI_TOOL_TYPES.ORG_HEALTH_ENGINE,
+    label: 'Organization Health Engine',
+    description: 'Real-time composite score across departments, projects, and people',
+    keywords: ['org health', 'organization health', 'composite score', 'health score', 'department health', 'organizational assessment', 'company health', 'health dashboard'],
+    category: 'AI Orchestration',
+  },
+  {
+    type: AI_TOOL_TYPES.CROSS_DEPT_INTELLIGENCE,
+    label: 'Cross-Department Intelligence',
+    description: 'AI identifies synergies and friction points between departments',
+    keywords: ['cross department', 'interdepartmental', 'synergy', 'friction', 'department collaboration', 'cross functional', 'team coordination', 'department alignment', 'silo'],
+    category: 'AI Orchestration',
+  },
 ];
 
 // ─── Keyword-based matching (instant, no AI cost) ────────────────

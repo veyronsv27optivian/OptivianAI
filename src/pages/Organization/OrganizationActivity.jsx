@@ -34,6 +34,7 @@ export default function OrganizationActivity() {
   const { user, profile } = useAuth();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
@@ -49,6 +50,7 @@ export default function OrganizationActivity() {
       setActivities(data || []);
     } catch (err) {
       console.error('Failed to load activity:', err);
+      setFetchError('Failed to load activity history. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -108,8 +110,25 @@ export default function OrganizationActivity() {
         </button>
       </div>
 
+      {/* Error state */}
+      {fetchError && !loading && (
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="p-4 rounded-xl bg-red-50 border border-red-200 max-w-md text-center">
+            <AlertCircle size={32} className="text-red-400 mx-auto mb-3" />
+            <p className="text-sm text-red-700 font-medium mb-1">Failed to load activity</p>
+            <p className="text-xs text-red-500">{fetchError}</p>
+            <button
+              onClick={() => { setFetchError(''); fetchActivity(); }}
+              className="mt-4 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-all"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Activity List */}
-      {loading ? (
+      {!fetchError && loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-600 rounded-full animate-spin" />
         </div>

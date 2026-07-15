@@ -2,12 +2,15 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Brain, Target, ShieldAlert, BarChart3, Lightbulb, AlertTriangle,
-  MessageSquare, Clock, Lock, FileText, Users, TrendingUp,
+  MessageSquare, Clock, FileText, Users, TrendingUp,
   DollarSign, HeartHandshake, BadgeCheck, Package, UserCircle,
   Palette, Search, PenTool, Presentation, Mail, Zap,
   Sliders, History, Server, ScrollText,
   FileSearch, FileSignature, FileSpreadsheet,
   Globe, Video, ChevronRight, Sparkles, List,
+  Bookmark, Database, UserCog, Layers, BookOpen,
+  Crown, Briefcase, UserCheck, Landmark, Heart,
+  Megaphone, CreditCard, Cpu, Wrench, Activity,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 import { AI_TOOL_TYPES, getToolInfo } from '../../services/ai';
@@ -15,6 +18,12 @@ import AIToolView from './AIToolView';
 import AISettings from './AISettings';
 import AIHistory from './AIHistory';
 import AIProviders from './AIProviders';
+import AITemplateLibrary from './AITemplateLibrary';
+import AICacheManager from './AICacheManager';
+import AIPersonaPresets from './AIPersonaPresets';
+import AIModelComparison from './AIModelComparison';
+import BatchAnalyzer from './BatchAnalyzer';
+import KnowledgeBase from './KnowledgeBase';
 import BusinessAdvisorForm from '../../components/ai-visualizations/BusinessAdvisorForm';
 import AiUsageDashboard from '../../components/ai-visualizations/AiUsageDashboard';
 import ToolRecommender from '../../components/ai-visualizations/ToolRecommender';
@@ -110,6 +119,35 @@ const TOOL_CATEGORIES = [
       { type: AI_TOOL_TYPES.CUSTOM_ASSISTANT, label: 'Custom Assistant', icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-50' },
     ],
   },
+  {
+    id: 'roles',
+    label: 'Role-Specific AI',
+    icon: Crown,
+    tools: [
+      { type: AI_TOOL_TYPES.EXECUTIVE_AI, label: 'Executive AI', icon: Crown, color: 'text-amber-600', bg: 'bg-amber-50' },
+      { type: AI_TOOL_TYPES.MANAGER_AI, label: 'Manager AI', icon: Briefcase, color: 'text-violet-600', bg: 'bg-violet-50' },
+      { type: AI_TOOL_TYPES.EMPLOYEE_AI, label: 'Employee AI', icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { type: AI_TOOL_TYPES.FINANCE_AI, label: 'Finance AI', icon: Landmark, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+      { type: AI_TOOL_TYPES.HR_SPECIFIC_AI, label: 'HR AI', icon: Heart, color: 'text-pink-600', bg: 'bg-pink-50' },
+      { type: AI_TOOL_TYPES.MARKETING_SPECIFIC_AI, label: 'Marketing AI', icon: Megaphone, color: 'text-sky-600', bg: 'bg-sky-50' },
+      { type: AI_TOOL_TYPES.SALES_SPECIFIC_AI, label: 'Sales AI', icon: CreditCard, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+      { type: AI_TOOL_TYPES.OPERATIONS_AI, label: 'Operations AI', icon: Wrench, color: 'text-teal-600', bg: 'bg-teal-50' },
+      { type: AI_TOOL_TYPES.TECHNICAL_AI, label: 'Technical AI', icon: Cpu, color: 'text-blue-600', bg: 'bg-blue-50' },
+    ],
+  },
+  {
+    id: 'orchestration',
+    label: 'AI Orchestration',
+    icon: Cpu,
+    tools: [
+      { type: AI_TOOL_TYPES.INTELLIGENT_DELEGATION, label: 'Intelligent Task Delegation', icon: Users, color: 'text-teal-600', bg: 'bg-teal-50' },
+      { type: AI_TOOL_TYPES.DECISION_SUPPORT, label: 'AI Decision Support', icon: BarChart3, color: 'text-violet-600', bg: 'bg-violet-50' },
+      { type: AI_TOOL_TYPES.RISK_DETECTION_AI, label: 'AI Risk Detection', icon: ShieldAlert, color: 'text-red-600', bg: 'bg-red-50' },
+      { type: AI_TOOL_TYPES.EXECUTIVE_INSIGHTS, label: 'Executive Insights', icon: Brain, color: 'text-amber-600', bg: 'bg-amber-50' },
+      { type: AI_TOOL_TYPES.ORG_HEALTH_ENGINE, label: 'Org Health Engine', icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { type: AI_TOOL_TYPES.CROSS_DEPT_INTELLIGENCE, label: 'Cross-Dept Intelligence', icon: Target, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    ],
+  },
 ];
 
 
@@ -121,6 +159,12 @@ const SUBPAGES = [
   { id: 'history', label: 'AI History', icon: History },
   { id: 'providers', label: 'Provider Management', icon: Server },
   { id: 'usage', label: 'Usage Analytics', icon: BarChart3 },
+  { id: 'templates', label: 'Prompt Templates', icon: Bookmark },
+  { id: 'cache', label: 'Cache Manager', icon: Database },
+  { id: 'personas', label: 'Persona Presets', icon: UserCog },
+  { id: 'compare', label: 'Model Compare', icon: Brain },
+  { id: 'batch', label: 'Batch Analysis', icon: Layers },
+  { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────
@@ -154,6 +198,24 @@ export default function AI() {
     } else if (path.startsWith('/app/ai/providers')) {
       setSelectedSubpage('providers');
       setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/templates')) {
+      setSelectedSubpage('templates');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/cache')) {
+      setSelectedSubpage('cache');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/personas')) {
+      setSelectedSubpage('personas');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/compare')) {
+      setSelectedSubpage('compare');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/knowledge')) {
+      setSelectedSubpage('knowledge');
+      setSelectedTool(null);
+    } else if (path.startsWith('/app/ai/batch')) {
+      setSelectedSubpage('batch');
+      setSelectedTool(null);
     } else if (path === '/app/ai') {
       // Reset to dashboard view if no subpage is selected
       setSelectedSubpage(null);
@@ -161,25 +223,8 @@ export default function AI() {
     }
   }, [location.pathname]);
 
-  if (userRole !== 'admin') {
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="w-16 h-16 rounded-lg bg-amber-100 border border-amber-200 flex items-center justify-center mb-6">
-          <Lock size={32} className="text-amber-600" />
-        </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Access Restricted</h2>
-        <p className="text-slate-500 text-center max-w-md text-sm">
-          The AI features are only available to organization admins. Contact your admin for assistance.
-        </p>
-        <button
-          onClick={() => navigate('/app')}
-          className="mt-6 px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all text-sm font-medium"
-        >
-          Back to Dashboard
-        </button>
-      </div>
-    );
-  }
+  // Remove the admin-only gate — all authenticated roles can access AI features
+  // if (userRole !== 'admin') { ... }
 
   const handleSelectTool = (toolType, toolLabel) => {
     setSelectedTool({ type: toolType, label: toolLabel });
@@ -223,18 +268,16 @@ export default function AI() {
   // ── Render subpages ─────────────────────────────────────────────
   if (selectedSubpage === 'settings') {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
-          <button
+      <div className="h-full flex flex-col">          <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-white/10">            <button
             onClick={handleBack}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+            className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
           >
             <ChevronRight size={20} className="rotate-180" />
           </button>
-          <div className="p-2 rounded-lg bg-slate-100">
-            <Sliders size={20} className="text-slate-600" />
+          <div className="p-2 rounded-lg bg-slate-100 dark:bg-white/5">
+            <Sliders size={20} className="text-slate-600 dark:text-slate-400" />
           </div>
-          <h2 className="text-lg font-semibold text-slate-900">AI Settings</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">AI Settings</h2>
         </div>
         <div className="flex-1 overflow-auto">
           <AISettings onClose={handleBack} />
@@ -245,18 +288,17 @@ export default function AI() {
 
   if (selectedSubpage === 'history') {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
+      <div className="h-full flex flex-col">          <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-white/10">
           <button
             onClick={handleBack}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+            className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all"
           >
             <ChevronRight size={20} className="rotate-180" />
           </button>
-          <div className="p-2 rounded-lg bg-slate-100">
-            <History size={20} className="text-slate-600" />
+          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+            <History size={20} className="text-slate-600 dark:text-slate-400" />
           </div>
-          <h2 className="text-lg font-semibold text-slate-900">AI History</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">AI History</h2>
         </div>
         <div className="flex-1 overflow-auto">
           <AIHistory />
@@ -267,18 +309,17 @@ export default function AI() {
 
   if (selectedSubpage === 'providers') {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
+      <div className="h-full flex flex-col">          <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-white/10">
           <button
             onClick={handleBack}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+            className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all"
           >
             <ChevronRight size={20} className="rotate-180" />
           </button>
-          <div className="p-2 rounded-lg bg-slate-100">
-            <Server size={20} className="text-slate-600" />
+          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+            <Server size={20} className="text-slate-600 dark:text-slate-400" />
           </div>
-          <h2 className="text-lg font-semibold text-slate-900">Provider Management</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Provider Management</h2>
         </div>
         <div className="flex-1 overflow-auto">
           <AIProviders />
@@ -290,22 +331,99 @@ export default function AI() {
   // ── Usage Analytics ──────────────────────────────────────────────
   if (selectedSubpage === 'usage') {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex items-center gap-3 p-4 border-b border-slate-200">
+      <div className="h-full flex flex-col">          <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-white/10">
           <button
             onClick={handleBack}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+            className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all"
           >
             <ChevronRight size={20} className="rotate-180" />
           </button>
-          <div className="p-2 rounded-lg bg-slate-100">
-            <BarChart3 size={20} className="text-slate-600" />
+          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+            <BarChart3 size={20} className="text-slate-600 dark:text-slate-400" />
           </div>
-          <h2 className="text-lg font-semibold text-slate-900">AI Usage Analytics</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">AI Usage Analytics</h2>
         </div>
         <div className="flex-1 overflow-auto p-4">
           <AiUsageDashboard />
         </div>
+      </div>
+    );
+  }
+
+  // ── Template Library ────────────────────────────────────────────
+  if (selectedSubpage === 'templates') {
+    return (
+      <div className="h-full flex flex-col">
+        {/* Template Library subpage */}
+        <AITemplateLibrary
+          onClose={handleBack}
+          onSelectTemplate={(t) => {
+            // Load the template into a tool that matches the template's toolType
+            if (t.toolType && t.toolType !== '*') {
+              handleSelectTool(t.toolType, t.name);
+            } else {
+              // Default to Business Advisor if no specific tool type
+              setSelectedTool({ type: AI_TOOL_TYPES.CUSTOM_ASSISTANT, label: t.name });
+              setSelectedSubpage(null);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ── Cache Manager ───────────────────────────────────────────────
+  if (selectedSubpage === 'cache') {
+    return (
+      <div className="h-full flex flex-col">
+        <AICacheManager onClose={handleBack} />
+      </div>
+    );
+  }
+
+  // ── Persona Presets ─────────────────────────────────────────────
+  if (selectedSubpage === 'personas') {
+    return (
+      <div className="h-full flex flex-col">
+        <AIPersonaPresets
+          onClose={handleBack}
+          onSelectPreset={(presetData) => {
+            // Fill Business Advisor form with preset data
+            setSelectedTool({
+              type: AI_TOOL_TYPES.BUSINESS_ADVISOR,
+              label: 'Business Advisor',
+              formData: presetData,
+            });
+            setSelectedSubpage(null);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ── Model Comparison (Item 61) ──────────────────────────────
+  if (selectedSubpage === 'compare') {
+    return (
+      <div className="h-full flex flex-col">
+        <AIModelComparison onClose={handleBack} />
+      </div>
+    );
+  }
+
+  // ── Batch Document Analysis (Item 64) ───────────────────────
+  if (selectedSubpage === 'batch') {
+    return (
+      <div className="h-full flex flex-col">
+        <BatchAnalyzer onClose={handleBack} />
+      </div>
+    );
+  }
+
+  // ── AI Knowledge Base (Item 116) ──────────────────────────
+  if (selectedSubpage === 'knowledge') {
+    return (
+      <div className="h-full flex flex-col">
+        <KnowledgeBase onClose={handleBack} />
       </div>
     );
   }
@@ -317,11 +435,11 @@ export default function AI() {
     // Business Advisor shows the form first
     if (selectedTool.type === AI_TOOL_TYPES.BUSINESS_ADVISOR && showAdvisorForm) {
       return (
-        <div className="h-full flex flex-col">
-          <div className="flex items-center gap-3 p-4 border-b border-slate-200 bg-white">
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-white/10 bg-white dark:dark-card-metallic">
             <button
               onClick={() => setShowAdvisorForm(false)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+              className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all"
             >
               <ChevronRight size={20} className="rotate-180" />
             </button>
@@ -329,8 +447,8 @@ export default function AI() {
               <Brain size={20} className={toolCfg?.color || 'text-blue-600'} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-900">Business Advisor</h2>
-              <p className="text-xs text-slate-400">Fill in details for tailored advice</p>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Business Advisor</h2>
+              <p className="text-xs text-slate-400 dark:text-slate-500">Fill in details for tailored advice</p>
             </div>
           </div>
           <div className="flex-1 overflow-auto p-4 max-w-2xl mx-auto w-full">
@@ -387,13 +505,28 @@ export default function AI() {
         [AI_TOOL_TYPES.REPORT_GENERATION]: 'Describe the report topic and data...',
         [AI_TOOL_TYPES.SUMMARIZATION]: 'Paste the content you want summarized...',
         [AI_TOOL_TYPES.DATA_EXTRACTION]: 'Paste the document content for analysis...',
+        [AI_TOOL_TYPES.EXECUTIVE_AI]: 'Describe your organizational context and strategic challenges...',
+        [AI_TOOL_TYPES.MANAGER_AI]: 'Describe your team context and management challenge...',
+        [AI_TOOL_TYPES.EMPLOYEE_AI]: 'What workplace question or task can I help you with?',
+        [AI_TOOL_TYPES.FINANCE_AI]: 'Describe your financial context and analysis needs...',
+        [AI_TOOL_TYPES.HR_SPECIFIC_AI]: 'Describe your HR challenge or people management needs...',
+        [AI_TOOL_TYPES.MARKETING_SPECIFIC_AI]: 'Describe your marketing context and campaign goals...',
+        [AI_TOOL_TYPES.SALES_SPECIFIC_AI]: 'Describe your sales context and pipeline goals...',
+        [AI_TOOL_TYPES.OPERATIONS_AI]: 'Describe your operations context and efficiency challenges...',
+        [AI_TOOL_TYPES.TECHNICAL_AI]: 'Describe your technical context and architecture needs...',
+        [AI_TOOL_TYPES.INTELLIGENT_DELEGATION]: 'Describe your team, tasks, and delegation needs...',
+        [AI_TOOL_TYPES.DECISION_SUPPORT]: 'Describe the decision you need help analyzing...',
+        [AI_TOOL_TYPES.RISK_DETECTION_AI]: 'Describe your project or business context for risk analysis...',
+        [AI_TOOL_TYPES.EXECUTIVE_INSIGHTS]: 'Paste or describe the business data to summarize...',
+        [AI_TOOL_TYPES.ORG_HEALTH_ENGINE]: 'Describe your organizational data for health assessment...',
+        [AI_TOOL_TYPES.CROSS_DEPT_INTELLIGENCE]: 'Describe your departments and collaboration challenges...',
       };
       return placeholders[selectedTool.type] || 'Describe your request...';
     };
 
     return (
       <div className="h-full flex flex-col">
-        <div className="flex items-center gap-3 p-4 border-b border-slate-200 bg-white">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-white/10 bg-white dark:dark-card-metallic">
           <button
             onClick={handleBack}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
@@ -406,14 +539,14 @@ export default function AI() {
             </div>
           )}
           <div className="flex-1">
-            <h2 className="text-base font-semibold text-slate-900">{selectedTool.label}</h2>
-            <p className="text-xs text-slate-400">AI-powered analysis and insights</p>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{selectedTool.label}</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500">AI-powered analysis and insights</p>
           </div>
           {/* Structured form button for Business Advisor */}
           {selectedTool.type === AI_TOOL_TYPES.BUSINESS_ADVISOR && (
             <button
               onClick={() => setShowAdvisorForm(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
             >
               <Target size={12} />
               Structured Form
@@ -439,8 +572,8 @@ export default function AI() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">AI Platform</h1>
-          <p className="text-slate-500 mt-1 text-sm">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">AI Platform</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
             {searchQuery ? `Search results for "${searchQuery}"` : 'Intelligent tools for analysis, planning, and content creation'}
           </p>
         </div>
@@ -452,7 +585,7 @@ export default function AI() {
               <button
                 key={sp.id}
                 onClick={() => handleSelectSubpage(sp.id)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:dark-card-metallic text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 transition-all text-sm"
               >
                 <Icon size={16} />
                 <span className="hidden sm:inline">{sp.label}</span>
@@ -473,7 +606,7 @@ export default function AI() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search AI tools..."
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
         />
       </div>
 
@@ -483,16 +616,16 @@ export default function AI() {
           const CatIcon = category.icon;
           const isExpanded = expandedCategories[category.id];
           return (
-            <div key={category.id} className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <div key={category.id} className="bg-white dark:dark-card-metallic border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
               {/* Category Header */}
               <button
                 onClick={() => toggleCategory(category.id)}
-                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <CatIcon size={18} className="text-slate-500" />
-                  <h3 className="font-semibold text-slate-800">{category.label}</h3>
-                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                  <h3 className="font-semibold text-slate-800 dark:text-slate-200">{category.label}</h3>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded-full">
                     {category.tools.length} tools
                   </span>
                 </div>
@@ -511,12 +644,12 @@ export default function AI() {
                       <button
                         key={tool.type}
                         onClick={() => handleSelectTool(tool.type, tool.label)}
-                        className="flex flex-col items-center gap-2 p-3 rounded-lg border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all group"
+                        className="flex flex-col items-center gap-2 p-3 rounded-lg border border-slate-100 dark:border-white/10 hover:border-slate-200 dark:hover:border-white/20 hover:shadow-sm dark:hover:shadow-glass transition-all group"
                       >
                         <div className={`p-2 rounded-lg ${tool.bg} group-hover:scale-110 transition-transform`}>
                           <ToolIcon size={18} className={tool.color} />
                         </div>
-                        <span className="text-xs text-slate-600 text-center leading-tight">{tool.label}</span>
+                        <span className="text-xs text-slate-600 dark:text-slate-400 text-center leading-tight">{tool.label}</span>
                       </button>
                     );
                   })}
@@ -528,9 +661,9 @@ export default function AI() {
 
         {filteredCategories.length === 0 && (
           <div className="text-center py-16">
-            <Search size={40} className="text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-700 mb-2">No tools found</h3>
-            <p className="text-sm text-slate-400">Try a different search term</p>
+            <Search size={40} className="text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">No tools found</h3>
+            <p className="text-sm text-slate-400 dark:text-slate-500">Try a different search term</p>
           </div>
         )}
       </div>

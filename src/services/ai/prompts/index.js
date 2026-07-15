@@ -130,3 +130,50 @@ export const websiteAnalyzer = _websiteAnalyzer;
 
 import * as _youtubeAnalyzer from './youtubeAnalyzer';
 export const youtubeAnalyzer = _youtubeAnalyzer;
+
+// ── Phase 9B: Role-Specific AI Assistants ───────────────────
+import * as _executiveAi from './executiveAi';
+export const executiveAi = _executiveAi;
+
+import * as _managerAi from './managerAi';
+export const managerAi = _managerAi;
+
+import * as _employeeAi from './employeeAi';
+export const employeeAi = _employeeAi;
+
+import * as _financeAi from './financeAi';
+export const financeAi = _financeAi;
+
+import * as _hrSpecificAi from './hrSpecificAi';
+export const hrSpecificAi = _hrSpecificAi;
+
+import * as _marketingAi from './marketingAi';
+export const marketingAi = _marketingAi;
+
+import * as _salesAi from './salesAi';
+export const salesAi = _salesAi;
+
+import * as _operationsAi from './operationsAi';
+export const operationsAi = _operationsAi;
+
+import * as _technicalAi from './technicalAi';
+export const technicalAi = _technicalAi;
+
+// ── Phase 9C: AI Project Orchestration ───────────────────
+import * as _intelligentDelegation from './intelligentDelegation';
+export const intelligentDelegation = _intelligentDelegation;
+
+import * as _decisionSupport from './decisionSupport';
+export const decisionSupport = _decisionSupport;
+
+import * as _riskDetectionAi from './riskDetectionAi';
+export const riskDetectionAi = _riskDetectionAi;
+
+import * as _executiveInsights from './executiveInsights';
+export const executiveInsights = _executiveInsights;
+
+import * as _orgHealthEngine from './orgHealthEngine';
+export const orgHealthEngine = _orgHealthEngine;
+
+import * as _crossDeptIntelligence from './crossDeptIntelligence';
+export const crossDeptIntelligence = _crossDeptIntelligence;

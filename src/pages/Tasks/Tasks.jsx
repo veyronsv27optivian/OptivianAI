@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../services/AuthContext';
 import { getTasks, createTask, updateTask, deleteTask, updateAssigneeStatus } from '../../services/taskService';
 import { exportTasksToCSV } from '../../services/dataExportService';
+import { useRealtime } from '../../services/useRealtime';
 
 const STATUS_CONFIG = {
   pending:      { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500', label: 'Pending', col: 'border-t-amber-400' },
@@ -114,6 +115,11 @@ export default function Tasks() {
     setLoading(true);
     Promise.all([loadTasks(), loadStaff()]).finally(() => setLoading(false));
   }, [loadTasks, loadStaff]);
+
+  // ─── Realtime subscription (Item 76) ─────────────────────────
+  useRealtime('tasks', ['INSERT', 'UPDATE', 'DELETE'], () => {
+    loadTasks();
+  }, { deps: [] });
 
   useEffect(() => {
     (async () => {
@@ -488,7 +494,7 @@ export default function Tasks() {
         </div>
         <div className="flex items-center gap-2">
           {/* View mode toggle (Item 47) */}
-          <div className="flex p-0.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50">
+          <div className="flex p-0.5 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
             <button
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded text-xs transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}`}
@@ -538,7 +544,7 @@ export default function Tasks() {
             className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
           />
         </div>
-        <div className="flex flex-wrap p-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50">
+        <div className="flex flex-wrap p-1 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
           {STATUS_FILTERS.map((s) => (
             <button
               key={s}
@@ -553,7 +559,7 @@ export default function Tasks() {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-lg text-sm text-slate-600 dark:text-slate-400">
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-sm text-slate-600 dark:text-text-secondary">
           <Filter size={16} className="text-slate-400 dark:text-slate-500" />
           <span className="text-xs">{filtered.length} task{filtered.length !== 1 ? 's' : ''}</span>
         </div>
@@ -568,7 +574,7 @@ export default function Tasks() {
 
       {/* ── LIST VIEW ── */}
       {!loading && viewMode === 'list' && (
-        <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
+        <div className="bg-white dark:dark-card-metallic border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
           {paginatedTasks.length === 0 ? (
             <div className="p-12 text-center">
               <CheckSquare size={36} className="text-slate-300 mx-auto mb-3" />
@@ -638,7 +644,7 @@ export default function Tasks() {
               </AnimatePresence>
 
               {/* Column headers */}
-              <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/50">
+              <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.03]">
                 <div className="sm:col-span-1 flex items-center">
                   <input
                     type="checkbox"
@@ -669,7 +675,7 @@ export default function Tasks() {
                     draggable
                     onDragStart={(e) => handleDragStart(e, task.id)}
                     onDragEnd={handleDragEnd}
-                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-b border-slate-100 dark:border-slate-700/30 last:border-0"
+                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors border-b border-slate-100 dark:border-white/5 last:border-0"
                   >
                     {/* Checkbox (Item 50) */}
                     <div className="sm:col-span-1 flex items-center">
@@ -766,7 +772,7 @@ export default function Tasks() {
 
               {/* Load more (Item 53) */}
               {hasMore && (
-                <div className="px-6 py-4 text-center border-t border-slate-100 dark:border-slate-700/30">
+                <div className="px-6 py-4 text-center border-t border-slate-100 dark:border-white/5">
                   <button
                     onClick={loadMore}
                     className="px-6 py-2 rounded-lg text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
@@ -789,16 +795,16 @@ export default function Tasks() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col.status)}
-              className="flex-1 min-w-[250px] max-w-[350px] bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50"
+              className="flex-1 min-w-[250px] max-w-[350px] bg-slate-50/80 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10"
             >
               {/* Column header */}
-              <div className={`p-3 border-b border-slate-200 dark:border-slate-700/50`}>
+              <div className="p-3 border-b border-slate-200 dark:border-white/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${STATUS_CONFIG[col.status]?.dot || 'bg-slate-400'}`} />
                     <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{col.label}</h3>
                   </div>
-                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-200 dark:bg-white/10 px-2 py-0.5 rounded-full">
                     {col.tasks.length}
                   </span>
                 </div>
@@ -825,7 +831,7 @@ export default function Tasks() {
                         onDragStart={(e) => handleDragStart(e, task.id)}
                         onDragEnd={handleDragEnd}
                         onClick={() => canManage && openEditModal(task)}
-                        className={`bg-white dark:bg-slate-800/90 rounded-lg border border-slate-200 dark:border-slate-700/50 border-t-2 ${colCfg.col} p-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-[0.98]`}
+                        className={`bg-white dark:bg-surface-raised/90 rounded-xl border border-slate-200 dark:border-white/10 border-t-2 ${colCfg.col} p-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-[0.98]`}
                       >
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <p className="text-sm font-medium text-slate-900 dark:text-slate-100 leading-tight line-clamp-2">
@@ -893,12 +899,11 @@ export default function Tasks() {
       {/* ── CREATE / EDIT MODAL (Items 48, 49) ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
-          <div
-            className="w-full max-w-2xl bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl max-h-[90vh] flex flex-col"
+          <div              className="w-full max-w-2xl bg-white dark:bg-surface-raised/95 border border-slate-200 dark:border-white/10 rounded-xl shadow-glass-lg dark:shadow-glass-xl max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50 shrink-0">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-600">
                   {editingTask ? (
@@ -930,7 +935,7 @@ export default function Tasks() {
                     required
                     value={formData.title}
                     onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                    className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                     placeholder="What needs to be done?"
                   />
                 </div>
@@ -1052,7 +1057,7 @@ export default function Tasks() {
                 {/* File attachments (Item 48) */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Attachments</label>
-                  <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center">
+                  <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center bg-transparent dark:bg-slate-800/30">
                     {taskFiles.length > 0 ? (
                       <div className="space-y-2">
                         {taskFiles.map(file => (
@@ -1102,7 +1107,7 @@ export default function Tasks() {
               </form>
 
               {/* Comments section (Item 49) */}
-              <div className="border-t border-slate-200 dark:border-slate-700/50 pt-4">
+              <div className="border-t border-slate-200 dark:border-white/10 pt-4">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                   <MessageSquare size={14} />
                   Comments ({taskComments.length})
@@ -1111,7 +1116,7 @@ export default function Tasks() {
                 {/* Comment list */}
                 <div className="space-y-3 mb-3 max-h-48 overflow-y-auto">
                   {taskComments.length === 0 ? (
-                    <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No comments yet</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4 dark:text-slate-500">No comments yet</p>
                   ) : (
                     taskComments.map(comment => (
                       <div key={comment.id} className="flex gap-2 group">
@@ -1163,7 +1168,7 @@ export default function Tasks() {
             </div>
 
             {/* Modal footer */}
-            <div className="p-5 border-t border-slate-200 dark:border-slate-700/50 shrink-0">
+            <div className="p-5 border-t border-slate-200 dark:border-white/10 shrink-0">
               {error && (
                 <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 mb-3">
                   <AlertCircle size={16} className="text-red-600 shrink-0" />
@@ -1202,7 +1207,7 @@ export default function Tasks() {
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl overflow-hidden">
+          <div className="w-full max-w-md bg-white dark:bg-surface-raised/95 border border-slate-200 dark:border-white/10 rounded-xl shadow-glass-lg dark:shadow-glass-xl overflow-hidden">
             <div className="p-6 text-center">
               <div className="mx-auto w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center mb-4">
                 <AlertCircle size={24} className="text-white" />

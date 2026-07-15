@@ -45,21 +45,129 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+// ─── Session timeout configuration (#66) ───────────────────────
+const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
+const SESSION_WARNING_MS = 5 * 60 * 1000; // 5 min warning before timeout
+const SESSION_KEY = 'optivian_session_last_activity';
+const TIMEOUT_DISABLED_KEY = 'optivian_session_timeout_disabled';
+
+function updateLastActivity() {
+  localStorage.setItem(SESSION_KEY, Date.now().toString());
+}
+
+function getLastActivity() {
+  try {
+    return parseInt(localStorage.getItem(SESSION_KEY) || '0', 10);
+  } catch {
+    return 0;
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [rememberMe, setRememberMe] = useState(true);
+  const [sessionExpiring, setSessionExpiring] = useState(false);
   const listenersRef = useRef(new Set());
   const userRef = useRef(null);
   const profileRef = useRef(null);
+  const activityEventsRef = useRef(['click', 'keydown', 'mousemove', 'touchstart', 'scroll']);
+  const timeoutCheckRef = useRef(null);
+  const signOutRef = useRef(null);
 
-  // Safety timeout: force loading to false after 5s to prevent infinite spinner
+  // Keep signOutRef in sync (stale closure safety)
+  useEffect(() => { signOutRef.current = signOut; });
+
+  // Safety timeout: force loading to false to prevent infinite spinner
+  // DEV_MODE: 1.5s (auth is local/synchronous)
+  // PROD mode: 4s (auth involves Supabase getSession network round-trip)
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 5000);
+    const timer = setTimeout(() => setLoading(false), DEV_MODE ? 1500 : 4000);
     return () => clearTimeout(timer);
   }, []);
+
+  // ─── Session Activity Tracking (#66) ─────────────────────────
+  useEffect(() => {
+    // Don't track in dev mode
+    if (DEV_MODE) return;
+
+    // Update activity on user interactions
+    const handleActivity = () => updateLastActivity();
+    const events = activityEventsRef.current;
+    events.forEach(event => window.addEventListener(event, handleActivity, { passive: true }));
+
+    // Initial activity stamp
+    updateLastActivity();
+
+    return () => {
+      events.forEach(event => window.removeEventListener(event, handleActivity));
+    };
+  }, []);
+
+  // ─── Session Timeout Check (#66) ────────────────────────────
+  useEffect(() => {
+    if (DEV_MODE || !user) {
+      setSessionExpiring(false);
+      return;
+    }
+
+    // Check if timeout is disabled for this session
+    const isDisabled = localStorage.getItem(TIMEOUT_DISABLED_KEY) === 'true';
+    if (isDisabled) return;
+
+    const checkTimeout = () => {
+      const lastActivity = getLastActivity();
+      const elapsed = Date.now() - lastActivity;
+
+      // Show warning 5 minutes before timeout
+      if (elapsed >= SESSION_TIMEOUT_MS - SESSION_WARNING_MS && elapsed < SESSION_TIMEOUT_MS) {
+        setSessionExpiring(true);
+      }
+
+      // Auto-logout after timeout
+      if (elapsed >= SESSION_TIMEOUT_MS) {
+        setSessionExpiring(false);
+        signOutRef.current?.('local');
+      }
+    };
+
+    // Check every 30 seconds
+    timeoutCheckRef.current = setInterval(checkTimeout, 30000);
+    // Also check immediately
+    checkTimeout();
+
+    return () => {
+      if (timeoutCheckRef.current) {
+        clearInterval(timeoutCheckRef.current);
+      }
+    };
+  }, [user, DEV_MODE]);
+
+  // ─── Reset activity on manual sign in ───────────────────────
+  useEffect(() => {
+    if (user) {
+      updateLastActivity();
+      setSessionExpiring(false);
+    }
+  }, [user?.id]);
+
+  // ─── Reset session timer on focus ───────────────────────────
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user) {
+        const lastActivity = getLastActivity();
+        const elapsed = Date.now() - lastActivity;
+        if (elapsed < SESSION_TIMEOUT_MS) {
+          updateLastActivity();
+          setSessionExpiring(false);
+        }
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user]);
 
   // Keep refs in sync
   useEffect(() => { userRef.current = user; }, [user]);
@@ -379,30 +487,47 @@ export function AuthProvider({ children }) {
 
   const signInWithOAuth = useCallback(async (provider) => {
     if (DEV_MODE) {
-      return { error: { message: 'OAuth not available in DEV_MODE.' } };
+      return { error: { message: 'OAuth sign-in requires Supabase to be configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file, then enable the providers in your Supabase dashboard. For now, use email/password to sign in.' } };
     }
 
-    const { data, error } = await authService.signInWithOAuth(provider);
-    if (error) return { error };
-
-    // OAuth redirects the browser — we'll handle the callback via onAuthStateChange
-    return { data, error: null };
+    try {
+      const { data, error } = await authService.signInWithOAuth(provider);
+      if (error) {
+        return { error };
+      }
+      // OAuth redirects the browser — handled by onAuthStateChange on return
+      return { data, error: null };
+    } catch (err) {
+      return { error: { message: `OAuth failed: ${err.message || 'Unknown error'}` } };
+    }
   }, []);
 
   const signOut = useCallback(async (scope = 'local') => {
-    if (DEV_MODE) {
+    // Always clear local state immediately — don't rely solely on onAuthStateChange
+    const clearLocal = () => {
       saveDevSession(null);
       setSession(null);
       setUser(null);
       setProfile(null);
+      setLoading(false);
       notifyListeners('SIGNED_OUT', null);
+    };
+
+    if (DEV_MODE) {
+      clearLocal();
       return { error: null };
     }
-    const { error } = await supabase.auth.signOut({ scope });
-    if (!error) {
-      setProfile(null);
+
+    try {
+      const { error } = await supabase.auth.signOut({ scope });
+      // Clear state immediately regardless of API result
+      clearLocal();
+      return { error };
+    } catch (err) {
+      // Even on network errors, force local logout so the user isn't stuck
+      clearLocal();
+      return { error: err };
     }
-    return { error };
   }, [notifyListeners]);
 
   const updatePassword = useCallback(async ({ password, metadata }) => {
@@ -847,6 +972,12 @@ export function AuthProvider({ children }) {
     return adminRoles.includes(userRole);
   }, [userRole]);
 
+  // ─── Renew session (reset idle timer) (#66) ──────────────────
+  const renewSession = useCallback(() => {
+    updateLastActivity();
+    setSessionExpiring(false);
+  }, []);
+
   // ─── Context value ─────────────────────────────────────────────
   const value = {
     // Auth state
@@ -892,6 +1023,11 @@ export function AuthProvider({ children }) {
     userRole,
     can,
     isAdmin,
+
+    // Session timeout (#66)
+    sessionExpiring,
+    renewSession,
+    sessionTimeoutMs: SESSION_TIMEOUT_MS,
   };
 
   return (

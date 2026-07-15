@@ -57,7 +57,7 @@ export default function QuickActions() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {actionGroups.map((group) => (
           <div key={group.label}>
-            <h4 className="text-[10px] font-semibold text-slate-400 uppercase mb-2 tracking-wider">
+            <h4 className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase mb-2 tracking-wider">
               {group.label}
             </h4>
             <div className="grid grid-cols-2 gap-1.5">
@@ -69,12 +69,12 @@ export default function QuickActions() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => navigate(action.to)}
-                    className="flex items-center gap-2 p-2.5 rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all"
+                    className="flex items-center gap-2 p-2.5 rounded-lg border border-transparent hover:border-slate-200 dark:hover:border-slate-600 hover:shadow-sm transition-all"
                   >
-                    <div className={`p-1.5 rounded-md ${action.bg} ${action.color}`}>
+                    <div className={`p-1.5 rounded-md ${action.bg} ${action.color} dark:bg-slate-800/80`}>
                       <Icon size={14} />
                     </div>
-                    <span className="text-[11px] font-medium text-slate-600">{action.label}</span>
+                    <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">{action.label}</span>
                   </motion.button>
                 );
               })}

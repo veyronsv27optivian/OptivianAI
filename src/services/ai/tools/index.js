@@ -50,3 +50,27 @@ export { CSVAnalyzerTool } from './csvAnalyzerTool';
 export { PowerPointAnalyzerTool } from './powerpointAnalyzerTool';
 export { WebsiteAnalyzerTool } from './websiteAnalyzerTool';
 export { YouTubeAnalyzerTool } from './youtubeAnalyzerTool';
+
+// ── Phase 9B: Role-Specific AI Assistants ───────────────────
+export { ExecutiveAiTool } from './executiveAiTool';
+export { ManagerAiTool } from './managerAiTool';
+export { EmployeeAiTool } from './employeeAiTool';
+export { FinanceAiTool } from './financeAiTool';
+export { HrSpecificAiTool } from './hrSpecificAiTool';
+export { MarketingAiTool } from './marketingAiTool';
+export { SalesAiTool } from './salesAiTool';
+export { OperationsAiTool } from './operationsAiTool';
+export { TechnicalAiTool } from './technicalAiTool';
+
+// ── Phase 9C: AI Project Orchestration ───────────────────
+export { IntelligentDelegationTool } from './intelligentDelegationTool';
+export { DecisionSupportTool } from './decisionSupportTool';
+export { RiskDetectionAiTool } from './riskDetectionAiTool';
+export { ExecutiveInsightsTool } from './executiveInsightsTool';
+export { OrgHealthEngineTool } from './orgHealthEngineTool';
+export { CrossDeptIntelligenceTool } from './crossDeptIntelligenceTool';
+
+// ── Phase 9C Extension: Full Orchestration (Items 100, 102, 106) ──
+export { AIProjectOrchestrationTool, aiProjectOrchestrationTool } from './aiProjectOrchestrationTool';
+export { WorkflowAutomationTool, workflowAutomationTool } from './workflowAutomationTool';
+export { PredictiveAnalyticsTool, predictiveAnalyticsTool } from './predictiveAnalyticsTool';

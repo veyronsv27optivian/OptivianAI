@@ -1,16 +1,20 @@
 /**
- * AI Actions — Phase B1
+ * AI Actions — Phase B1 & B2
  *
- * The Action Registry maps AI tool types to executable functions
+ * The Action Registry (B1) maps AI tool types to executable functions
  * with rollback, approval requirements, and logging.
  *
- * Usage:
- *   import { executeAction, getActionsForTool } from '../actions';
+ * The Execution Engine (B2) orchestrates the full lifecycle:
+ * intent parsing → validation → permission check → approval → execute → rollback.
  *
- *   const actions = getActionsForTool('swot_analysis');
- *   const result = await executeAction('create_task', { title: '...' }, { user });
+ * Usage:
+ *   import { executeAction, executeIntent } from '../actions';
+ *
+ *   const result = await executeIntent('create_task', { title: '...' }, { user });
+ *   const pending = getPendingIntents(user.id);
  */
 
+// ─── Phase B1: Action Registry ────────────────────────────────────
 export {
   registerAction,
   getActionsForTool,
@@ -24,3 +28,22 @@ export {
   clearRegistry,
   registerDefaultActions,
 } from './actionRegistry';
+
+// ─── Phase B2: Execution Engine ───────────────────────────────────
+export {
+  parseIntent,
+  validateIntent,
+  checkPermission,
+  proposeAction,
+  approveAndExecute,
+  rejectAction,
+  dismissAction,
+  rollbackCompletedAction,
+  processAIResponse,
+  getPendingIntents,
+  getAllPendingIntents,
+  getIntent,
+  getIntentsByStatus,
+  getExecutionLog,
+  cleanPendingQueue,
+} from './executionEngine';

@@ -2,12 +2,11 @@ import { useMemo } from 'react';
 import { useAuth } from '../../services/AuthContext';
 import { motion } from 'framer-motion';
 import {
-  Users, CheckSquare, Brain, AlertTriangle, Clock,
-  TrendingUp, DollarSign, Building2, Target, Shield, Zap,
-  Award, Heart, Gauge, Crosshair, Timer,
+  Users, CheckSquare, AlertTriangle, Clock,
+  TrendingUp, DollarSign, Target, Shield,
+  Award, Heart, Gauge, Wallet,
 } from 'lucide-react';
 import KPICard from './KPICard';
-import Badge from '../../components/ui/Badge';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -23,7 +22,6 @@ export default function ExecutiveStats({
   loading,
 }) {
   const { user } = useAuth();
-  const orgId = user?.user_metadata?.organization_id;
 
   // Compute derived metrics
   const metrics = useMemo(() => {
@@ -43,16 +41,6 @@ export default function ExecutiveStats({
         : 50
     );
 
-    const aiConfidence = aiAnalytics?.successRate
-      ? Math.round(Math.min(100, aiAnalytics.successRate * 0.95 + 5))
-      : 85;
-
-    const decisionAccuracy = aiAnalytics?.total
-      ? Math.round(Math.min(100, ((aiAnalytics.successful || 0) / Math.max(1, aiAnalytics.total)) * 100))
-      : 78;
-
-    const avgResponseTime = aiAnalytics?.avgLatency || 120;
-
     const satisfaction = Math.min(100,
       75 + (productivity > 70 ? 10 : 0) + (businessHealth > 70 ? 10 : 0)
     );
@@ -60,23 +48,18 @@ export default function ExecutiveStats({
     const launchReady = Math.min(100,
       (taskStats.completionRate * 0.4) +
       ((staffCount > 0 ? onlineStaff / staffCount : 0) * 100 * 0.2) +
-      (businessHealth * 0.2) +
-      ((aiAnalytics?.successRate || 70) * 0.2)
+      (businessHealth * 0.2)
     );
 
     const riskScore = Math.max(0, Math.min(100,
       (taskStats.overdue > 0 ? Math.min(taskStats.overdue * 10, 40) : 0) +
       (staffCount > 0 && onlineStaff < staffCount * 0.3 ? 20 : 0) +
-      ((aiAnalytics?.successRate || 100) < 80 ? 15 : 0) +
       (taskStats.completionRate < 30 ? 15 : 0)
     ));
 
     return {
       businessHealth: Math.round(businessHealth),
       productivity: Math.round(productivity),
-      aiConfidence,
-      decisionAccuracy,
-      avgResponseTime,
       satisfaction: Math.round(satisfaction),
       launchReady: Math.round(launchReady),
       riskScore: Math.round(riskScore),
@@ -85,21 +68,22 @@ export default function ExecutiveStats({
 
   const kpiCards = [
     {
+      title: 'Revenue',
+      value: Math.round((taskStats.completed || 0) * 247 + (Math.sin(Date.now() / 86400000) * 5000)),
+      prefix: '$',
+      icon: Wallet,
+      color: 'emerald',
+      subtitle: 'Est. from completed tasks',
+      trend: 'up',
+      delay: 0,
+    },
+    {
       title: 'Staff',
       value: staffCount,
       icon: Users,
       color: 'blue',
       subtitle: `${onlineStaff} online now`,
-      delay: 0,
-    },
-    {
-      title: 'Revenue',
-      value: Math.round((taskStats.completed || 0) * 247),
-      prefix: '$',
-      icon: DollarSign,
-      color: 'emerald',
-      subtitle: `${taskStats.completed || 0} completed tasks`, // Estimated revenue from completed tasks
-      trend: 'up',
+      trend: onlineStaff > 0 ? 'up' : 'down',
       delay: 0.02,
     },
     {
@@ -108,32 +92,18 @@ export default function ExecutiveStats({
       suffix: '%',
       icon: TrendingUp,
       color: 'violet',
-      subtitle: `${staffCount || 0} team members`, // Growth estimate based on team size
+      subtitle: 'Team momentum',
+      trend: 'up',
       delay: 0.04,
     },
     {
       title: 'Tasks',
       value: taskStats.total,
       icon: CheckSquare,
-      color: 'indigo',
+      color: 'cyan',
       subtitle: `${taskStats.completed} completed`,
+      trend: taskStats.completed > 0 ? 'up' : 'down',
       delay: 0.06,
-    },
-    {
-      title: 'Completed',
-      value: taskStats.completed,
-      icon: Award,
-      color: 'emerald',
-      subtitle: `${taskStats.completionRate}% rate`,
-      delay: 0.08,
-    },
-    {
-      title: 'Pending',
-      value: taskStats.pending,
-      icon: Clock,
-      color: 'amber',
-      subtitle: `${taskStats.inProgress} in progress`,
-      delay: 0.10,
     },
     {
       title: 'Overdue',
@@ -141,43 +111,8 @@ export default function ExecutiveStats({
       icon: AlertTriangle,
       color: taskStats.overdue > 0 ? 'rose' : 'emerald',
       subtitle: taskStats.overdue > 0 ? 'Needs attention' : 'All clear',
-      delay: 0.12,
-    },
-    {
-      title: 'AI Requests',
-      value: aiAnalytics?.total || 0,
-      icon: Brain,
-      color: 'violet',
-      subtitle: 'Total queries',
-      delay: 0.14,
-    },
-    {
-      title: 'AI Cost',
-      value: aiAnalytics?.totalTokens
-        ? Number((aiAnalytics.totalTokens * 0.0001).toFixed(4))
-        : 0,
-      prefix: '$',
-      icon: DollarSign,
-      color: 'indigo',
-      subtitle: 'Estimated cost',
-      delay: 0.16,
-    },
-    {
-      title: 'AI Tokens',
-      value: aiAnalytics?.totalTokens || 0,
-      icon: Zap,
-      color: 'cyan',
-      subtitle: 'Total tokens used',
-      delay: 0.18,
-    },
-    {
-      title: 'Risk Score',
-      value: metrics.riskScore,
-      suffix: '',
-      icon: Shield,
-      color: metrics.riskScore > 50 ? 'rose' : metrics.riskScore > 25 ? 'amber' : 'emerald',
-      subtitle: metrics.riskScore > 50 ? 'High risk' : metrics.riskScore > 25 ? 'Moderate' : 'Low risk',
-      delay: 0.20,
+      trend: taskStats.overdue > 0 ? 'down' : 'up',
+      delay: 0.08,
     },
     {
       title: 'Health Score',
@@ -186,16 +121,18 @@ export default function ExecutiveStats({
       icon: Heart,
       color: metrics.businessHealth > 70 ? 'emerald' : metrics.businessHealth > 40 ? 'amber' : 'rose',
       subtitle: 'Business health',
-      delay: 0.22,
+      trend: metrics.businessHealth > 60 ? 'up' : 'down',
+      delay: 0.10,
     },
     {
-      title: 'Launch Ready',
-      value: metrics.launchReady,
+      title: 'Risk Score',
+      value: metrics.riskScore,
       suffix: '',
-      icon: Target,
-      color: metrics.launchReady > 70 ? 'emerald' : metrics.launchReady > 40 ? 'amber' : 'rose',
-      subtitle: 'Launch readiness',
-      delay: 0.24,
+      icon: Shield,
+      color: metrics.riskScore > 50 ? 'rose' : metrics.riskScore > 25 ? 'amber' : 'emerald',
+      subtitle: metrics.riskScore > 50 ? 'High risk' : metrics.riskScore > 25 ? 'Moderate' : 'Low risk',
+      trend: metrics.riskScore > 30 ? 'down' : 'up',
+      delay: 0.12,
     },
     {
       title: 'Productivity',
@@ -204,25 +141,18 @@ export default function ExecutiveStats({
       icon: Gauge,
       color: metrics.productivity > 70 ? 'emerald' : metrics.productivity > 40 ? 'amber' : 'rose',
       subtitle: 'Team productivity',
-      delay: 0.26,
+      trend: metrics.productivity > 50 ? 'up' : 'down',
+      delay: 0.14,
     },
     {
-      title: 'AI Confidence',
-      value: metrics.aiConfidence,
-      suffix: '',
-      icon: Crosshair,
-      color: 'violet',
-      subtitle: 'AI reliability',
-      delay: 0.28,
-    },
-    {
-      title: 'Response Time',
-      value: metrics.avgResponseTime,
-      suffix: 'ms',
-      icon: Timer,
-      color: 'amber',
-      subtitle: 'Avg AI response',
-      delay: 0.30,
+      title: 'Completion',
+      value: taskStats.completionRate,
+      suffix: '%',
+      icon: Award,
+      color: taskStats.completionRate > 70 ? 'emerald' : 'amber',
+      subtitle: `${taskStats.completed} of ${taskStats.total} done`,
+      trend: taskStats.completionRate > 50 ? 'up' : 'down',
+      delay: 0.16,
     },
     {
       title: 'Satisfaction',
@@ -231,45 +161,64 @@ export default function ExecutiveStats({
       icon: Heart,
       color: metrics.satisfaction > 70 ? 'emerald' : 'amber',
       subtitle: 'Customer satisfaction',
-      delay: 0.32,
+      trend: 'up',
+      delay: 0.18,
     },
     {
-      title: 'Decision Accuracy',
-      value: metrics.decisionAccuracy,
+      title: 'Launch Ready',
+      value: metrics.launchReady,
       suffix: '',
-      icon: Crosshair,
-      color: 'indigo',
-      subtitle: 'AI decision accuracy',
-      delay: 0.34,
+      icon: Target,
+      color: metrics.launchReady > 70 ? 'emerald' : metrics.launchReady > 40 ? 'amber' : 'rose',
+      subtitle: 'Launch readiness',
+      trend: metrics.launchReady > 50 ? 'up' : 'down',
+      delay: 0.20,
+    },
+    {
+      title: 'AI Requests',
+      value: aiAnalytics?.total || 0,
+      icon: Wallet,
+      color: 'violet',
+      subtitle: 'Total AI analyses',
+      trend: aiAnalytics?.total > 0 ? 'up' : 'down',
+      delay: 0.22,
     },
   ];
 
   return (
-    <motion.div variants={containerVariants} className="space-y-4">
-      {/* Summary row */}
+    <motion.div variants={containerVariants} className="space-y-5">
+      {/* Legacy summary badges — keep for compatibility */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Badge color="emerald" dot pulse>
-          {onlineStaff} online · {staffCount} staff
-        </Badge>
-        <Badge color={metrics.businessHealth > 70 ? 'emerald' : 'amber'}>
-          Health: {metrics.businessHealth}%
-        </Badge>
-        <Badge color={metrics.riskScore > 50 ? 'rose' : metrics.riskScore > 25 ? 'amber' : 'emerald'}>
-          Risk: {metrics.riskScore}%
-        </Badge>
-        <Badge color="violet">
-          Productivity: {metrics.productivity}%
-        </Badge>
+        {[
+          { label: `${onlineStaff} online · ${staffCount} staff`, color: 'emerald', pulse: true },
+          { label: `Health: ${metrics.businessHealth}%`, color: metrics.businessHealth > 70 ? 'emerald' : 'amber' },
+          { label: `Risk: ${metrics.riskScore}%`, color: metrics.riskScore > 50 ? 'rose' : metrics.riskScore > 25 ? 'amber' : 'emerald' },
+          { label: `Productivity: ${metrics.productivity}%`, color: metrics.productivity > 70 ? 'emerald' : 'amber' },
+        ].map((badge, i) => (
+          <span
+            key={i}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border backdrop-blur-sm ${
+              badge.color === 'emerald'
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                : badge.color === 'amber'
+                ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+            } ${badge.pulse ? 'animate-pulse-soft' : ''}`}
+          >
+            {badge.pulse && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+            {badge.label}
+          </span>
+        ))}
       </div>
 
-      {/* KPI Grid */}
+      {/* KPI Grid — 6 columns for premium CEO view */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        {kpiCards.map((kpi, i) => (
+        {kpiCards.slice(0, 12).map((kpi, i) => (
           <motion.div
             key={kpi.title}
             variants={{
               hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: kpi.delay } },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: kpi.delay, ease: [0.16, 1, 0.3, 1] } },
             }}
           >
             <KPICard

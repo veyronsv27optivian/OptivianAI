@@ -22,6 +22,7 @@ import { AiLogger } from './logger';
 import { AnalyticsTracker } from './analytics';
 import { UsageTracker } from './usage';
 import { AiCache } from './cache';
+import { sendNotificationEmail, isEmailConfigured } from '../emailService';
 
 // ─── Prompt module static imports ───────────────────────────────
 import * as _businessAdvisor from './prompts/businessAdvisor';
@@ -62,6 +63,25 @@ import * as _csvAnalyzer from './prompts/csvAnalyzer';
 import * as _powerpointAnalyzer from './prompts/powerpointAnalyzer';
 import * as _websiteAnalyzer from './prompts/websiteAnalyzer';
 import * as _youtubeAnalyzer from './prompts/youtubeAnalyzer';
+
+// ── Phase 9B: Role-Specific AI Assistants ───────────────────
+import * as _executiveAi from './prompts/executiveAi';
+import * as _managerAi from './prompts/managerAi';
+import * as _employeeAi from './prompts/employeeAi';
+import * as _financeAi from './prompts/financeAi';
+import * as _hrSpecificAi from './prompts/hrSpecificAi';
+import * as _marketingAi from './prompts/marketingAi';
+import * as _salesAi from './prompts/salesAi';
+import * as _operationsAi from './prompts/operationsAi';
+import * as _technicalAi from './prompts/technicalAi';
+
+// ── Phase 9C: AI Project Orchestration ───────────────────
+import * as _intelligentDelegation from './prompts/intelligentDelegation';
+import * as _decisionSupport from './prompts/decisionSupport';
+import * as _riskDetectionAi from './prompts/riskDetectionAi';
+import * as _executiveInsights from './prompts/executiveInsights';
+import * as _orgHealthEngine from './prompts/orgHealthEngine';
+import * as _crossDeptIntelligence from './prompts/crossDeptIntelligence';
 
 const DEV_MODE = !import.meta.env.VITE_SUPABASE_URL;
 
@@ -130,6 +150,23 @@ function _resolvePromptModule(toolType) {
   [AI_TOOL_TYPES.POWERPOINT_ANALYZER]: _powerpointAnalyzer,
   [AI_TOOL_TYPES.WEBSITE_ANALYZER]: _websiteAnalyzer,
   [AI_TOOL_TYPES.YOUTUBE_ANALYZER]: _youtubeAnalyzer,
+  // ── Phase 9B: Role-Specific AI Assistants ───────────────────
+  [AI_TOOL_TYPES.EXECUTIVE_AI]: _executiveAi,
+  [AI_TOOL_TYPES.MANAGER_AI]: _managerAi,
+  [AI_TOOL_TYPES.EMPLOYEE_AI]: _employeeAi,
+  [AI_TOOL_TYPES.FINANCE_AI]: _financeAi,
+  [AI_TOOL_TYPES.HR_SPECIFIC_AI]: _hrSpecificAi,
+  [AI_TOOL_TYPES.MARKETING_SPECIFIC_AI]: _marketingAi,
+  [AI_TOOL_TYPES.SALES_SPECIFIC_AI]: _salesAi,
+  [AI_TOOL_TYPES.OPERATIONS_AI]: _operationsAi,
+  [AI_TOOL_TYPES.TECHNICAL_AI]: _technicalAi,
+  // ── Phase 9C: AI Project Orchestration ───────────────────
+  [AI_TOOL_TYPES.INTELLIGENT_DELEGATION]: _intelligentDelegation,
+  [AI_TOOL_TYPES.DECISION_SUPPORT]: _decisionSupport,
+  [AI_TOOL_TYPES.RISK_DETECTION_AI]: _riskDetectionAi,
+  [AI_TOOL_TYPES.EXECUTIVE_INSIGHTS]: _executiveInsights,
+  [AI_TOOL_TYPES.ORG_HEALTH_ENGINE]: _orgHealthEngine,
+  [AI_TOOL_TYPES.CROSS_DEPT_INTELLIGENCE]: _crossDeptIntelligence,
   };
 
   return promptModules[toolType] || null;
@@ -536,6 +573,22 @@ export async function saveAnalysis({
     };
     analyses.push(entry);
     devSet(analyses);
+
+    // In dev mode, email is logged to console
+    if (isEmailConfigured()) {
+      const profiles = JSON.parse(localStorage.getItem('optivian_dev_profiles') || '[]');
+      const p = profiles.find(pr => pr.id === profileId || pr.user_id === profileId);
+      if (p?.email) {
+        sendNotificationEmail('ai_report', p.email, {
+          userName: p.full_name || p.email?.split('@')[0] || 'User',
+          reportName: AI_TOOL_REGISTRY[type]?.label || type,
+          reportType: AI_TOOL_REGISTRY[type]?.label || type,
+          reportUrl: `${window.location.origin}/#/app/ai`,
+          summary: 'Your AI analysis is complete. View it in the AI Platform.',
+        }).catch(() => {});
+      }
+    }
+
     return { data: entry, error: null };
   }
 
@@ -553,6 +606,27 @@ export async function saveAnalysis({
       })
       .select()
       .single();
+
+    // Notify user via email that AI analysis is complete (fire-and-forget, safe fail)
+    if (!error && isEmailConfigured()) {
+      supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', profileId)
+        .single()
+        .then(({ data: profileData }) => {
+          if (profileData?.email) {
+            sendNotificationEmail('ai_report', profileData.email, {
+              userName: profileData.full_name || profileData.email?.split('@')[0] || 'User',
+              reportName: AI_TOOL_REGISTRY[type]?.label || type,
+              reportType: AI_TOOL_REGISTRY[type]?.label || type,
+              reportUrl: `${window.location.origin}/#/app/ai`,
+              summary: 'Your AI analysis is complete. View it in the AI Platform.',
+            }).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }
 
     return { data, error };
   } catch (err) {

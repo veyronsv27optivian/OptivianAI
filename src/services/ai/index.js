@@ -133,8 +133,9 @@ export {
   promptSanitizer,
 } from './utils';
 
-// ─── Action Registry (Phase B1) ───────────────────────────────
+// ─── AI Actions (Phase B1 + B2) ───────────────────────────
 export {
+  // Registry (B1)
   registerAction,
   getActionsForTool,
   executeAction,
@@ -144,6 +145,22 @@ export {
   getActionLog,
   requiresApproval,
   getSafetyLevel,
+  // Execution Engine (B2)
+  parseIntent,
+  validateIntent,
+  checkPermission,
+  proposeAction,
+  approveAndExecute,
+  rejectAction,
+  dismissAction,
+  rollbackCompletedAction,
+  processAIResponse,
+  getPendingIntents,
+  getAllPendingIntents,
+  getIntent,
+  getIntentsByStatus,
+  getExecutionLog,
+  cleanPendingQueue,
 } from './actions';
 
 // ─── Base Tool Class ───────────────────────────────────────────

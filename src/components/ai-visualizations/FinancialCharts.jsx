@@ -33,7 +33,7 @@ function Gauge({ value, max = 100, label, color = 'emerald', size = 'md' }) {
 
 function MetricCard({ label, value, prefix, suffix, icon: Icon, color }) {
   return (
-    <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+    <div className="p-3 rounded-lg bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
       <div className="flex items-center gap-1.5 mb-1">
         {Icon && <Icon size={12} className={`text-${color}-500`} />}
         <span className="text-[10px] text-slate-500">{label}</span>
@@ -99,7 +99,7 @@ export default function FinancialCharts({ data }) {
   const hasCharts = revenueForecast.length > 0;
 
   return (
-    <div className="border border-slate-200 rounded-xl bg-white p-5 shadow-sm">
+    <div className="premium-card dark:dark-card-metallic p-5">
       <div className="flex items-center gap-2 mb-4">
         <DollarSign size={16} className="text-emerald-500" />
         <h3 className="text-sm font-bold text-slate-800">Financial Forecast</h3>

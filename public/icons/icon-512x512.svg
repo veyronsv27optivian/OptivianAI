@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="64" fill="url(#g)"/>
+  <g transform="translate(256,256)" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="0" cy="-64" r="40"/>
+    <path d="M80,-64 C80,24 40,52 0,72 C-40,52 -80,24 -80,-64" stroke-width="10"/>
+    <path d="M-20,80 L-20,120 L20,120 L20,80" stroke-width="8"/>
+    <circle cx="0" cy="-160" r="10" fill="#FFFFFF" opacity="0.5"/>
+    <circle cx="-70" cy="-120" r="8" fill="#FFFFFF" opacity="0.3"/>
+    <circle cx="70" cy="-120" r="8" fill="#FFFFFF" opacity="0.3"/>
+    <!-- Sparkle dots -->
+    <circle cx="-100" cy="-160" r="5" fill="#FFFFFF" opacity="0.4"/>
+    <circle cx="100" cy="-160" r="5" fill="#FFFFFF" opacity="0.4"/>
+    <circle cx="0" cy="-200" r="5" fill="#FFFFFF" opacity="0.3"/>
+  </g>
+</svg>

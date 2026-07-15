@@ -78,11 +78,17 @@ export default function AiUsageDashboard({ analytics }) {
 
   const trendData = useMemo(() => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    return months.map((month, i) => ({
-      name: month,
-      requests: Math.round((data?.total || 100) * (0.1 + Math.random() * 0.2) * (i + 1)),
-      success: Math.round((data?.successful || 80) * (0.1 + Math.random() * 0.2) * (i + 1)),
-    }));
+    // Distribute total requests across months with realistic growth curve
+    const total = data?.total || 0;
+    const successful = data?.successful || 0;
+    return months.map((month, i) => {
+      const monthWeight = (i + 1) / 21; // Sum(1..6) = 21
+      return {
+        name: month,
+        requests: Math.round(total * monthWeight),
+        success: Math.round(successful * monthWeight),
+      };
+    });
   }, [data]);
 
   if (loading) {
@@ -146,8 +152,7 @@ export default function AiUsageDashboard({ analytics }) {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-        {/* Provider Usage */}
-        <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+        {/* Provider Usage */}            <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4 border border-slate-200 dark:border-white/10">
           <h4 className="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-1.5">
             <Server size={12} /> Provider Distribution
           </h4>
@@ -163,8 +168,7 @@ export default function AiUsageDashboard({ analytics }) {
           )}
         </div>
 
-        {/* Feature Usage */}
-        <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+        {/* Feature Usage */}            <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4 border border-slate-200 dark:border-white/10">
           <h4 className="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-1.5">
             <BarChart3 size={12} /> Top Features
           </h4>
@@ -213,8 +217,7 @@ export default function AiUsageDashboard({ analytics }) {
       </div>
 
       {/* Cost & Success Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">            <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4 border border-slate-200 dark:border-white/10">
           <h4 className="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-1.5">
             <DollarSign size={12} /> Cost Analysis
           </h4>
@@ -238,8 +241,7 @@ export default function AiUsageDashboard({ analytics }) {
             </div>
           </div>
         </div>
-
-        <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+            <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4 border border-slate-200 dark:border-white/10">
           <h4 className="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-1.5">
             <Activity size={12} /> Performance
           </h4>

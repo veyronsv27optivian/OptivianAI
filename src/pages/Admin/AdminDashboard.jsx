@@ -132,8 +132,8 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-          <p className="text-slate-500 mt-1 text-sm">Manage team members, roles, and permissions</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Admin Dashboard</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Manage team members, roles, and permissions</p>
         </div>
         {canManage && (
           <button
@@ -168,35 +168,34 @@ export default function AdminDashboard() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by name or email..."
-          className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+          className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
         />
       </div>
 
       {/* Members Table */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white dark:dark-card-metallic border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
         {loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
             <p className="text-sm text-slate-500">Loading team members...</p>
           </div>
-        ) : filteredMembers.length === 0 ? (
-          <div className="p-12 text-center">
-            <Users size={36} className="text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">No team members found</p>
-            <p className="text-sm text-slate-400 mt-1">
+        ) : filteredMembers.length === 0 ? (            <div className="p-12 text-center">
+            <Users size={36} className="text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <p className="text-slate-500 dark:text-slate-400 font-medium">No team members found</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
               {canManage ? 'Invite your first team member to get started' : 'Ask your admin to add team members'}
             </p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
             {/* Header */}
-            <div className="hidden md:grid md:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">
+            <div className="hidden md:grid md:grid-cols-12 gap-4 px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-white/[0.03]">
               <div className="md:col-span-3">Member</div>
               <div className="md:col-span-2">Role</div>
               <div className="md:col-span-2">Provider</div>
@@ -209,7 +208,7 @@ export default function AdminDashboard() {
               return (
                 <div
                   key={member.id || member.profileId}
-                  className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 px-6 py-4 hover:bg-slate-50 transition-colors items-center"
+                  className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors items-center"
                 >
                   {/* Member info */}
                   <div className="md:col-span-3 flex items-center gap-3">
@@ -221,10 +220,10 @@ export default function AdminDashboard() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                         {member.full_name || member.email?.split('@')[0] || 'Unknown'}
                       </p>
-                      <p className="text-xs text-slate-400 truncate">{member.email}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{member.email}</p>
                     </div>
                   </div>
 
@@ -234,7 +233,7 @@ export default function AdminDashboard() {
                       <select
                         value={member.role}
                         onChange={(e) => handleRoleChange(member, e.target.value)}
-                        className="appearance-none px-3 py-1.5 pr-8 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        className="appearance-none px-3 py-1.5 pr-8 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                       >
                         {availableRoles.map(r => (
                           <option key={r} value={r}>{getRoleInfo(r).label}</option>
@@ -249,7 +248,7 @@ export default function AdminDashboard() {
 
                   {/* Provider */}
                   <div className="md:col-span-2">
-                    <span className="text-xs text-slate-500 capitalize">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 capitalize">
                       {member.provider || 'email'}
                     </span>
                   </div>
@@ -257,12 +256,12 @@ export default function AdminDashboard() {
                   {/* Status */}
                   <div className="md:col-span-2">
                     {member.is_suspended ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs text-red-700 bg-red-50 px-2.5 py-1 rounded-lg font-medium">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 px-2.5 py-1 rounded-lg font-medium">
                         <Ban size={12} />
                         Suspended
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg font-medium">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-lg font-medium">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         Active
                       </span>
@@ -280,8 +279,8 @@ export default function AdminDashboard() {
                           }}
                           className={`p-2 rounded transition-all ${
                             member.is_suspended
-                              ? 'text-emerald-600 hover:bg-emerald-50'
-                              : 'text-amber-600 hover:bg-amber-50'
+                              ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                              : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
                           }`}
                           title={member.is_suspended ? 'Unsuspend' : 'Suspend'}
                         >
@@ -292,7 +291,7 @@ export default function AdminDashboard() {
                             setMemberToAction(member);
                             setShowRemoveModal(true);
                           }}
-                          className="p-2 rounded text-red-600 hover:bg-red-50 transition-all"
+                          className="p-2 rounded text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                           title="Remove member"
                         >
                           <X size={16} />
@@ -310,47 +309,46 @@ export default function AdminDashboard() {
       {/* Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-slate-200">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-glass-lg dark:shadow-glass-xl" onClick={(e) => e.stopPropagation()}>              <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-600">
                   <UserPlus size={20} className="text-white" />
                 </div>
-                <h2 className="text-base font-semibold text-slate-900">Invite Team Member</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Invite Team Member</h2>
               </div>
               <button onClick={() => { setShowInviteModal(false); setActionError(''); }}
-                className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all">
+                className="p-1.5 rounded text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
                 <X size={20} />
               </button>
             </div>
 
             <form onSubmit={handleInvite} className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
                 <input
                   type="email"
                   required
                   value={inviteForm.email}
                   onChange={(e) => setInviteForm(p => ({ ...p, email: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                   placeholder="colleague@company.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Temporary Password</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Temporary Password</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     required
                     value={inviteForm.password}
                     onChange={(e) => setInviteForm(p => ({ ...p, password: e.target.value }))}
-                    className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setInviteForm(p => ({ ...p, password: generateTempPassword() }))}
-                    className="px-3 py-2.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all text-sm font-medium"
+                    className="px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all text-sm font-medium"
                     title="Generate new password"
                   >
                     <Key size={16} />
@@ -360,11 +358,11 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Role</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Role</label>
                 <select
                   value={inviteForm.role}
                   onChange={(e) => setInviteForm(p => ({ ...p, role: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                 >
                   {availableRoles.map(r => (
                     <option key={r} value={r}>{getRoleInfo(r).label}</option>
@@ -373,8 +371,8 @@ export default function AdminDashboard() {
               </div>
 
               {actionError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-700">{actionError}</p>
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-700 dark:text-red-300">{actionError}</p>
                 </div>
               )}
 
@@ -382,7 +380,7 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => { setShowInviteModal(false); setActionError(''); }}
-                  className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-all text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
                 >
                   Cancel
                 </button>
@@ -411,24 +409,23 @@ export default function AdminDashboard() {
               <div className="mx-auto w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center mb-4">
                 <AlertCircle size={24} className="text-white" />
               </div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Remove Team Member?</h2>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Remove Team Member?</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                 Are you sure you want to remove{' '}
-                <span className="text-slate-900 font-medium">{memberToAction.full_name || memberToAction.email}</span>?
+                <span className="text-slate-900 dark:text-slate-100 font-medium">{memberToAction.full_name || memberToAction.email}</span>?
                 This action cannot be undone.
               </p>
             </div>
             <div className="flex gap-3 px-6 pb-6">
               <button
-                onClick={() => { setShowRemoveModal(false); setMemberToAction(null); }}
-                className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-all text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRemove}
-                disabled={actionLoading}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-50 text-sm"
+                onClick={() => { setShowRemoveModal(false); setMemberToAction(null); }}                  className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRemove}
+                  disabled={actionLoading}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-50 text-sm"
               >
                 {actionLoading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -451,10 +448,10 @@ export default function AdminDashboard() {
               }`}>
                 {memberToAction.is_suspended ? <ShieldOff size={24} className="text-white" /> : <Ban size={24} className="text-white" />}
               </div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
                 {memberToAction.is_suspended ? 'Unsuspend' : 'Suspend'} Team Member?
               </h2>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                 {memberToAction.is_suspended
                   ? `Reactivate ${memberToAction.full_name || memberToAction.email}'s access?`
                   : `This will prevent ${memberToAction.full_name || memberToAction.email} from accessing the workspace.`

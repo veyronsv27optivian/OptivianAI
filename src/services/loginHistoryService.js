@@ -23,40 +23,6 @@ function uid() {
 }
 
 /**
- * Seed mock login history data for DEV_MODE.
- */
-function ensureDevSeeds(userId) {
-  const events = devGet();
-  if (events.length > 0) return events;
-
-  const now = Date.now();
-  const providers = ['email', 'google', 'github', 'microsoft'];
-  const devices = [
-    'Chrome 121 / Windows 10',
-    'Safari 17 / macOS 14',
-    'Firefox 123 / Windows 11',
-    'Chrome 120 / Android 14',
-    'Edge 122 / Windows 10',
-  ];
-
-  for (let i = 0; i < 25; i++) {
-    const success = Math.random() > 0.15;
-    events.push({
-      id: uid(),
-      user_id: userId,
-      provider: providers[Math.floor(Math.random() * providers.length)],
-      ip_address: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-      user_agent: devices[Math.floor(Math.random() * devices.length)],
-      success,
-      failure_reason: success ? null : 'Invalid password',
-      created_at: new Date(now - i * Math.random() * 86400000 * 3).toISOString(),
-    });
-  }
-  devSet(events);
-  return events;
-}
-
-/**
  * Fetch login history for the current user.
  *
  * @param {string} userId - The user's auth ID.
@@ -78,7 +44,7 @@ export async function getLoginHistory(userId, options = {}) {
   } = options;
 
   if (DEV_MODE) {
-    const events = ensureDevSeeds(userId)
+    const events = devGet()
       .filter(e => e.user_id === userId)
       .sort((a, b) => ascending
         ? new Date(a[orderBy]) - new Date(b[orderBy])

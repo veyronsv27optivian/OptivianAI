@@ -93,9 +93,9 @@ export default function NotificationCenter({
             animate={{ opacity: 1 }}
             className="flex flex-col items-center py-8"
           >
-            <Bell size={32} className="text-slate-300 mb-2" />
-            <p className="text-sm text-slate-400">No notifications</p>
-            <p className="text-xs text-slate-300 mt-1">You're all caught up!</p>
+            <Bell size={32} className="text-slate-300 dark:text-slate-600 mb-2" />
+            <p className="text-sm text-slate-400 dark:text-slate-500">No notifications</p>
+            <p className="text-xs text-slate-300 dark:text-slate-600 mt-1">You're all caught up!</p>
           </motion.div>
         ) : (
           <div className="space-y-1">
@@ -121,15 +121,15 @@ export default function NotificationCenter({
                       className={`flex items-start gap-3 p-3 rounded-lg transition-all ${
                         !n.read
                           ? 'bg-primary/5 border-l-2 border-l-primary'
-                          : 'hover:bg-slate-50 border-l-2 border-l-transparent'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 border-l-2 border-l-transparent'
                       }`}
                     >
                       <div className={`p-1.5 rounded-lg shrink-0 ${config.color}`}>
                         <Icon size={12} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs text-slate-700 leading-relaxed">{n.message}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">{timeAgo(n.created_at)}</p>
+                        <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{n.message}</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{timeAgo(n.created_at)}</p>
                       </div>
                       {!n.read && (
                         <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5" />
@@ -146,7 +146,7 @@ export default function NotificationCenter({
       {notifications.length > 5 && (
         <button
           onClick={() => navigate('/app/tasks')}
-          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all"
+          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
         >
           View all {notifications.length} notifications <ArrowRight size={12} />
         </button>

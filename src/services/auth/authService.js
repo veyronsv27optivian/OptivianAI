@@ -66,10 +66,15 @@ export async function signInWithOAuth(provider) {
     return { data: null, error: { message: `Unknown OAuth provider: ${provider}` } };
   }
 
+  // IMPORTANT: redirectTo must point to the bare origin (no hash path) so that
+  // the OAuth tokens arrive in the URL hash fragment. HashRouter will consume
+  // the hash for routing, so App.jsx has a pre-router guard that detects
+  // OAuth callbacks and defers mounting the router until Supabase finishes
+  // processing the tokens.
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: oauthConfig.provider,
     options: {
-      redirectTo: `${window.location.origin}/app`,
+      redirectTo: `${window.location.origin}`,
       queryParams: provider === 'microsoft' ? {
         tenant: 'common',
       } : undefined,

@@ -22,8 +22,11 @@ export class DeepSeekProvider extends BaseProvider {
    */
   constructor(config = {}) {
     const cfg = PROVIDER_CONFIGS[AI_PROVIDERS.DEEPSEEK];
+    // Try specific key first, then shared OpenRouter key, then empty
+    const specificKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+    const sharedKey = import.meta.env.VITE_OPENROUTER_API_KEY;
     super({
-      apiKey: config.apiKey || import.meta.env.VITE_DEEPSEEK_API_KEY || '',
+      apiKey: config.apiKey || specificKey || sharedKey || '',
       model: config.model || import.meta.env.VITE_DEEPSEEK_MODEL || cfg.defaultModel,
       endpoint: cfg.endpoint,
       timeout: config.timeout,

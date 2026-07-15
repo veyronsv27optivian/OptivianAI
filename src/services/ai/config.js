@@ -27,15 +27,8 @@ export const AI_TOOL_TYPES = {
   RISK_DETECTION: 'risk_detection',
   LAUNCH_READINESS: 'launch_readiness',
   SOCIAL_ANALYSIS: 'social_analysis',
-  STRATEGY_REPORT: 'strategy_report',
   COMPETITIVE_ANALYSIS: 'competitive_analysis',
-  MARKET_RESEARCH: 'market_research',
-  CONTENT_GENERATION: 'content_generation',
-  PERFORMANCE_ANALYSIS: 'performance_analysis',
-  PREDICTIVE_ANALYTICS: 'predictive_analytics',
   REPORT_GENERATION: 'report_generation',
-  DATA_EXTRACTION: 'data_extraction',
-  SUMMARIZATION: 'summarization',
   // ── New tools ──────────────────────────────────────────────
   BUSINESS_PLAN: 'business_plan',
   SALES_ADVISOR: 'sales_advisor',
@@ -61,17 +54,59 @@ export const AI_TOOL_TYPES = {
   WEBSITE_ANALYZER: 'website_analyzer',
   YOUTUBE_ANALYZER: 'youtube_analyzer',
 
-  // ── Direct tool type names (used by prompt resolution) ────
-  SWOT_ANALYSIS: 'swot_analysis',
-  FINANCIAL_FORECAST: 'financial_forecast',
-  FUTURE_LAB: 'future_lab',
-  MARKETING_STRATEGY: 'marketing_strategy',
-  MEETING_NOTES: 'meeting_notes',
-  DOCUMENT_ANALYZER: 'document_analyzer',
+  // ── Role-Specific AI Assistants (Phase 9B, Items 91-99) ──
+  EXECUTIVE_AI: 'executive_ai',
+  MANAGER_AI: 'manager_ai',
+  EMPLOYEE_AI: 'employee_ai',
+  FINANCE_AI: 'finance_ai',
+  HR_SPECIFIC_AI: 'hr_specific_ai',
+  MARKETING_SPECIFIC_AI: 'marketing_ai',
+  SALES_SPECIFIC_AI: 'sales_ai',
+  OPERATIONS_AI: 'operations_ai',
+  TECHNICAL_AI: 'technical_ai',
+
+  // ── Phase 9C: AI Project Orchestration (Items 101-108) ──
+  INTELLIGENT_DELEGATION: 'intelligent_delegation',
+  DECISION_SUPPORT: 'decision_support',
+  RISK_DETECTION_AI: 'risk_detection_ai',
+  EXECUTIVE_INSIGHTS: 'executive_insights',
+  ORG_HEALTH_ENGINE: 'org_health_engine',
+  CROSS_DEPT_INTELLIGENCE: 'cross_dept_intelligence',
+
+  // ── Phase 9C Extension: Full Orchestration (Items 100, 102, 106) ──
+  AI_PROJECT_ORCHESTRATION: 'ai_project_orchestration',
+  WORKFLOW_AUTOMATION: 'workflow_automation',
+  PREDICTIVE_ANALYTICS_TOOL: 'predictive_analytics_tool',
+
+  // ── Direct / canonical tool type names (used by prompt resolution) ──
+  // These are the canonical internal names. The UI in AI.jsx and
+  // ToolRecommender uses alias names (STRATEGY_REPORT, PERFORMANCE_ANALYSIS,
+  // etc.) that get mapped to these through _resolvePromptModule in aiService.js.
+  // This dual-key pattern allows the same tool to be accessed by both its
+  // alias (UI-facing) and canonical (internal) name without duplication.
+  SWOT_ANALYSIS: 'swot_analysis',               // Alias: STRATEGY_REPORT
+  FINANCIAL_FORECAST: 'financial_forecast',      // Alias: PERFORMANCE_ANALYSIS
+  FUTURE_LAB: 'future_lab',                      // Alias: PREDICTIVE_ANALYTICS
+  MARKETING_STRATEGY: 'marketing_strategy',      // Alias: CONTENT_GENERATION
+  MEETING_NOTES: 'meeting_notes',                // Alias: SUMMARIZATION
+  DOCUMENT_ANALYZER: 'document_analyzer',         // Alias: DATA_EXTRACTION — generic fallback, prefer specific (pdf, word, excel, csv, ppt)
   PITCH_DECK_ASSISTANT: 'pitch_deck_assistant',
 };
 
 // ─── Provider configuration ──────────────────────────────────────
+//
+// Each provider defines:
+//   name             — Display name
+//   endpoint         — API endpoint URL
+//   envKey           — Primary env var for API key
+//   fallbackEnvKey   — Shared fallback env var (VITE_OPENROUTER_API_KEY)
+//   envModel         — Env var for model override
+//   defaultModel     — Fallback model if env var is not set
+//   supportsStreaming — Whether streaming is supported
+//   supportsVision   — Whether vision/image analysis is supported
+//   isDefault        — Whether this is the default provider
+//   priority         — Fallback order (1 = tried first)
+//
 
 export const PROVIDER_CONFIGS = {
   [AI_PROVIDERS.GEMINI]: {
@@ -105,12 +140,12 @@ export const PROVIDER_CONFIGS = {
     supportsStreaming: true,
     supportsVision: true,
     isDefault: false,
-    priority: 3,     // final fallback
+    priority: 3,     // fallback after DeepSeek
   },
   [AI_PROVIDERS.OPENAI_VIA_OPENROUTER]: {
     name: 'OpenAI',
     endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-    envKey: 'VITE_DEEPSEEK_API_KEY',
+    envKey: 'VITE_OPENROUTER_API_KEY',
     envModel: 'VITE_OPENROUTER_OPENAI_MODEL',
     defaultModel: 'openai/gpt-4o-mini',
     supportsStreaming: true,
@@ -175,58 +210,16 @@ export const AI_TOOL_REGISTRY = {
     description: 'Analyze social media presence and strategy',
     requiredCapabilities: ['text', 'vision'],
   },
-  [AI_TOOL_TYPES.STRATEGY_REPORT]: {
-    id: AI_TOOL_TYPES.STRATEGY_REPORT,
-    label: 'Strategy Report',
-    description: 'Generate comprehensive strategy reports',
-    requiredCapabilities: ['text'],
-  },
   [AI_TOOL_TYPES.COMPETITIVE_ANALYSIS]: {
     id: AI_TOOL_TYPES.COMPETITIVE_ANALYSIS,
     label: 'Competitive Analysis',
     description: 'Analyze competitive landscape and positioning',
     requiredCapabilities: ['text'],
   },
-  [AI_TOOL_TYPES.MARKET_RESEARCH]: {
-    id: AI_TOOL_TYPES.MARKET_RESEARCH,
-    label: 'Market Research',
-    description: 'Research market trends and opportunities',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.CONTENT_GENERATION]: {
-    id: AI_TOOL_TYPES.CONTENT_GENERATION,
-    label: 'Content Generation',
-    description: 'Generate marketing copy, emails, and content',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.PERFORMANCE_ANALYSIS]: {
-    id: AI_TOOL_TYPES.PERFORMANCE_ANALYSIS,
-    label: 'Performance Analysis',
-    description: 'Analyze business performance metrics',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.PREDICTIVE_ANALYTICS]: {
-    id: AI_TOOL_TYPES.PREDICTIVE_ANALYTICS,
-    label: 'Predictive Analytics',
-    description: 'Forecast trends and outcomes',
-    requiredCapabilities: ['text'],
-  },
   [AI_TOOL_TYPES.REPORT_GENERATION]: {
     id: AI_TOOL_TYPES.REPORT_GENERATION,
     label: 'Report Generation',
     description: 'Auto-generate structured reports',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.DATA_EXTRACTION]: {
-    id: AI_TOOL_TYPES.DATA_EXTRACTION,
-    label: 'Data Extraction',
-    description: 'Extract structured data from text',
-    requiredCapabilities: ['text'],
-  },
-  [AI_TOOL_TYPES.SUMMARIZATION]: {
-    id: AI_TOOL_TYPES.SUMMARIZATION,
-    label: 'Summarization',
-    description: 'Summarize lengthy content',
     requiredCapabilities: ['text'],
   },
   // ── New Tool Registrations ─────────────────────────────────
@@ -412,6 +405,120 @@ export const AI_TOOL_REGISTRY = {
     description: 'Create and refine investor pitch decks',
     requiredCapabilities: ['text'],
   },
+
+  // ── Role-Specific AI Assistants (Phase 9B) ───────────────────
+  [AI_TOOL_TYPES.EXECUTIVE_AI]: {
+    id: AI_TOOL_TYPES.EXECUTIVE_AI,
+    label: 'Executive AI',
+    description: 'Virtual Chief Executive Advisor — strategy, market dynamics, org health',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.MANAGER_AI]: {
+    id: AI_TOOL_TYPES.MANAGER_AI,
+    label: 'Manager AI',
+    description: 'Operations strategist & team coach — bottlenecks, resources, productivity',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.EMPLOYEE_AI]: {
+    id: AI_TOOL_TYPES.EMPLOYEE_AI,
+    label: 'Employee AI',
+    description: 'Personal workplace assistant — tasks, schedule, documents, collaboration',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.FINANCE_AI]: {
+    id: AI_TOOL_TYPES.FINANCE_AI,
+    label: 'Finance AI',
+    description: 'Financial advisor — budgets, forecasts, cost optimization, investment insights',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.HR_SPECIFIC_AI]: {
+    id: AI_TOOL_TYPES.HR_SPECIFIC_AI,
+    label: 'HR AI',
+    description: 'HR assistant — recruitment, performance reviews, satisfaction analysis',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.MARKETING_SPECIFIC_AI]: {
+    id: AI_TOOL_TYPES.MARKETING_SPECIFIC_AI,
+    label: 'Marketing AI',
+    description: 'Marketing strategist — campaigns, content strategy, brand health',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.SALES_SPECIFIC_AI]: {
+    id: AI_TOOL_TYPES.SALES_SPECIFIC_AI,
+    label: 'Sales AI',
+    description: 'Sales assistant — pipeline optimization, lead scoring, forecasting',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.OPERATIONS_AI]: {
+    id: AI_TOOL_TYPES.OPERATIONS_AI,
+    label: 'Operations AI',
+    description: 'Operations analyst — workflow efficiency, resource allocation',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.TECHNICAL_AI]: {
+    id: AI_TOOL_TYPES.TECHNICAL_AI,
+    label: 'Technical AI',
+    description: 'Technical architect — infrastructure monitoring, security, system health',
+    requiredCapabilities: ['text'],
+  },
+
+  // ── Phase 9C: AI Project Orchestration ───────────────────
+  [AI_TOOL_TYPES.INTELLIGENT_DELEGATION]: {
+    id: AI_TOOL_TYPES.INTELLIGENT_DELEGATION,
+    label: 'Intelligent Task Delegation',
+    description: 'AI assigns tasks based on skills, workload, and availability',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.DECISION_SUPPORT]: {
+    id: AI_TOOL_TYPES.DECISION_SUPPORT,
+    label: 'AI Decision Support',
+    description: 'AI presents options with probability analysis for executive decisions',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.RISK_DETECTION_AI]: {
+    id: AI_TOOL_TYPES.RISK_DETECTION_AI,
+    label: 'AI Risk Detection',
+    description: 'Proactive identification of project, financial, and operational risks',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.EXECUTIVE_INSIGHTS]: {
+    id: AI_TOOL_TYPES.EXECUTIVE_INSIGHTS,
+    label: 'Executive Insights Engine',
+    description: 'AI distills complex data into actionable executive summaries',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.ORG_HEALTH_ENGINE]: {
+    id: AI_TOOL_TYPES.ORG_HEALTH_ENGINE,
+    label: 'Organization Health Engine',
+    description: 'Real-time composite score across departments, projects, and people',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.CROSS_DEPT_INTELLIGENCE]: {
+    id: AI_TOOL_TYPES.CROSS_DEPT_INTELLIGENCE,
+    label: 'Cross-Department Intelligence',
+    description: 'AI identifies synergies and friction points between departments',
+    requiredCapabilities: ['text'],
+  },
+
+  // ── Phase 9C Extension: Full Orchestration ───────────────────
+  [AI_TOOL_TYPES.AI_PROJECT_ORCHESTRATION]: {
+    id: AI_TOOL_TYPES.AI_PROJECT_ORCHESTRATION,
+    label: 'AI Project Orchestration',
+    description: 'Full workflow: objective → plan → assign → monitor execution',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.WORKFLOW_AUTOMATION]: {
+    id: AI_TOOL_TYPES.WORKFLOW_AUTOMATION,
+    label: 'Workflow Automation',
+    description: 'AI automates repetitive business processes across departments',
+    requiredCapabilities: ['text'],
+  },
+  [AI_TOOL_TYPES.PREDICTIVE_ANALYTICS_TOOL]: {
+    id: AI_TOOL_TYPES.PREDICTIVE_ANALYTICS_TOOL,
+    label: 'Predictive Analytics',
+    description: 'AI forecasts trends, revenue, and resource needs',
+    requiredCapabilities: ['text'],
+  },
 };
 
 // ─── Default generation parameters ───────────────────────────────
@@ -434,6 +541,10 @@ export const ENV_KEYS = {
   QWEN_API_KEY: 'VITE_QWEN_API_KEY',
   QWEN_MODEL: 'VITE_QWEN_MODEL',
   OPENROUTER_OPENAI_MODEL: 'VITE_OPENROUTER_OPENAI_MODEL',
+  OPENROUTER_API_KEY: 'VITE_OPENROUTER_API_KEY',
   OPENROUTER_REFERRER: 'VITE_OPENROUTER_REFERRER',
   OPENROUTER_TITLE: 'VITE_OPENROUTER_TITLE',
+
+  // ── CORS Proxy (for Website & YouTube analyzers) ──────────
+  CORS_PROXY_URL: 'VITE_CORS_PROXY_URL',
 };

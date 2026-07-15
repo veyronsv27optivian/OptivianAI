@@ -10,7 +10,9 @@ import { useAuth } from '../../services/AuthContext';
 import { getRoleInfo } from '../../services/auth/roles';
 import { getLoginHistory, getLoginHistoryStats } from '../../services/loginHistoryService';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useToast } from '../../components/ui/Toast';
 import MfaSetup from './MfaSetup';
+import SessionsPage from './SessionsPage';
 
 export default function Settings() {
   const { user, profile, signOut, isDevMode, updatePassword, updateProfile, uploadAvatar } = useAuth();
@@ -32,6 +34,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const toast = useToast();
 
   // Sync from profile
   useEffect(() => {
@@ -79,10 +82,12 @@ export default function Settings() {
       });
       if (error) throw error;
       setPasswordSuccess('Password updated successfully!');
+      toast({ type: 'success', title: 'Password updated', message: 'Your password has been changed successfully.' });
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
       setPasswordError(err.message || 'Failed to update password');
+      toast({ type: 'error', title: 'Password failed', message: err.message || 'Failed to update password' });
     } finally {
       setPasswordLoading(false);
     }
@@ -99,9 +104,11 @@ export default function Settings() {
       });
       if (error) throw error;
       setSaved(true);
+      toast({ type: 'success', title: 'Profile saved', message: 'Your profile has been updated successfully.' });
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       setSaveError(err.message || 'Failed to update profile');
+      toast({ type: 'error', title: 'Save failed', message: err.message || 'Failed to update profile' });
     } finally {
       setSaving(false);
     }
@@ -115,8 +122,10 @@ export default function Settings() {
       const { data, error } = await uploadAvatar(file);
       if (error) throw error;
       setAvatarUrl(data.url);
+      toast({ type: 'success', title: 'Avatar updated', message: 'Profile picture changed successfully.' });
     } catch (err) {
       setSaveError(err.message || 'Failed to upload avatar');
+      toast({ type: 'error', title: 'Upload failed', message: err.message || 'Failed to upload avatar' });
     }
     setUploadingAvatar(false);
     e.target.value = '';
@@ -131,6 +140,7 @@ export default function Settings() {
     { id: 'security', label: 'Password', icon: Key },
     { id: '2fa', label: 'Two-Factor Auth', icon: ShieldCheck },
     { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'sessions', label: 'Sessions', icon: Monitor },
     { id: 'organization', label: 'Organization', icon: Building2 },
     { id: 'login-history', label: 'Login History', icon: History },
   ];
@@ -180,7 +190,7 @@ export default function Settings() {
           {activeTab === 'profile' && (
             <div className="space-y-6">
               {/* Avatar section */}
-              <div className="flex items-center gap-4 pb-6 border-b border-slate-200">
+              <div className="flex items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-700/50">
                 <div className="relative shrink-0">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-lg object-cover ring-2 ring-slate-100" />
@@ -192,11 +202,11 @@ export default function Settings() {
                   <button
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={uploadingAvatar}
-                    className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
+                    className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all disabled:opacity-50"
                     title="Change photo"
                   >
                     {uploadingAvatar ? (
-                      <div className="w-3 h-3 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
+                      <div className="w-3 h-3 border-2 border-slate-300 dark:border-slate-600 border-t-blue-500 rounded-full animate-spin" />
                     ) : (
                       <Camera size={13} />
                     )}
@@ -253,7 +263,7 @@ export default function Settings() {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                    className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                     placeholder="+1 (555) 000-0000"
                   />
                 </div>
@@ -266,7 +276,7 @@ export default function Settings() {
                     type="text"
                     value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                    className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                     placeholder="e.g. Senior Developer"
                   />
                 </div>
@@ -305,7 +315,7 @@ export default function Settings() {
           {activeTab === 'security' && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">Change Password</h2>                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Update your password regularly to keep your account secure.</p>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Change Password</h2>                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Update your password regularly to keep your account secure.</p>
               </div>
 
               <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
@@ -408,8 +418,8 @@ export default function Settings() {
           {/* ── Organization Tab ── */}
           {activeTab === 'organization' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-slate-900">Organization Info</h2>
-              <p className="text-sm text-slate-500">Your organization details and membership.</p>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Organization Info</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Your organization details and membership.</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -420,7 +430,7 @@ export default function Settings() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Provider</label>
-                  <div className="px-3 py-2 rounded-lg bg-slate-50 text-sm text-slate-600 capitalize">
+                  <div className="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-sm text-slate-600 dark:text-slate-400 capitalize">
                     {profile?.provider || user?.app_metadata?.provider || 'email'}
                   </div>
                 </div>
@@ -429,7 +439,7 @@ export default function Settings() {
                     <Clock size={14} className="inline mr-1" />
                     Last Login
                   </label>
-                  <div className="px-3 py-2 rounded-lg bg-slate-50 text-sm text-slate-600">
+                  <div className="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-sm text-slate-600 dark:text-slate-400">
                     {profile?.last_login ? new Date(profile.last_login).toLocaleString() : 'N/A'}
                   </div>
                 </div>
@@ -453,6 +463,9 @@ export default function Settings() {
           {/* ── Notifications Tab ── */}
           {activeTab === 'notifications' && <NotificationPreferences />}
 
+          {/* ── Sessions Tab (Item 67) ── */}
+          {activeTab === 'sessions' && <SessionsPage />}
+
           {/* ── Login History Tab ── */}
           {activeTab === 'login-history' && <LoginHistoryView userId={user?.id} />}
         </div>
@@ -474,6 +487,7 @@ function NotificationPreferences() {
     task_overdue: true,
     chat_messages: true,
     ai_reports: false,
+    daily_digest: false,
     weekly_digest: false,
     mentions_only: false,
   };
@@ -510,6 +524,7 @@ function NotificationPreferences() {
     const { error } = await updateProfile({ notification_preferences: prefs });
     if (!error) {
       setSaved(true);
+      toast({ type: 'success', title: 'Preferences saved', message: 'Notification preferences updated.' });
       setTimeout(() => setSaved(false), 2000);
     }
     setSaving(false);
@@ -542,6 +557,7 @@ function NotificationPreferences() {
       title: 'AI & Reports',
       items: [
         { key: 'ai_reports', label: 'AI Report Ready', desc: 'When an AI analysis report is ready', icon: Shield },
+        { key: 'daily_digest', label: 'Daily Digest Email', desc: 'Daily summary of tasks due, overdue, and unread messages', icon: Mail },
         { key: 'weekly_digest', label: 'Weekly Digest', desc: 'Weekly summary of activity', icon: RefreshCw },
       ],
     },
@@ -726,7 +742,7 @@ function LoginHistoryView({ userId }) {
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all disabled:opacity-50"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           Refresh

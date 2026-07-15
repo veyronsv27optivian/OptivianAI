@@ -419,6 +419,92 @@ export function registerDefaultActions() {
     requiresApproval: false,
     safetyLevel: 'low',
   });
+
+  // ── Phase C3: Admin Actions ────────────────────────────────────
+
+  registerAction({
+    toolType: '*',
+    actionName: 'generate_report',
+    label: 'Generate & Send Report',
+    description: 'Generate an AI report and optionally email or share it with team members',
+    handler: async (params, context) => {
+      const user = context.user;
+      if (!user) throw new Error('User context required');
+      const { generateText } = await import('../aiService');
+      const result = await generateText('report_generation', params.prompt || params.topic, {
+        systemPrompt: `Generate a detailed ${params.reportType || 'business'} report. Title: ${params.title || 'Untitled'}. Include executive summary, key findings, data analysis, and recommendations.`,
+        skipLogging: false,
+        useCache: false,
+      });
+      // Share result if conversationId provided
+      if (params.shareWith && params.conversationId) {
+        const { sendMessage } = await import('../../chatService');
+        await sendMessage(user, params.conversationId, `**Report: ${params.title || 'AI Report'}**\n\n${result.text.slice(0, 60000)}`, {});
+      }
+      return { text: result.text, provider: result.provider, reportType: params.reportType || 'business' };
+    },
+    requiresApproval: true,
+    safetyLevel: 'low',
+  });
+
+  registerAction({
+    toolType: '*',
+    actionName: 'suggest_provisioning',
+    label: 'Suggest User Provisioning',
+    description: 'Analyze team workload and suggest new roles or hiring needs',
+    handler: async (params, context) => {
+      const user = context.user;
+      if (!user) throw new Error('User context required');
+      const { getTasks } = await import('../../taskService');
+      const tasks = await getTasks(user);
+      const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done').length;
+      const totalTasks = tasks.length;
+      const workloadScore = totalTasks > 0 ? Math.round((overdue / totalTasks) * 100) : 0;
+      const suggestion = {
+        suggestedRoles: workloadScore > 30 ? ['additional_staff', 'project_manager'] : [],
+        workloadScore,
+        totalTasks,
+        overdueTasks: overdue,
+        analysis: workloadScore > 30
+          ? `Team is at ${workloadScore}% overdue rate. Consider hiring additional staff or reallocating resources.`
+          : `Team workload is manageable (${workloadScore}% overdue rate). No urgent hiring needed.`,
+      };
+      return suggestion;
+    },
+    requiresApproval: true,
+    safetyLevel: 'medium',
+  });
+
+  registerAction({
+    toolType: '*',
+    actionName: 'cleanup_data',
+    label: 'Data Cleanup Automation',
+    description: 'Archive old completed tasks that are past the retention period',
+    handler: async (params, context) => {
+      const user = context.user;
+      if (!user) throw new Error('User context required');
+      const cleaned = { tasks: 0 };
+      const cutoff = new Date(Date.now() - (params.olderThanDays || 90) * 24 * 60 * 60 * 1000);
+
+      // Clean completed tasks older than cutoff
+      const { getTasks, updateTask } = await import('../../taskService');
+      const tasks = await getTasks(user);
+      for (const t of tasks) {
+        if ((t.status === 'done' || t.status === 'cancelled') && new Date(t.updated_at || t.created_at) < cutoff) {
+          await updateTask(user, t.id, { status: 'archived' });
+          cleaned.tasks++;
+        }
+      }
+
+      return {
+        archivedTasks: cleaned.tasks,
+        olderThanDays: params.olderThanDays || 90,
+        message: `Archived ${cleaned.tasks} completed task${cleaned.tasks !== 1 ? 's' : ''} older than ${params.olderThanDays || 90} days.`,
+      };
+    },
+    requiresApproval: true,
+    safetyLevel: 'medium',
+  });
 }
 
 // ─── Auto-register on import ─────────────────────────────────────

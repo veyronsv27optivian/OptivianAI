@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { createNotification } from './notificationService';
+import { sendNotificationEmail, isEmailConfigured } from './emailService';
 
 // ──────────────────────────────────────────────
 // Dev mode localStorage helpers
@@ -216,6 +217,14 @@ export async function createTask(user, taskData) {
         if (ap?.user_id) {
           createNotification(ap.user_id, 'task_assigned', `You have been assigned to: "${newTask.title}"`, 'task', newTask.id);
         }
+        if (ap?.email && isEmailConfigured()) {
+          sendNotificationEmail('task_assigned', ap.email, {
+            taskTitle: newTask.title,
+            assigneeName: ap.full_name || ap.email?.split('@')[0] || 'User',
+            dueDate: newTask.due_date,
+            taskUrl: `${window.location.origin}/#/app/tasks`,
+          });
+        }
       }
     }
 
@@ -245,11 +254,19 @@ export async function createTask(user, taskData) {
 
   if (error) return { data, error };
 
-  // Fire notifications for all assignees
+  // Fire notifications + email for all assignees
   for (const pid of assigneeIds) {
-    const { data: ap } = await supabase.from('profiles').select('user_id').eq('id', pid).single();
+    const { data: ap } = await supabase.from('profiles').select('user_id, email, full_name').eq('id', pid).single();
     if (ap?.user_id) {
       createNotification(ap.user_id, 'task_assigned', `You have been assigned to: "${data.title}"`, 'task', data.id);
+    }
+    if (ap?.email && isEmailConfigured()) {
+      sendNotificationEmail('task_assigned', ap.email, {
+        taskTitle: data.title,
+        assigneeName: ap.full_name || ap.email?.split('@')[0] || 'User',
+        dueDate: data.due_date,
+        taskUrl: `${window.location.origin}/#/app/tasks`,
+      });
     }
   }
 

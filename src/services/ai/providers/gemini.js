@@ -9,7 +9,7 @@
  */
 import { BaseProvider } from './provider';
 import { PROVIDER_CONFIGS, AI_PROVIDERS } from '../config';
-import { AiProviderError } from '../errors';
+import { AiProviderError, AiConfigurationError } from '../errors';
 
 export class GeminiProvider extends BaseProvider {
   /**

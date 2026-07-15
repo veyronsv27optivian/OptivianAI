@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
 
 const variants = {
-  default: 'bg-white dark:bg-slate-800/90 border border-border dark:border-slate-700/50',
-  glass: 'glass-card dark:glass-dark',
-  gradient: 'bg-gradient-to-br dark:bg-gradient-to-br',
-  elevated: 'bg-white dark:bg-slate-800 border border-border dark:border-slate-700/50 shadow-glass dark:shadow-glass-lg',
-  premium: 'bg-white dark:bg-slate-800/90 border border-border dark:border-slate-700/50 shadow-premium dark:shadow-premium-lg',
-  'gradient-border': 'bg-white dark:bg-slate-800/90 gradient-border',
-  flat: 'bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/30',
+  default: 'bg-white dark:dark-card-metallic border border-border/80 dark:border-white/5 shadow-card hover:shadow-card-hover',
+  glass: 'glass-card dark:dark-card-metallic backdrop-blur-lg',
+  gradient: 'bg-gradient-to-br from-white to-slate-50 dark:from-surface-raised/90 dark:to-surface/95 dark:border-white/5',
+  elevated: 'bg-white dark:dark-card-metallic border border-border/80 dark:border-white/5 shadow-card hover:shadow-card-hover',
+  premium: 'premium-card border border-border/80 dark:border-white/5',
+  'gradient-border': 'premium-card gradient-border',
+  flat: 'bg-slate-50/80 dark:bg-surface-raised/60 border border-slate-100 dark:border-white/5',
+  metallic: 'dark-card-metallic border border-white/5 cursor-pointer hover:-translate-y-0.5',
 };
 
 export default function Card({
@@ -33,19 +34,20 @@ export default function Card({
       : {};
 
   const hoverClasses = hover
-    ? 'hover:shadow-glass-lg dark:hover:shadow-glass-lg hover:-translate-y-0.5 dark:hover:border-slate-600/50'
+    ? 'hover:shadow-card-hover hover:-translate-y-0.5 hover:border-primary/20 dark:hover:border-primary/20 hover-glow'
     : '';
 
   return (
     <Component
       {...motionProps}
       className={`
-        rounded-xl overflow-hidden transition-all duration-300
+        rounded-2xl overflow-hidden transition-all duration-300
         ${variants[variant] || variants.default}
         ${gradient ? `${gradient} ` : ''}
         ${padding}
         ${hoverClasses}
-        ${onClick ? 'cursor-pointer active:scale-[0.98]' : ''}
+        ${onClick ? 'cursor-pointer active:scale-[0.97]' : ''}
+        ${animate ? 'animate-fade-in-up' : ''}
         ${className}
       `}
       {...props}
@@ -71,13 +73,13 @@ export function CardHeader({ title, subtitle, action, icon: Icon, color = 'prima
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-3">
         {Icon && (
-          <div className={`p-2 rounded-lg ${colorMap[color] || colorMap.primary}`}>
+          <div className={`p-2.5 rounded-xl ${colorMap[color] || colorMap.primary}`}>
             <Icon size={16} />
           </div>
         )}
         <div>
-          <h3 className="text-sm font-semibold text-foreground dark:text-slate-100">{title}</h3>
-          {subtitle && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{subtitle}</p>}
+          <h3 className="text-sm font-semibold text-text-primary dark:text-slate-100">{title}</h3>
+          {subtitle && <p className="text-xs text-text-tertiary dark:text-slate-500 mt-0.5">{subtitle}</p>}
         </div>
       </div>
       {action && <div className="shrink-0">{action}</div>}
@@ -87,7 +89,7 @@ export function CardHeader({ title, subtitle, action, icon: Icon, color = 'prima
 
 export function CardFooter({ children, className = '' }) {
   return (
-    <div className={`mt-4 pt-3 border-t border-border dark:border-slate-700/50 ${className}`}>
+    <div className={`mt-4 pt-3 border-t border-border/80 dark:border-white/5 ${className}`}>
       {children}
     </div>
   );

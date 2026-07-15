@@ -82,19 +82,18 @@ export default function AISettings({ onClose }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {Icon && <Icon size={16} className="text-slate-400" />}
-          <label className="text-sm font-medium text-slate-700">{label}</label>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
         </div>
         <span className="text-sm text-blue-600 font-mono">{value}</span>
       </div>
-      {description && <p className="text-xs text-slate-400">{description}</p>}
-      <input
+      {description && <p className="text-xs text-slate-400">{description}</p>}        <input
         type="range"
         min={min}
         max={max}
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+        className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-600"
       />
       <div className="flex justify-between text-[10px] text-slate-400">
         <span>{min}</span>
@@ -113,7 +112,7 @@ export default function AISettings({ onClose }) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
       >
         {options.map(opt => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -126,7 +125,7 @@ export default function AISettings({ onClose }) {
     <div className="max-w-2xl mx-auto p-6 space-y-8">
       {/* Saved indicator */}
       {saved && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-sm">
           <Save size={16} />
           Settings saved successfully
         </div>
@@ -134,11 +133,11 @@ export default function AISettings({ onClose }) {
 
       {/* Provider & Model */}
       <section className="space-y-4">
-        <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
           <Brain size={18} className="text-blue-600" />
           Provider & Model
         </h3>
-        <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div className="bg-white dark:dark-card-metallic border border-slate-200 dark:border-white/10 rounded-xl p-5 space-y-4 shadow-sm">
           <SelectField
             label="Preferred Provider"
             value={settings.preferredProvider}
@@ -172,11 +171,11 @@ export default function AISettings({ onClose }) {
 
       {/* Generation Parameters */}
       <section className="space-y-4">
-        <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
           <Sliders size={18} className="text-purple-600" />
           Generation Parameters
         </h3>
-        <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-6">
+        <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-5 space-y-6">
           <RangeSlider
             label="Temperature"
             value={settings.temperature}
@@ -222,11 +221,11 @@ export default function AISettings({ onClose }) {
 
       {/* Behavior */}
       <section className="space-y-4">
-        <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
           <Brain size={18} className="text-emerald-600" />
           Behavior & Preferences
         </h3>
-        <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div className="bg-white dark:dark-card-metallic border border-slate-200 dark:border-white/10 rounded-xl p-5 space-y-4 shadow-sm">
           <SelectField
             label="Creativity Level"
             value={settings.creativity}
@@ -303,11 +302,11 @@ export default function AISettings({ onClose }) {
 
       {/* Toggles */}
       <section className="space-y-4">
-        <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
           <Monitor size={18} className="text-amber-600" />
           Display & Features
         </h3>
-        <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-3">
+        <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg p-5 space-y-3">
           <ToggleOption
             label="Streaming Responses"
             enabled={settings.streamingEnabled}
@@ -343,7 +342,7 @@ export default function AISettings({ onClose }) {
         </button>
         <button
           onClick={handleReset}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
         >
           <RotateCcw size={16} />
           Reset to Defaults
@@ -356,19 +355,18 @@ export default function AISettings({ onClose }) {
 // ─── Toggle Component ─────────────────────────────────────────────
 
 function ToggleOption({ label, enabled, onChange, icon: Icon, description }) {
-  return (
-    <div className="flex items-center justify-between py-2">
+  return (      <div className="flex items-center justify-between py-2">
       <div className="flex items-start gap-3">
-        {Icon && <Icon size={16} className="text-slate-400 mt-0.5" />}
+        {Icon && <Icon size={16} className="text-slate-400 dark:text-slate-500 mt-0.5" />}
         <div>
-          <p className="text-sm font-medium text-slate-700">{label}</p>
-          {description && <p className="text-xs text-slate-400">{description}</p>}
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</p>
+          {description && <p className="text-xs text-slate-400 dark:text-slate-500">{description}</p>}
         </div>
       </div>
       <button
         onClick={() => onChange(!enabled)}
         className={`relative w-11 h-6 rounded-full transition-all ${
-          enabled ? 'bg-blue-600' : 'bg-slate-300'
+          enabled ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
         }`}
       >
         <span

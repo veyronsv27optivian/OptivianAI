@@ -274,7 +274,7 @@ export default function ToolRecommender({ onSelectTool }) {
                   >
                     <button
                       onClick={() => onSelectTool?.(rec.type, rec.label)}
-                      className="w-full flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 hover:border-blue-200 dark:hover:border-blue-700/50 hover:shadow-md dark:hover:shadow-premium-lg transition-all duration-200 text-left active:scale-[0.99]"
+                      className="w-full flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-white/5 bg-white dark:bg-surface-raised/60 hover:border-blue-200 dark:hover:border-blue-700/50 hover:shadow-md dark:hover:shadow-premium-lg transition-all duration-200 text-left active:scale-[0.99]"
                     >
                       {/* Icon */}
                       <div className={`shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
@@ -334,7 +334,7 @@ export default function ToolRecommender({ onSelectTool }) {
                     setQuery(example);
                     inputRef.current?.focus();
                   }}
-                  className="text-xs px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all"
+                  className="text-xs px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-surface-raised/60 text-slate-500 dark:text-slate-400 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all"
                 >
                   {example}
                 </button>
