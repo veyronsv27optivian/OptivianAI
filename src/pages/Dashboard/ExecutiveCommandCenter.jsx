@@ -6,10 +6,10 @@ import Card, { CardHeader } from '../../components/ui/Card';
 
 function StatusIndicator({ label, value, status, trend }) {
   const colors = {
-    critical: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', dot: 'bg-red-500' },
-    warning: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500' },
-    good: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-    info: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', dot: 'bg-blue-500' },
+    critical: { bg: 'bg-red-50 dark:bg-red-950/40', border: 'border-red-200 dark:border-red-800/50', text: 'text-red-700 dark:text-red-400', dot: 'bg-red-500' },
+    warning: { bg: 'bg-amber-50 dark:bg-amber-950/40', border: 'border-amber-200 dark:border-amber-800/50', text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500' },
+    good: { bg: 'bg-emerald-50 dark:bg-emerald-950/40', border: 'border-emerald-200 dark:border-emerald-800/50', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500' },
+    info: { bg: 'bg-blue-50 dark:bg-blue-950/40', border: 'border-blue-200 dark:border-blue-800/50', text: 'text-blue-700 dark:text-blue-400', dot: 'bg-blue-500' },
   };
   const c = colors[status] || colors.info;
   const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : null;
@@ -63,10 +63,10 @@ export default function ExecutiveCommandCenter({ taskStats, staffCount, loading 
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all">
           <Zap size={16} /> Generate Executive Report
         </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-all">
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
           <Eye size={16} /> View All Metrics
         </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-all">
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
           <RefreshCw size={16} /> Refresh Data
         </button>
       </div>

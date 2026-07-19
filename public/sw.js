@@ -100,8 +100,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
-  if (request.method !== 'GET') return;
+  // Skip non-GET requests and unsupported schemes (e.g., chrome-extension://)
+  if (request.method !== 'GET' || !url.protocol.startsWith('http')) return;
 
   // ── Fonts: cache-first, long-lived ──────────────────────────
   if (url.hostname.includes('fonts.googleapis') || url.hostname.includes('fonts.gstatic') || url.pathname.endsWith('.woff2')) {
@@ -195,7 +195,7 @@ async function cacheFirst(request) {
 
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    if (response.ok && request.url.startsWith('http')) {
       const clone = response.clone();
       caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
     }
@@ -211,7 +211,7 @@ async function cacheFirst(request) {
 async function networkFirst(request) {
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    if (response.ok && request.url.startsWith('http')) {
       const clone = response.clone();
       caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
     }

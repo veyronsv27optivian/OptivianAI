@@ -7,12 +7,12 @@ import { motion } from 'framer-motion';
 import Card, { CardHeader } from '../../components/ui/Card';
 
 const DEPARTMENTS = [
-  { id: 'engineering', label: 'Engineering', color: 'text-blue-600', bg: 'bg-blue-50', icon: Users },
-  { id: 'marketing', label: 'Marketing', color: 'text-sky-600', bg: 'bg-sky-50', icon: TrendingUp },
-  { id: 'sales', label: 'Sales', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: Target },
-  { id: 'hr', label: 'HR', color: 'text-pink-600', bg: 'bg-pink-50', icon: Users },
-  { id: 'finance', label: 'Finance', color: 'text-yellow-600', bg: 'bg-yellow-50', icon: BarChart3 },
-  { id: 'operations', label: 'Operations', color: 'text-teal-600', bg: 'bg-teal-50', icon: Activity },
+  { id: 'engineering', label: 'Engineering', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40', icon: Users },
+  { id: 'marketing', label: 'Marketing', color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-50 dark:bg-sky-950/40', icon: TrendingUp },
+  { id: 'sales', label: 'Sales', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40', icon: Target },
+  { id: 'hr', label: 'HR', color: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-50 dark:bg-pink-950/40', icon: Users },
+  { id: 'finance', label: 'Finance', color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/40', icon: BarChart3 },
+  { id: 'operations', label: 'Operations', color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-50 dark:bg-teal-950/40', icon: Activity },
 ];
 
 const DASHBOARD_TEMPLATES = {
@@ -59,7 +59,7 @@ function DeptHeader({ dept, selected, onClick }) {
   return (
     <button onClick={onClick}
       className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
-        selected ? `${dept.bg} ${dept.color} border-current` : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+        selected ? `${dept.bg} ${dept.color} border-current` : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
       }`}
     >
       <Icon size={16} /> {dept.label}
@@ -94,13 +94,13 @@ export default function DepartmentCommandCenter({ taskStats }) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             {template.metrics.map(m => (
               <div key={m.label} className={`p-3 rounded-lg border ${
-                m.status === 'good' ? 'bg-emerald-50 border-emerald-200' :
-                m.status === 'warning' ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'
+                m.status === 'good' ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/50' :
+                m.status === 'warning' ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/50' : 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/50'
               }`}>
-                <p className="text-xs text-slate-500 mb-1">{m.label}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{m.label}</p>
                 <p className={`text-lg font-bold ${
-                  m.status === 'good' ? 'text-emerald-700' :
-                  m.status === 'warning' ? 'text-amber-700' : 'text-blue-700'
+                  m.status === 'good' ? 'text-emerald-700 dark:text-emerald-400' :
+                  m.status === 'warning' ? 'text-amber-700 dark:text-amber-400' : 'text-blue-700 dark:text-blue-400'
                 }`}>{m.value}</p>
                 <p className="text-[10px] text-slate-400">{m.trend}</p>
               </div>
@@ -109,20 +109,20 @@ export default function DepartmentCommandCenter({ taskStats }) {
 
           {/* Department Tasks */}
           <div>
-            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Active Tasks</h4>
+            <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Active Tasks</h4>
             <div className="space-y-2">
               {template.tasks.map(t => (
-                <div key={t.title} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-slate-200 transition-colors">
+                <div key={t.title} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-700/50 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${
                       t.status === 'in_progress' ? 'bg-blue-500' : t.status === 'review' ? 'bg-violet-500' : 'bg-amber-500'
                     }`} />
-                    <span className="text-sm text-slate-700">{t.title}</span>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">{t.title}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-slate-400">{t.assignee}</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                      t.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                      t.priority === 'high' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400' : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400'
                     }`}>{t.priority}</span>
                   </div>
                 </div>
@@ -137,7 +137,7 @@ export default function DepartmentCommandCenter({ taskStats }) {
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all">
           <BarChart3 size={16} /> Generate Report
         </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-all">
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
           <CheckCircle size={16} /> View All Tasks
         </button>
       </div>

@@ -225,7 +225,12 @@ export default function AIPanel({
             className="p-3 rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50"
           >
             <div className="flex items-center gap-2 mb-1.5">
-              <stat.icon size={12} className={`text-${stat.color}-500`} />
+              <stat.icon size={12} className={
+                stat.color === 'emerald' ? 'text-emerald-500 dark:text-emerald-400' :
+                stat.color === 'blue' ? 'text-blue-500 dark:text-blue-400' :
+                stat.color === 'rose' ? 'text-rose-500 dark:text-rose-400' :
+                'text-violet-500 dark:text-violet-400'
+              } />
               <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase">{stat.label}</span>
             </div>
             <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{stat.value}</p>

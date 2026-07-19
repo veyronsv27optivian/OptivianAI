@@ -62,18 +62,35 @@ export default function Users() {
     setActionSuccess('');
 
     try {
-      const { error } = await createStaffMember({
+      const { data, error } = await createStaffMember({
         email: newStaff.email,
         password: newStaff.password,
         role: newStaff.role,
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        // Show the exact Supabase error so it's diagnosable
+        const msg = error.message || JSON.stringify(error);
+        console.error('[handleAddStaff] createStaffMember error:', error);
+        throw new Error(msg);
+      }
 
       setActionSuccess('Staff member created successfully!');
       setShowAddModal(false);
       setNewStaff({ email: '', password: generateTempPassword(), role: 'staff' });
+      
+      // Optimistically add to UI list using the real DB profile returned
+      if (data?.profile) {
+        setMembers(prev => {
+          // Prevent duplicates if loadMembers is very fast
+          if (prev.some(m => m.user_id === data.profile.user_id)) return prev;
+          return [data.profile, ...prev];
+        });
+      }
+      
+      // Reload from DB instantly since the upsert is guaranteed finished
       loadMembers();
     } catch (err) {
+      console.error('[handleAddStaff] caught:', err.message);
       setActionError(err.message);
     } finally {
       setActionLoading(false);
@@ -386,10 +403,10 @@ export default function Users() {
                 <select
                   value={newStaff.role}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, role: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
                 >
                   {availableRoles.map(r => (
-                    <option key={r} value={r}>{getRoleInfo(r).label}</option>
+                    <option key={r} value={r} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">{getRoleInfo(r).label}</option>
                   ))}
                 </select>
               </div>

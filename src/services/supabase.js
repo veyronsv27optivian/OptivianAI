@@ -11,6 +11,22 @@ export const supabase = createClient(
   supabaseAnonKey || 'dev-mode-fallback-key',
 );
 
+// Creates a temporary client that DOES NOT persist session to localStorage.
+// Used for creating users (staff) so it doesn't log the admin out.
+export const createTempSupabaseClient = () => {
+  return createClient(
+    supabaseUrl || window.location.origin + '/api',
+    supabaseAnonKey || 'dev-mode-fallback-key',
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      }
+    }
+  );
+};
+
 export const checkUsernameUnique = async (username) => {
   if (supabaseUrl === undefined || supabaseUrl === '') {
     // If we're mocking, just return true

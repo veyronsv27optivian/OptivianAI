@@ -119,7 +119,7 @@ export default function CalendarWidget({ upcomingDeadlines = [], loading }) {
       {/* Day Headers */}
       <div className="grid grid-cols-7 gap-0.5 mb-1">
         {DAYS.map(d => (
-          <div key={d} className="text-center text-[10px] font-medium text-slate-400 py-1">
+          <div key={d} className="text-center text-[10px] font-medium text-slate-400 dark:text-slate-500 py-1">
             {d}
           </div>
         ))}
@@ -166,7 +166,7 @@ export default function CalendarWidget({ upcomingDeadlines = [], loading }) {
       {/* Today's Events */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+          <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
             <Clock size={12} /> Today
           </h4>
           {todayEvents.length > 0 && (
@@ -197,11 +197,11 @@ export default function CalendarWidget({ upcomingDeadlines = [], loading }) {
               </motion.div>
             ))}
             {todayEvents.length > 3 && (
-              <p className="text-[10px] text-slate-400 text-center">+{todayEvents.length - 3} more</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">+{todayEvents.length - 3} more</p>
             )}
           </div>
         ) : (
-          <p className="text-xs text-slate-400 text-center py-2">No events today</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-2">No events today</p>
         )}
       </div>
 

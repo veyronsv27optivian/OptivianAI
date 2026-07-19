@@ -10,7 +10,6 @@
 import { AI_PROVIDERS, PROVIDER_CONFIGS, PROVIDERS_BY_PRIORITY, ENV_KEYS } from './config';
 import { GeminiProvider } from './providers/gemini';
 import { DeepSeekProvider } from './providers/deepseek';
-import { QwenProvider } from './providers/qwen';
 import { OpenAIViaOpenRouterProvider } from './providers/openaiViaOpenRouter';
 import { AiConfigurationError } from './errors';
 
@@ -57,11 +56,6 @@ export function initProviderManager(overrides = {}) {
     new DeepSeekProvider({ apiKey: apiKeys.deepseek }),
   );
 
-  // Qwen VL (backup)
-  providers.set(
-    AI_PROVIDERS.QWEN,
-    new QwenProvider({ apiKey: apiKeys.qwen }),
-  );
 
   // OpenAI (via OpenRouter — uses VITE_DEEPSEEK_API_KEY / OpenRouter key)
   providers.set(

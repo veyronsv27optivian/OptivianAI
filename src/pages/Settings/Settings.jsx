@@ -56,7 +56,6 @@ export default function Settings() {
 
   const handleLogout = async () => {
     await signOut();
-    // Use window.location to ensure redirect works even after ProtectedRoute unmounts
     window.location.href = '/';
   };
 
