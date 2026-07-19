@@ -1,7 +1,7 @@
 /**
  * ─── Auth Service ──────────────────────────────────────────────────
  * Centralized authentication service that wraps Supabase Auth and
- * provides OAuth (Google, GitHub, Microsoft), session management,
+ * provides OAuth (Google, GitHub), session management,
  * password flows, and profile auto-creation.
  *
  * All auth API calls go through this module.
@@ -31,14 +31,6 @@ const OAUTH_PROVIDERS = {
     color: 'text-slate-900',
     bg: 'bg-slate-900',
     border: 'border-slate-800',
-  },
-  microsoft: {
-    provider: 'azure',
-    label: 'Microsoft',
-    icon: null,
-    color: 'text-blue-600',
-    bg: 'bg-white',
-    border: 'border-slate-300',
   },
 };
 
@@ -75,9 +67,6 @@ export async function signInWithOAuth(provider) {
     provider: oauthConfig.provider,
     options: {
       redirectTo: `${window.location.origin}`,
-      queryParams: provider === 'microsoft' ? {
-        tenant: 'common',
-      } : undefined,
     },
   });
 
