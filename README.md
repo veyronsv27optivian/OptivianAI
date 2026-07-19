@@ -106,7 +106,7 @@ The system operates in two modes:
 - **Email + Password** with session persistence
 - **Google Login** (OAuth)
 - **GitHub Login** (OAuth)
-
+- **Microsoft Login** (Azure OAuth)
 - **Email-based Two-Factor Authentication** — 6-digit OTP sent to email
 - **Password Reset** flow with email verification
 - **Remember Me** support with extended session duration
@@ -537,7 +537,7 @@ Custom HTML email templates are in `supabase/email-templates/`. Paste these into
 
 - [x] Project infrastructure (React, Vite, Tailwind, Electron)
 - [x] Complete Supabase database schema with RLS policies
-- [x] Authentication (Email + Password, Google, GitHub)
+- [x] Authentication (Email + Password, Google, GitHub, Microsoft)
 - [x] Email-based Two-Factor Authentication
 - [x] RBAC with 22 roles and 13 resources
 - [x] Organization creation with business details
@@ -616,7 +616,7 @@ This project is proprietary software. All rights reserved.
 ### Current Limitations
 
 1. **Developer Mode Constraints**
-   - OAuth providers (Google, GitHub) are unavailable
+   - OAuth providers (Google, GitHub, Microsoft) are unavailable
    - AI calls require API keys even in Developer Mode
    - Edge Functions (send-otp, delete-user) require a live Supabase instance
 

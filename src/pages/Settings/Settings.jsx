@@ -701,7 +701,8 @@ function LoginHistoryView({ userId }) {
     email: { bg: 'bg-blue-100', text: 'text-blue-700' },
     google: { bg: 'bg-red-100', text: 'text-red-700' },
     github: { bg: 'bg-slate-100', text: 'text-slate-700' },
-
+    microsoft: { bg: 'bg-cyan-100', text: 'text-cyan-700' },
+    azure: { bg: 'bg-cyan-100', text: 'text-cyan-700' },
   };
 
   return (

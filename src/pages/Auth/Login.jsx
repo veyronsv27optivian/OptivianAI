@@ -174,7 +174,16 @@ export default function Login() {
               </svg>
               <span>Continue with GitHub</span>
             </button>
-
+            <button onClick={() => handleOAuth('microsoft')} disabled={isLoading}
+              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium disabled:opacity-50">
+              <svg className="w-5 h-5" viewBox="0 0 23 23">
+                <rect x="1" y="1" width="10" height="10" fill="#f25022"/>
+                <rect x="12" y="1" width="10" height="10" fill="#7fba00"/>
+                <rect x="1" y="12" width="10" height="10" fill="#00a4ef"/>
+                <rect x="12" y="12" width="10" height="10" fill="#ffb900"/>
+              </svg>
+              <span>Continue with Microsoft</span>
+            </button>
           </div>
 
           <div className="relative mb-6">
