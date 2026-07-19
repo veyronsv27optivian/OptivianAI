@@ -148,12 +148,11 @@ Run these SQL migrations in your Supabase Dashboard (SQL Editor):
 
 ---
 
-## 5. OAuth Providers — Google, GitHub, Microsoft
+## 5. OAuth Providers — Google, GitHub
 
 Already configured in Supabase Dashboard:
 - **Google:** Enabled (needs Client ID + Secret)
 - **GitHub:** Enabled (needs Client ID + Secret)
-- **Microsoft/Azure:** Enabled (needs Tenant ID + Client ID + Secret)
 
 Go to: Supabase Dashboard → Authentication → Providers → Configure each
 
