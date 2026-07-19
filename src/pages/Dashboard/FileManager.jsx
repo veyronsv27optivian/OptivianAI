@@ -88,9 +88,9 @@ export default function FileManager({ onClose }) {
           return (
             <button key={f.id} onClick={() => setSelectedFolder(f.id)}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                selectedFolder === f.id
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  selectedFolder === f.id
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50'
               }`}
             >
               <FIcon size={16} />
@@ -101,7 +101,7 @@ export default function FileManager({ onClose }) {
         <div className="border-t border-slate-200 dark:border-slate-700/50 my-2 pt-2">
           <p className="text-[10px] text-slate-400 px-3 mb-1 uppercase tracking-wider">Storage</p>
           <div className="px-3">
-            <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
               <div className="h-full bg-blue-500 rounded-full" style={{ width: '23%' }} />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">23 MB of 100 MB used</p>
@@ -116,19 +116,19 @@ export default function FileManager({ onClose }) {
           <div className="relative flex-1 max-w-md">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search files..." className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Search files..." className="w-full pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex p-0.5 bg-slate-100 rounded-lg">
-              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded text-xs ${viewMode === 'grid' ? 'bg-white shadow-sm' : ''}`}>
+            <div className="flex p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
+              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded text-xs ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500'}`}>
                 <Grid3X3 size={14} />
               </button>
-              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded text-xs ${viewMode === 'list' ? 'bg-white shadow-sm' : ''}`}>
+              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded text-xs ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500'}`}>
                 <List size={14} />
               </button>
             </div>
-            <button onClick={onClose || (() => navigate('/app/settings'))} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+            <button onClick={onClose || (() => navigate('/app/settings'))} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all">
               <X size={16} />
             </button>
           </div>
@@ -138,7 +138,7 @@ export default function FileManager({ onClose }) {
         <div className="flex-1 overflow-auto p-4">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Upload size={40} className="text-slate-300 mb-3" />
+              <Upload size={40} className="text-slate-300 dark:text-slate-600 mb-3" />
               <p className="text-sm text-slate-500 font-medium">No files found</p>
               <p className="text-xs text-slate-400 mt-1">Files you upload or attach to tasks will appear here</p>
             </div>
@@ -147,23 +147,23 @@ export default function FileManager({ onClose }) {
               {filtered.map(f => {
                 const FI = getFileIcon(f.type || f.ext);
                 return (
-                  <div key={f.id} className="group p-4 rounded-lg border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
+                  <div key={f.id} className="group p-4 rounded-lg border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm dark:bg-slate-800/50 transition-all">
                     <div className="flex justify-center mb-3">
                       <FI size={36} className={getFileColor(f.type || f.ext)} />
                     </div>
-                    <p className="text-xs text-center font-medium text-slate-700 truncate">{f.name}</p>
+                    <p className="text-xs text-center font-medium text-slate-700 dark:text-slate-300 truncate">{f.name}</p>
                     <p className="text-[10px] text-center text-slate-400 mt-0.5">{formatSize(f.size)}</p>
                     <div className="flex justify-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50" title="Download"><Download size={12} /></button>
-                      <button onClick={() => handleDelete(f.id)} className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-red-50" title="Delete"><Trash2 size={12} /></button>
+                      <button className="p-1 rounded text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30" title="Download"><Download size={12} /></button>
+                      <button onClick={() => handleDelete(f.id)} className="p-1 rounded text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30" title="Delete"><Trash2 size={12} /></button>
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-800/90 border border-slate-200 rounded-lg overflow-hidden">
-              <div className="grid grid-cols-12 gap-4 px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b">
+              <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+              <div className="grid grid-cols-12 gap-4 px-4 py-2.5 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700">
                 <div className="col-span-5">Name</div>
                 <div className="col-span-2">Size</div>
                 <div className="col-span-3">Uploaded</div>
@@ -172,16 +172,16 @@ export default function FileManager({ onClose }) {
               {filtered.map(f => {
                 const FI = getFileIcon(f.type || f.ext);
                 return (
-                  <div key={f.id} className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 items-center">
+                  <div key={f.id} className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-0 items-center">
                     <div className="col-span-5 flex items-center gap-2 min-w-0">
                       <FI size={16} className={`shrink-0 ${getFileColor(f.type || f.ext)}`} />
-                      <span className="text-sm text-slate-700 truncate">{f.name}</span>
+                      <span className="text-sm text-slate-700 dark:text-slate-300 truncate">{f.name}</span>
                     </div>
-                    <div className="col-span-2 text-xs text-slate-500">{formatSize(f.size)}</div>
+                    <div className="col-span-2 text-xs text-slate-500 dark:text-slate-400">{formatSize(f.size)}</div>
                     <div className="col-span-3 text-xs text-slate-400">{formatDate(f.created_at || f.uploaded_at)}</div>
                     <div className="col-span-2 flex justify-end gap-1">
-                      <button className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50" title="Download"><Download size={12} /></button>
-                      <button onClick={() => handleDelete(f.id)} className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-red-50" title="Delete"><Trash2 size={12} /></button>
+                      <button className="p-1 rounded text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30" title="Download"><Download size={12} /></button>
+                      <button onClick={() => handleDelete(f.id)} className="p-1 rounded text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30" title="Delete"><Trash2 size={12} /></button>
                     </div>
                   </div>
                 );

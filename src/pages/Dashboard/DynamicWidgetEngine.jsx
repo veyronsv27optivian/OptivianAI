@@ -67,22 +67,22 @@ export default function DynamicWidgetEngine({ userRole = 'staff', onClose, curre
             <div className="p-2 rounded-lg bg-blue-600"><LayoutDashboard size={18} className="text-white" /></div>
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Customize Dashboard</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all">
             <X size={20} />
           </button>
         </div>
 
         <div className="flex-1 overflow-auto p-5 space-y-4">
-          <p className="text-sm text-slate-500">Toggle widgets on/off and reorder by dragging.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Toggle widgets on/off and reorder by dragging.</p>
 
           {/* Layout mode toggle */}
-          <div className="flex p-0.5 bg-slate-100 rounded-lg w-fit">
+          <div className="flex p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg w-fit">
             <button onClick={() => setLayoutMode('grid')}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${layoutMode === 'grid' ? 'bg-white shadow-sm' : 'text-slate-500'}`}>
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${layoutMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>
               Grid
             </button>
             <button onClick={() => setLayoutMode('compact')}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${layoutMode === 'compact' ? 'bg-white shadow-sm' : 'text-slate-500'}`}>
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${layoutMode === 'compact' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>
               Compact
             </button>
           </div>
@@ -98,18 +98,18 @@ export default function DynamicWidgetEngine({ userRole = 'staff', onClose, curre
                   <Reorder.Item key={item.id} value={item} as="div">
                     <motion.div layout className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/90 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-grab active:cursor-grabbing">
                       <GripVertical size={16} className="text-slate-300 shrink-0" />
-                      <div className={`p-1.5 rounded ${item.visible ? 'bg-blue-50' : 'bg-slate-100'}`}>
-                        <Icon size={16} className={item.visible ? 'text-blue-600' : 'text-slate-400'} />
+                      <div className={`p-1.5 rounded ${item.visible ? 'bg-blue-50 dark:bg-blue-900/30' : 'bg-slate-100 dark:bg-slate-700/50'}`}>
+                        <Icon size={16} className={item.visible ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium ${item.visible ? 'text-slate-900' : 'text-slate-400'}`}>{widget.label}</p>
+                        <p className={`text-sm font-medium ${item.visible ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`}>{widget.label}</p>
                         <p className="text-[10px] text-slate-400">{widget.id}</p>
                       </div>
                       <button onClick={() => toggleWidget(item.id)}
                         className={`p-2 rounded-lg transition-all ${
                           item.visible
-                            ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                            : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50'
+                            : 'bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600/50'
                         }`}
                         title={item.visible ? 'Hide widget' : 'Show widget'}
                       >
@@ -126,7 +126,7 @@ export default function DynamicWidgetEngine({ userRole = 'staff', onClose, curre
         <div className="flex items-center justify-between p-5 border-t border-slate-200 dark:border-slate-700/50">
           <span className="text-xs text-slate-400">{config.filter(c => c.visible).length} widgets visible</span>
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">Cancel</button>
+            <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all">Cancel</button>
             <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all">
               <Save size={14} /> Save Layout
             </button>

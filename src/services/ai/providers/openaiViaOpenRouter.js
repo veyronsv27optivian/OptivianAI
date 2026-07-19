@@ -102,6 +102,8 @@ export class OpenAIViaOpenRouterProvider extends BaseProvider {
       temperature: options.temperature ?? 0.7,
       max_tokens: options.maxTokens ?? 2048,
       top_p: options.topP ?? 0.95,
+      // OpenRouter web search grounding
+      plugins: [{ id: 'web', max_results: 3 }],
     };
 
     const response = await this._fetchWithTimeout(this.endpoint, {
@@ -153,6 +155,8 @@ export class OpenAIViaOpenRouterProvider extends BaseProvider {
       max_tokens: options.maxTokens ?? 2048,
       top_p: options.topP ?? 0.95,
       stream: true,
+      // OpenRouter web search grounding
+      plugins: [{ id: 'web', max_results: 3 }],
     };
 
     const response = await this._fetchWithTimeout(this.endpoint, {

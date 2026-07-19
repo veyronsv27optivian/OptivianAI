@@ -12,37 +12,37 @@ const actionGroups = [
   {
     label: 'Management',
     actions: [
-      { icon: Users, label: 'Manage Users', color: 'text-blue-600', bg: 'bg-blue-50', to: '/app/users' },
-      { icon: UserPlus, label: 'Invite Staff', color: 'text-emerald-600', bg: 'bg-emerald-50', to: '/app/users' },
-      { icon: Building2, label: 'Org Settings', color: 'text-teal-600', bg: 'bg-teal-50', to: '/app/org' },
-      { icon: Shield, label: 'Admin Panel', color: 'text-violet-600', bg: 'bg-violet-50', to: '/app/admin' },
+      { icon: Users, label: 'Manage Users', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/25', to: '/app/users' },
+      { icon: UserPlus, label: 'Invite Staff', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/25', to: '/app/users' },
+      { icon: Building2, label: 'Org Settings', color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-50 dark:bg-teal-900/25', to: '/app/org' },
+      { icon: Shield, label: 'Admin Panel', color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-900/25', to: '/app/admin' },
     ],
   },
   {
     label: 'Tasks & Projects',
     actions: [
-      { icon: CheckSquare, label: 'Create Task', color: 'text-emerald-600', bg: 'bg-emerald-50', to: '/app/tasks' },
-      { icon: Target, label: 'Create Project', color: 'text-indigo-600', bg: 'bg-indigo-50', to: '/app/tasks' },
-      { icon: ClipboardList, label: 'My Tasks', color: 'text-amber-600', bg: 'bg-amber-50', to: '/app/tasks' },
-      { icon: Calendar, label: 'Schedule', color: 'text-rose-600', bg: 'bg-rose-50', to: '/app/tasks' },
+      { icon: CheckSquare, label: 'Create Task', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/25', to: '/app/tasks' },
+      { icon: Target, label: 'Create Project', color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/25', to: '/app/tasks' },
+      { icon: ClipboardList, label: 'My Tasks', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/25', to: '/app/tasks' },
+      { icon: Calendar, label: 'Schedule', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-900/25', to: '/app/tasks' },
     ],
   },
   {
     label: 'AI & Analytics',
     actions: [
-      { icon: Brain, label: 'AI Advisor', color: 'text-violet-600', bg: 'bg-violet-50', to: '/app/ai' },
-      { icon: TrendingUp, label: 'Org Analytics', color: 'text-cyan-600', bg: 'bg-cyan-50', to: '/app/org/analytics' },
-      { icon: PieChart, label: 'AI History', color: 'text-indigo-600', bg: 'bg-indigo-50', to: '/app/ai/history' },
-      { icon: BarChart3, label: 'Reports', color: 'text-amber-600', bg: 'bg-amber-50', to: '/app/ai' },
+      { icon: Brain, label: 'AI Advisor', color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-900/25', to: '/app/ai' },
+      { icon: TrendingUp, label: 'Org Analytics', color: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-50 dark:bg-cyan-900/25', to: '/app/org/analytics' },
+      { icon: PieChart, label: 'AI History', color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/25', to: '/app/ai/history' },
+      { icon: BarChart3, label: 'Reports', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/25', to: '/app/ai' },
     ],
   },
   {
     label: 'Communication',
     actions: [
-      { icon: MessageSquare, label: 'Chat', color: 'text-cyan-600', bg: 'bg-cyan-50', to: '/app/chat' },
-      { icon: Video, label: 'Meeting', color: 'text-rose-600', bg: 'bg-rose-50', to: '/app/chat' },
-      { icon: FileText, label: 'Documents', color: 'text-blue-600', bg: 'bg-blue-50', to: '/app/chat' },
-      { icon: Upload, label: 'Upload File', color: 'text-orange-600', bg: 'bg-orange-50', to: '/app/chat' },
+      { icon: MessageSquare, label: 'Chat', color: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-50 dark:bg-cyan-900/25', to: '/app/chat' },
+      { icon: Video, label: 'Meeting', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-900/25', to: '/app/chat' },
+      { icon: FileText, label: 'Documents', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/25', to: '/app/chat' },
+      { icon: Upload, label: 'Upload File', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/25', to: '/app/chat' },
     ],
   },
 ];

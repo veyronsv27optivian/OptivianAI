@@ -12,7 +12,6 @@
 export const AI_PROVIDERS = {
   GEMINI: 'gemini',
   DEEPSEEK: 'deepseek',
-  QWEN: 'qwen',
   OPENAI_VIA_OPENROUTER: 'openai',
 };
 
@@ -121,7 +120,7 @@ export const PROVIDER_CONFIGS = {
     endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
     envKey: 'VITE_GEMINI_API_KEY',
     envModel: 'VITE_GEMINI_MODEL',
-    defaultModel: 'gemini-2.0-flash',
+    defaultModel: 'gemini-3.5-flash',
     supportsStreaming: true,
     supportsVision: true,
     isDefault: true,
@@ -132,23 +131,13 @@ export const PROVIDER_CONFIGS = {
     endpoint: 'https://openrouter.ai/api/v1/chat/completions',
     envKey: 'VITE_DEEPSEEK_API_KEY',
     envModel: 'VITE_DEEPSEEK_MODEL',
-    defaultModel: 'deepseek/deepseek-r1:free',
+    defaultModel: 'deepseek/deepseek-v4-flash',
     supportsStreaming: true,
     supportsVision: false,
     isDefault: false,
     priority: 2,     // fallback after Gemini
   },
-  [AI_PROVIDERS.QWEN]: {
-    name: 'Qwen VL',
-    endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-    envKey: 'VITE_QWEN_API_KEY',
-    envModel: 'VITE_QWEN_MODEL',
-    defaultModel: 'qwen/qwen2.5-vl-72b-instruct:free',
-    supportsStreaming: true,
-    supportsVision: true,
-    isDefault: false,
-    priority: 3,     // fallback after DeepSeek
-  },
+
   [AI_PROVIDERS.OPENAI_VIA_OPENROUTER]: {
     name: 'OpenAI',
     endpoint: 'https://openrouter.ai/api/v1/chat/completions',

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from './supabase';
+import { supabase, createTempSupabaseClient } from './supabase';
 import { authService } from './auth/authService';
 import { hasPermission } from './auth/permissions';
 import { getRoleInfo } from './auth/roles';
@@ -41,6 +41,15 @@ function saveDevSession(session) {
   else localStorage.removeItem(DEV_KEYS.session);
 }
 
+function clearAllLocalData() {
+  const keys = Object.keys(localStorage);
+  for (const key of keys) {
+    if (key.startsWith('optivian_') || key.startsWith('sb-')) {
+      localStorage.removeItem(key);
+    }
+  }
+}
+
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
@@ -76,6 +85,9 @@ export function AuthProvider({ children }) {
   const activityEventsRef = useRef(['click', 'keydown', 'mousemove', 'touchstart', 'scroll']);
   const timeoutCheckRef = useRef(null);
   const signOutRef = useRef(null);
+  // When true, onAuthStateChange skips processing — used during staff creation
+  // to prevent the admin session from being replaced by the new staff member's session.
+  const suppressAuthRef = useRef(false);
 
   // Keep signOutRef in sync (stale closure safety)
   useEffect(() => { signOutRef.current = signOut; });
@@ -295,6 +307,9 @@ export function AuthProvider({ children }) {
       });
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        // Skip if we're in the middle of creating a staff member
+        if (suppressAuthRef.current) return;
+
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -503,30 +518,24 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signOut = useCallback(async (scope = 'local') => {
-    // Always clear local state immediately — don't rely solely on onAuthStateChange
-    const clearLocal = () => {
-      saveDevSession(null);
-      setSession(null);
-      setUser(null);
-      setProfile(null);
-      setLoading(false);
-      notifyListeners('SIGNED_OUT', null);
-    };
+    // Clear ALL local caches first — no leftover data from this session.
+    clearAllLocalData();
 
-    if (DEV_MODE) {
-      clearLocal();
-      return { error: null };
-    }
+    // Clear React state so the UI responds instantly.
+    setSession(null);
+    setUser(null);
+    setProfile(null);
+    setLoading(false);
+    notifyListeners('SIGNED_OUT', null);
 
-    try {
-      const { error } = await supabase.auth.signOut({ scope });
-      // Clear state immediately regardless of API result
-      clearLocal();
-      return { error };
-    } catch (err) {
-      // Even on network errors, force local logout so the user isn't stuck
-      clearLocal();
-      return { error: err };
+    if (!DEV_MODE) {
+      // Wait for Supabase to invalidate the server-side session so
+      // getSession() on the next page load doesn't auto-restore it.
+      // Race against a 3s timeout to avoid hanging.
+      await Promise.race([
+        supabase.auth.signOut({ scope }),
+        new Promise(resolve => setTimeout(resolve, 3000)),
+      ]);
     }
   }, [notifyListeners]);
 
@@ -757,111 +766,118 @@ export function AuthProvider({ children }) {
         }));
     }
 
-    const { data: myProfile } = await supabase
-      .from('profiles')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .single();
+    // Use already-loaded profile state instead of a Supabase query (avoids RLS hang)
+    const orgId = profile?.organization_id;
 
-    if (!myProfile?.organization_id) return [];
+    if (!orgId) return [];
 
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('organization_id', myProfile.organization_id)
+      .eq('organization_id', orgId)
       .neq('user_id', user.id);
     if (error) throw error;
     return data || [];
-  }, [user]);
+  }, [user, profile]);
 
   const createStaffMember = useCallback(async ({ email, password, role }) => {
+    console.log('[createStaffMember] called — DEV_MODE:', DEV_MODE, '| user:', user?.id);
     if (!user) return { error: { message: 'Not authenticated.' } };
 
     if (DEV_MODE) {
       const users = getDev(DEV_KEYS.users);
       if (users.find(u => u.email === email)) {
-        return { error: { message: 'A user with this email already exists.' } };
+        return { error: { message: 'User already exists' } };
       }
-
+      const newUserId = uid();
+      users.push({ id: newUserId, email, role: role || 'staff' });
+      saveDev(DEV_KEYS.users, users);
+      
       const profiles = getDev(DEV_KEYS.profiles);
       const myProfile = profiles.find(p => p.user_id === user.id);
-      const orgId = myProfile?.organization_id;
+      const newProfile = {
+        id: uid(),
+        user_id: newUserId,
+        email,
+        full_name: email.split('@')[0],
+        role: role || 'staff',
+        organization_id: myProfile?.organization_id,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      profiles.push(newProfile);
+      saveDev(DEV_KEYS.profiles, profiles);
+      return { data: { user: { id: newUserId, email }, profile: newProfile }, error: null };
+    }
 
-      const id = uid();
-      const newUser = {
-        id,
+    const organizationId = profile?.organization_id;
+    console.log('[createStaffMember] Supabase mode — orgId:', organizationId, '| profile:', profile?.id);
+
+    // Create a temporary client that DOES NOT persist the session
+    const tempSupabase = createTempSupabaseClient();
+    
+    let data, error;
+    try {
+      // signUp with the temp client — it logs the new user into the TEMP client in-memory only
+      const { data: signUpData, error: signUpError } = await tempSupabase.auth.signUp({
         email,
         password,
-        user_metadata: { email, role: role || 'staff', temp_password: true },
-        created_at: new Date().toISOString(),
-      };
-      users.push(newUser);
-      saveDev(DEV_KEYS.users, users);
-
-      if (orgId) {
-        profiles.push({
-          id: uid(),
-          user_id: id,
-          email,
-          full_name: email.split('@')[0],
-          role: role || 'staff',
-          organization_id: orgId,
-          provider: 'email',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-        saveDev(DEV_KEYS.profiles, profiles);
-      }
-
-      return { data: newUser, error: null };
-    }
-
-    const currentAccessToken = session?.access_token;
-    const currentRefreshToken = session?.refresh_token;
-
-    let organizationId = null;
-    const { data: myProfile } = await supabase
-      .from('profiles')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .single();
-    if (myProfile?.organization_id) {
-      organizationId = myProfile.organization_id;
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          role: role || 'staff',
-          temp_password: true,
-          organization_id: organizationId,
+        options: {
+          data: {
+            role: role || 'staff',
+            temp_password: true,
+            organization_id: organizationId,
+          },
         },
-      },
-    });
+      });
+      data = signUpData;
+      error = signUpError;
+    } catch (err) {
+      error = { message: err.message };
+    }
 
-    if (currentAccessToken && currentRefreshToken) {
-      try {
-        await supabase.auth.setSession({
-          access_token: currentAccessToken,
-          refresh_token: currentRefreshToken,
-        });
-      } catch (e) {
-        console.error('Failed to restore admin session after staff creation:', e);
+    if (error) {
+      console.error('[createStaffMember] signUp error:', error);
+      return { data: null, error };
+    }
+
+    if (!data?.user) {
+      return { data: null, error: { message: 'User could not be created. They may already exist.' } };
+    }
+
+    console.log('[createStaffMember] User created:', data.user.id, '— linking to org:', organizationId);
+
+    // Await the profile upsert using the temp client (bypassing admin RLS)
+    let newProfile = null;
+    if (organizationId) {
+      const profileToInsert = {
+        user_id: data.user.id,
+        email,
+        full_name: email.split('@')[0],
+        role: role || 'staff',
+        organization_id: organizationId,
+        is_active: true,
+        updated_at: new Date().toISOString(),
+      };
+      
+      const { data: upsertedData, error: profileError } = await tempSupabase
+        .from('profiles')
+        .upsert(profileToInsert, { onConflict: 'user_id' })
+        .select()
+        .single();
+        
+      if (profileError) {
+        console.error('[createStaffMember] Profile upsert error:', profileError);
+        newProfile = profileToInsert; // Fallback to mock profile if select fails
+      } else {
+        console.log('[createStaffMember] Profile linked to org successfully');
+        newProfile = upsertedData;
       }
     }
 
-    if (data?.user && organizationId) {
-      await supabase
-        .from('profiles')
-        .update({ organization_id: organizationId, role: role || 'staff' })
-        .eq('user_id', data.user.id);
-    }
-
-    return { data, error };
-  }, [user, session]);
+    return { data: { user: data.user, profile: newProfile }, error: null };
+  }, [user, session, profile]);
 
   const removeStaffMember = useCallback(async (memberId, userId) => {
     if (!user) return { error: { message: 'Not authenticated.' } };

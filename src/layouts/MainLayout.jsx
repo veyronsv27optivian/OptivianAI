@@ -21,20 +21,22 @@ import SessionTimeoutModal from '../components/ui/SessionTimeoutModal';
 import CommandPalette from '../components/ui/CommandPalette';
 import RecommendationsPanel from '../components/ui/RecommendationsPanel';
 
+import { hasPermission } from '../services/auth/permissions';
+
 function getNavItems(role) {
   const items = [
-    { icon: Home, label: 'Dashboard', path: '/app', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
-    { icon: Users, label: 'Users & Roles', path: '/app/users', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
-    { icon: CheckSquare, label: 'Tasks', path: '/app/tasks', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
-    { icon: MessageSquare, label: 'Chat', path: '/app/chat', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
-    { icon: Building2, label: 'Organization', path: '/app/org', badge: null, roles: ['admin', 'owner', 'manager', 'staff'], submenu: [
+    { icon: Home, label: 'Dashboard', path: '/app', badge: null, requiredResource: 'dashboard' },
+    { icon: Users, label: 'Users & Roles', path: '/app/users', badge: null, requiredResource: 'users' },
+    { icon: CheckSquare, label: 'Tasks', path: '/app/tasks', badge: null, requiredResource: 'tasks' },
+    { icon: MessageSquare, label: 'Chat', path: '/app/chat', badge: null, requiredResource: 'chat' },
+    { icon: Building2, label: 'Organization', path: '/app/org', badge: null, requiredResource: 'organization', submenu: [
       { icon: Settings, label: 'Org Settings', path: '/app/org' },
       { icon: BarChart3, label: 'Analytics', path: '/app/org/analytics' },
       { icon: Target, label: 'Structure', path: '/app/org/structure' },
       { icon: Clock, label: 'Activity', path: '/app/org/activity' },
     ]},
-    { icon: FileText, label: 'Files', path: '/app/files', badge: null, roles: ['admin', 'owner', 'manager', 'staff'] },
-    { icon: Brain, label: 'AI Platform', path: '/app/ai', badge: null, roles: ['admin', 'owner', 'manager', 'staff'], submenu: [
+    { icon: FileText, label: 'Files', path: '/app/files', badge: null, requiredResource: 'documents' },
+    { icon: Brain, label: 'AI Platform', path: '/app/ai', badge: null, requiredResource: 'ai', submenu: [
       { icon: Settings, label: 'AI Settings', path: '/app/ai/settings' },
       { icon: History, label: 'History', path: '/app/ai/history' },
       { icon: Server, label: 'Providers', path: '/app/ai/providers' },
@@ -42,7 +44,13 @@ function getNavItems(role) {
       { icon: Globe, label: 'Journey Map 3D', path: '/app/journey' },
     ]},
   ];
-  return items.filter(item => item.roles.includes(role));
+  
+  // Filter items based on whether the user's role has 'view' access to the required resource
+  return items.filter(item => {
+    // If no specific resource is required, everyone sees it
+    if (!item.requiredResource) return true;
+    return hasPermission(role, item.requiredResource, 'view');
+  });
 }
 
 export default function MainLayout() {
@@ -200,7 +208,6 @@ export default function MainLayout() {
 
   const handleLogout = async () => {
     await signOut();
-    // Use window.location to ensure redirect works even after ProtectedRoute unmounts
     window.location.href = '/';
   };
 

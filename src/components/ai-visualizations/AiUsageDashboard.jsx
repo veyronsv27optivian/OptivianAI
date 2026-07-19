@@ -91,16 +91,23 @@ export default function AiUsageDashboard({ analytics }) {
     });
   }, [data]);
 
+  const statColors = {
+    blue: { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' },
+    emerald: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400' },
+    amber: { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-400' },
+    violet: { bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-600 dark:text-violet-400' },
+  };
+
   if (loading) {
     return (
       <div className="p-6 space-y-4">
-        <div className="h-6 bg-slate-200 rounded w-1/3 animate-pulse" />
+        <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-1/3 animate-pulse" />
         <div className="grid grid-cols-4 gap-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-20 bg-slate-100 rounded-lg animate-pulse" />
+            <div key={i} className="h-20 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
           ))}
         </div>
-        <div className="h-48 bg-slate-100 rounded-lg animate-pulse" />
+        <div className="h-48 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -132,19 +139,20 @@ export default function AiUsageDashboard({ analytics }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         {stats.map((stat, i) => {
           const StatIcon = stat.icon;
+          const sc = statColors[stat.color] || statColors.blue;
           return (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`p-3 rounded-lg bg-${stat.color}-50`}
+              className={`p-3 rounded-lg ${sc.bg}`}
             >
               <div className="flex items-center gap-1.5 mb-1.5">
-                <StatIcon size={12} className={`text-${stat.color}-600`} />
-                <span className="text-[10px] font-medium text-slate-500">{stat.label}</span>
+                <StatIcon size={12} className={sc.text} />
+                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{stat.label}</span>
               </div>
-              <p className={`text-lg font-bold text-${stat.color}-600 tabular-nums`}>{stat.value}</p>
+              <p className={`text-lg font-bold ${sc.text} tabular-nums`}>{stat.value}</p>
             </motion.div>
           );
         })}
@@ -201,7 +209,7 @@ export default function AiUsageDashboard({ analytics }) {
       </div>
 
       {/* Trend Chart */}
-      <div className="bg-slate-50 rounded-lg p-4 border border-slate-100 mb-4">
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-100 dark:border-slate-700/50 mb-4">
         <h4 className="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-1.5">
           <TrendingUp size={12} /> Request Trend (6 months)
         </h4>
@@ -231,7 +239,7 @@ export default function AiUsageDashboard({ analytics }) {
             />
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-500">Estimated Cost</span>
-              <span className="text-sm font-bold text-slate-800">${costEstimate.toFixed(4)}</span>
+              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">${costEstimate.toFixed(4)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-500">Avg Cost / Request</span>

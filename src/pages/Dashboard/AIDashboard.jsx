@@ -64,6 +64,12 @@ export default function AIDashboard({
     return items;
   }, []);
 
+  const metricColors = {
+    violet: { bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-600 dark:text-violet-400' },
+    emerald: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400' },
+    blue: { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' },
+  };
+
   const summaryMetrics = useMemo(() => {
     if (!taskStats) return [];
     return [
@@ -90,18 +96,21 @@ export default function AIDashboard({
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-2 mb-4">
-        {summaryMetrics.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={`p-2.5 rounded-lg bg-${stat.color}-50 dark:bg-slate-800/60`}
-          >
-            <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{stat.label}</span>
-            <p className={`text-xs font-bold text-${stat.color}-600 tabular-nums`}>{stat.value}</p>
-          </motion.div>
-        ))}
+        {summaryMetrics.map((stat, i) => {
+          const mc = metricColors[stat.color] || metricColors.blue;
+          return (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className={`p-2.5 rounded-lg ${mc.bg}`}
+            >
+              <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{stat.label}</span>
+              <p className={`text-xs font-bold ${mc.text} tabular-nums`}>{stat.value}</p>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Tool Grid */}

@@ -60,10 +60,10 @@ export default function TaskCenter({
       {/* Task Status Grid */}
       <div className="grid grid-cols-4 gap-2 mb-4">
         {[
-          { label: 'Pending', value: taskStats.pending, color: 'bg-slate-500', bg: 'bg-slate-50 border-slate-200' },
-          { label: 'In Progress', value: taskStats.inProgress, color: 'bg-blue-500', bg: 'bg-blue-50 border-blue-200' },
-          { label: 'Completed', value: taskStats.completed, color: 'bg-emerald-500', bg: 'bg-emerald-50 border-emerald-200' },
-          { label: 'Overdue', value: taskStats.overdue, color: 'bg-rose-500', bg: 'bg-rose-50 border-rose-200' },
+          { label: 'Pending', value: taskStats.pending, color: 'bg-slate-500', bg: 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700' },
+          { label: 'In Progress', value: taskStats.inProgress, color: 'bg-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/50' },
+          { label: 'Completed', value: taskStats.completed, color: 'bg-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50' },
+          { label: 'Overdue', value: taskStats.overdue, color: 'bg-rose-500', bg: 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/50' },
         ].map((s, i) => (
           <motion.div
             key={s.label}
@@ -83,7 +83,7 @@ export default function TaskCenter({
       {/* Priority Distribution */}
       {upcomingDeadlines.length > 0 && (
         <div className="mb-4">
-          <h4 className="text-xs font-semibold text-slate-500 uppercase mb-2 flex items-center gap-1.5">
+          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1.5">
             <BarChart3 size={12} /> Priority Distribution
           </h4>
           <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700/50">
@@ -125,7 +125,7 @@ export default function TaskCenter({
       {/* Upcoming Deadlines */}
       {upcomingDeadlines.length > 0 ? (
         <div>
-          <h4 className="text-xs font-semibold text-slate-500 uppercase mb-2 flex items-center gap-1.5">
+          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-1.5">
             <Calendar size={12} /> Upcoming Deadlines
           </h4>
           <div className="space-y-1">
