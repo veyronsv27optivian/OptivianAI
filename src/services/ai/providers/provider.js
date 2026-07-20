@@ -185,8 +185,24 @@ export class BaseProvider {
   }
 
   /**
+   * Calculate a jittered backoff delay.
+   * Adds ±25% randomness to avoid thundering-herd retries.
+   * @param {number} baseMs
+   * @returns {number}
+   */
+  _jitteredDelay(baseMs) {
+    const jitter = 0.75 + Math.random() * 0.5; // 0.75–1.25
+    return Math.round(baseMs * jitter);
+  }
+
+  /**
    * Retry wrapper: retries a fn up to maxRetries times for
    * retryable errors (rate-limit, timeout, 5xx).
+   *
+   * For 429 (rate-limit) errors, uses the Retry-After header when the
+   * server provides it; otherwise applies jittered exponential backoff:
+   *   attempt 0 → ~2s,  attempt 1 → ~4s,  attempt 2 → ~8s … (capped at 60s).
+   *
    * @param {() => Promise<T>} fn
    * @returns {Promise<T>}
    * @template T
@@ -206,11 +222,22 @@ export class BaseProvider {
             err.details?.status < 600)
         ) {
           if (attempt < this.maxRetries) {
-            const delay =
-              err instanceof AiRateLimitError
-                ? (err.retryAfter || 2) * 1000
-                : Math.min(1000 * 2 ** attempt, 10_000);
-            await new Promise((r) => setTimeout(r, delay));
+            let delayMs;
+            if (err instanceof AiRateLimitError) {
+              if (err.retryAfter) {
+                // Server told us exactly how long to wait — use that
+                delayMs = err.retryAfter * 1000;
+              } else {
+                // Jittered exponential backoff: 2s, 4s, 8s …
+                delayMs = this._jitteredDelay(
+                  Math.min(1000 * 2 ** (attempt + 1), 60_000),
+                );
+              }
+            } else {
+              // For timeouts and 5xx: faster backoff capped at 10s
+              delayMs = Math.min(1000 * 2 ** attempt, 10_000);
+            }
+            await new Promise((r) => setTimeout(r, delayMs));
             continue;
           }
         }

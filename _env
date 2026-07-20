@@ -24,6 +24,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 # ── 1. Gemini (DEFAULT) ──────────────────────────────────────────
 # Get a free API key: https://aistudio.google.com/apikey
+# Must start with "AIza" or "AQ." (Google AI Studio). OAuth / Firebase tokens will not work.
 VITE_GEMINI_API_KEY=AIzaSyAb8RN6IQBQUZcievc7RUx5nvxe-Pc89uymw5n5iCIo9ZJ3nXCQ
 VITE_GEMINI_MODEL=gemini-2.0-flash
 
