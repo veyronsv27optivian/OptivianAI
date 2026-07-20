@@ -49,18 +49,38 @@ export class GeminiProvider extends BaseProvider {
 
   /** @override */
   isAvailable() {
-    return !!this.apiKey;
+    return !!this.apiKey && this._isValidApiKey(this.apiKey);
+  }
+
+  /**
+   * Google AI Studio keys start with "AIza" or "AQ.".
+   * @param {string} key
+   * @returns {boolean}
+   */
+  _isValidApiKey(key) {
+    return typeof key === 'string' && (key.startsWith('AIza') || key.startsWith('AQ.'));
+  }
+
+  _assertConfigured() {
+    if (!this.apiKey) {
+      throw new AiConfigurationError(
+        'Gemini is not configured. Set VITE_GEMINI_API_KEY in your environment.',
+      );
+    }
+
+    if (!this._isValidApiKey(this.apiKey)) {
+      throw new AiConfigurationError(
+        'Invalid Gemini API key format. Create a key at https://aistudio.google.com/apikey ' +
+        'and set VITE_GEMINI_API_KEY in your .env file. Keys must start with "AIza" or "AQ.".',
+      );
+    }
   }
 
   // ─── Text (non-streaming) ─────────────────────────────────────
 
   /** @override */
   async generateText(prompt, options = {}) {
-    if (!this.isAvailable()) {
-      throw new AiConfigurationError(
-        'Gemini is not configured. Set VITE_GEMINI_API_KEY in your environment.',
-      );
-    }
+    this._assertConfigured();
 
     return this._withRetry(() => this._generateTextOnce(prompt, options));
   }
@@ -120,11 +140,7 @@ export class GeminiProvider extends BaseProvider {
 
   /** @override */
   async *generateStream(prompt, options = {}) {
-    if (!this.isAvailable()) {
-      throw new AiConfigurationError(
-        'Gemini is not configured. Set VITE_GEMINI_API_KEY in your environment.',
-      );
-    }
+    this._assertConfigured();
 
     const url = `${this.endpoint}/${this.model}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
 

@@ -1,15 +1,60 @@
 import { createClient } from '@supabase/supabase-js';
+import {
+  clearSupabaseAuthStorage,
+  markSupabaseRefreshInvalid,
+} from './authSanitize';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const isBrowser = typeof window !== 'undefined';
+
+function isInvalidRefreshTokenError(error) {
+  const message = error?.message || '';
+  return (
+    message.includes('Invalid Refresh Token') ||
+    message.includes('Refresh Token Not Found') ||
+    error?.code === 'refresh_token_not_found'
+  );
+}
 
 // When SUPABASE_URL is empty/missing, the app runs in DEV_MODE
 // with localStorage-based data. The client is still created to avoid
 // runtime errors, but all queries check DEV_MODE first.
 export const supabase = createClient(
-  supabaseUrl || window.location.origin + '/api',
+  supabaseUrl || (isBrowser ? window.location.origin + '/api' : 'http://localhost/api'),
   supabaseAnonKey || 'dev-mode-fallback-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+    },
+  },
 );
+
+if (isBrowser && supabaseUrl) {
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') {
+      clearSupabaseAuthStorage();
+    }
+  });
+
+  // Recover silently when a stale refresh token was stored locally.
+  supabase.auth.getSession().then(({ error }) => {
+    if (isInvalidRefreshTokenError(error)) {
+      markSupabaseRefreshInvalid();
+      clearSupabaseAuthStorage();
+      supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+    }
+  }).catch((error) => {
+    if (isInvalidRefreshTokenError(error)) {
+      markSupabaseRefreshInvalid();
+      clearSupabaseAuthStorage();
+    }
+  });
+}
 
 // Creates a temporary client that DOES NOT persist session to localStorage.
 // Used for creating users (staff) so it doesn't log the admin out.

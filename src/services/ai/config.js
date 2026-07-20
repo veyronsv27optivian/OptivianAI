@@ -120,7 +120,7 @@ export const PROVIDER_CONFIGS = {
     endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
     envKey: 'VITE_GEMINI_API_KEY',
     envModel: 'VITE_GEMINI_MODEL',
-    defaultModel: 'gemini-3.5-flash',
+    defaultModel: 'gemini-2.0-flash',
     supportsStreaming: true,
     supportsVision: true,
     isDefault: true,

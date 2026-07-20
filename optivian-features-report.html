@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OptivianAI — Complete Feature Catalog</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1a1a2e;
+    background: #f8f9fc;
+    line-height: 1.6;
+    padding: 0;
+  }
+
+  /* ── Cover Page ──────────────────────── */
+  .cover {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: white;
+    padding: 80px 60px 60px;
+    text-align: center;
+    page-break-after: always;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .cover h1 {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cover .tagline {
+    font-size: 20px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 40px;
+  }
+
+  .cover .meta {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    line-height: 2;
+  }
+
+  .cover .meta span { display: block; }
+
+  .cover .badge-container {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 32px;
+  }
+
+  .cover .badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* ── Table of Contents ────────────────── */
+  .toc {
+    padding: 60px;
+    page-break-after: always;
+  }
+
+  .toc h2 { font-size: 28px; margin-bottom: 24px; color: #1a1a2e; }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e8ecf4;
+    text-decoration: none;
+    color: #1a1a2e;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .toc-item:hover { border-color: #667eea; box-shadow: 0 2px 8px rgba(102,126,234,0.15); }
+
+  .toc-item .num {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .toc-item .count { margin-left: auto; font-size: 12px; color: #667eea; font-weight: 600; }
+
+  /* ── Sections ─────────────────────────── */
+  .section {
+    padding: 60px;
+    page-break-after: always;
+  }
+
+  .section:last-child { page-break-after: auto; }
+
+  .section-header {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #e8ecf4;
+  }
+
+  .section-header .cat-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  .cat-badge.blue { background: #eef2ff; color: #4f46e5; }
+  .cat-badge.green { background: #ecfdf5; color: #059669; }
+  .cat-badge.purple { background: #f5f3ff; color: #7c3aed; }
+  .cat-badge.orange { background: #fff7ed; color: #ea580c; }
+  .cat-badge.red { background: #fef2f2; color: #dc2626; }
+  .cat-badge.teal { background: #ecfeff; color: #0d9488; }
+  .cat-badge.pink { background: #fdf2f8; color: #db2777; }
+  .cat-badge.slate { background: #f1f5f9; color: #475569; }
+  .cat-badge.amber { background: #fffbeb; color: #d97706; }
+  .cat-badge.indigo { background: #eef2ff; color: #4f46e5; }
+
+  .section-header h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+
+  .section-header p {
+    font-size: 15px;
+    color: #6b7280;
+  }
+
+  /* ── Feature Cards ────────────────────── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .feature-full { grid-column: 1 / -1; }
+
+  .feature-card {
+    background: white;
+    border: 1px solid #e8ecf4;
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.2s;
+    break-inside: avoid;
+  }
+
+  .feature-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-color: #d4d8e8; }
+
+  .feature-card .fc-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .feature-card .fc-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .feature-card .fc-icon.blue { background: #eef2ff; }
+  .feature-card .fc-icon.green { background: #ecfdf5; }
+  .feature-card .fc-icon.purple { background: #f5f3ff; }
+  .feature-card .fc-icon.orange { background: #fff7ed; }
+  .feature-card .fc-icon.red { background: #fef2f2; }
+  .feature-card .fc-icon.teal { background: #ecfeff; }
+  .feature-card .fc-icon.pink { background: #fdf2f8; }
+  .feature-card .fc-icon.slate { background: #f1f5f9; }
+  .feature-card .fc-icon.amber { background: #fffbeb; }
+  .feature-card .fc-icon.indigo { background: #eef2ff; }
+
+  .feature-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-top: 2px;
+  }
+
+  .feature-card .fc-status {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .fc-status.ready { background: #ecfdf5; color: #059669; }
+  .fc-status.in-progress { background: #fffbeb; color: #d97706; }
+  .fc-status.future { background: #f1f5f9; color: #64748b; }
+  .fc-status.planned { background: #f5f3ff; color: #7c3aed; }
+
+  .feature-card .fc-desc {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+
+  .feature-card .fc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .feature-card .fc-tag {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+
+  .fc-tag.low { background: #ecfdf5; color: #059669; }
+  .fc-tag.medium { background: #fffbeb; color: #d97706; }
+  .fc-tag.high { background: #fef2f2; color: #dc2626; }
+
+  .fc-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  .fc-details strong { color: #374151; }
+
+  /* ── Tables ───────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+
+  .data-table th {
+    background: #f8f9fc;
+    color: #374151;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid #e8ecf4;
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border: 1px solid #e8ecf4;
+    color: #6b7280;
+  }
+
+  .data-table tr:hover td { background: #f8f9fc; }
+
+  /* ── Summary Box ──────────────────────── */
+  .summary-box {
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border: 1px solid #c7d2fe;
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 32px;
+  }
+
+  .summary-box h3 {
+    font-size: 20px;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+  }
+
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #e8ecf4;
+  }
+
+  .stat-card .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #4f46e5;
+  }
+
+  .stat-card .label {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+  }
+
+  /* ── Print ────────────────────────────── */
+  @media print {
+    body { background: white; }
+    .section { padding: 40px; }
+    .toc { padding: 40px; }
+    .feature-grid { break-inside: avoid; }
+    .cover { min-height: auto; padding: 60px 40px; }
+  }
+
+  /* ── Status Legend ────────────────────── */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 20px 0 8px;
+    padding: 16px 20px;
+    background: #f8f9fc;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.green { background: #059669; }
+  .legend-dot.yellow { background: #d97706; }
+  .legend-dot.gray { background: #64748b; }
+  .legend-dot.purple { background: #7c3aed; }
+
+  h4 { font-size: 18px; margin: 28px 0 12px; color: #1a1a2e; }
+  ul, ol { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 4px; color: #6b7280; font-size: 14px; }
+
+  .inline-code {
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'SF Mono', monospace;
+    font-size: 12px;
+    color: #374151;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<div class="cover">
+  <h1>OptivianAI</h1>
+  <p class="tagline">The Complete Feature Catalog — Every Capability, Every Tool, Every Plan</p>
+  <div class="meta">
+    <span><strong>Domain:</strong> Decision Intelligence</span>
+    <span><strong>Team:</strong> Veronyx</span>
+    <span><strong>Status:</strong> Planning &amp; Foundation Phase</span>
+    <span><strong>Generated:</strong> July 20, 2026</span>
+  </div>
+  <div class="badge-container">
+    <span class="badge">✅ 80+ Implemented Features</span>
+    <span class="badge">🚧 20+ In Progress</span>
+    <span class="badge">🔮 100+ Planned</span>
+    <span class="badge">🤖 18 AI Agents</span>
+  </div>
+</div>
+
+<!-- ═══════════════ TABLE OF CONTENTS ═══════════════ -->
+<div class="toc">
+  <h2>📑 Table of Contents</h2>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot green"></span> Implemented</span>
+    <span class="legend-item"><span class="legend-dot yellow"></span> In Progress</span>
+    <span class="legend-item"><span class="legend-dot purple"></span> Planned / Future</span>
+    <span class="legend-item"><span class="legend-dot gray"></span> Backlog / Vision</span>
+  </div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="num">1</span> AI Advisor &amp; Business Intelligence<span class="count">16</span></a>
+    <a class="toc-item" href="#s2"><span class="num">2</span> AI Agent Architecture<span class="count">18</span></a>
+    <a class="toc-item" href="#s3"><span class="num">3</span> Multi-Provider AI Infrastructure<span class="count">14</span></a>
+    <a class="toc-item" href="#s4"><span class="num">4</span> Execution Engine &amp; Autonomous Actions<span class="count">22</span></a>
+    <a class="toc-item" href="#s5"><span class="num">5</span> Role-Based Access Control (RBAC)<span class="count">22</span></a>
+    <a class="toc-item" href="#s6"><span class="num">6</span> Authentication &amp; Security<span class="count">12</span></a>
+    <a class="toc-item" href="#s7"><span class="num">7</span> Internal Communication<span class="count">8</span></a>
+    <a class="toc-item" href="#s8"><span class="num">8</span> Task Management<span class="count">10</span></a>
+    <a class="toc-item" href="#s9"><span class="num">9</span> Organization Management<span class="count">6</span></a>
+    <a class="toc-item" href="#s10"><span class="num">10</span> Dashboard &amp; Analytics<span class="count">14</span></a>
+    <a class="toc-item" href="#s11"><span class="num">11</span> Enterprise Role Dashboards<span class="count">24</span></a>
+    <a class="toc-item" href="#s12"><span class="num">12</span> File Analyzers &amp; Document Processing<span class="count">6</span></a>
+    <a class="toc-item" href="#s13"><span class="num">13</span> UI &amp; User Experience<span class="count">20</span></a>
+    <a class="toc-item" href="#s14"><span class="num">14</span> Notifications &amp; Alerts<span class="count">6</span></a>
+    <a class="toc-item" href="#s15"><span class="num">15</span> Supabase Backend &amp; Database<span class="count">15+</span></a>
+    <a class="toc-item" href="#s16"><span class="num">16</span> Vision &amp; Future Features<span class="count">30+</span></a>
+  </div>
+</div>
+
+<!-- ═══════════════ 1. AI ADVISOR & BUSINESS INTELLIGENCE ═══════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <span class="cat-badge blue">🤖 Section 1</span>
+    <h2>AI Advisor &amp; Business Intelligence</h2>
+    <p>Core AI advisory tools that power OptivianAI's Decision Intelligence capabilities — a connected AI manager for launching products, programs, and ventures.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">🧠</div>
+        <div>
+          <h3>AI Business Advisor <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Acts as a practical advisor through the complete product/program journey. Provides structured guidance with input forms for industry, company size, stage, and goals.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Advisory</span><span class="fc-tag">Decision Intelligence</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">📋</div>
+        <div>
+          <h3>Requirement Analyzer <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Reads user input or documents and detects vague, incomplete, contradictory, or unrealistic requirements. Structured prompt files are implemented.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Analysis</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">🎯</div>
+        <div>
+          <h3>Decision Simulation Engine <span class="fc-status planned">Planned</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Interactive "what-if" scenario testing for choices like timeline, budget, team size, feature cuts, and launch decisions before execution. Scenario comparison table planned.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Simulation</span><span class="fc-tag">Planned</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">🔮</div>
+        <div>
+          <h3>Future Lab <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Analyzes business ideas and explores strategic possibilities with AI-driven insights. Helps users think through long-term scenarios and opportunities.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Strategy</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">📊</div>
+        <div>
+          <h3>SWOT Analysis <span class="fc-status planned">Planned</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Generates comprehensive Strengths, Weaknesses, Opportunities, and Threats analysis. Planned to render as an interactive 4-quadrant grid visualization.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Analysis</span><span class="fc-tag">Visualization</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">📈</div>
+        <div>
+          <h3>Marketing Strategy <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI-powered marketing strategy recommendations based on business profile. Includes campaign planning, content strategy, and audience targeting.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Marketing</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">🏢</div>
+        <div>
+          <h3>Competitor Analysis <span class="fc-status planned">Planned</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Deep competitive landscape analysis with actionable insights. Planned to render as a comparison table with structured competitor data.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Analysis</span><span class="fc-tag">Planned</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">💰</div>
+        <div>
+          <h3>Financial Forecast <span class="fc-status planned">Planned</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Revenue projections, cost analysis, and financial modeling. Planned to include cash flow gauge, revenue area chart, and P&L bar chart.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Finance</span><span class="fc-tag">Planned</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">✅</div>
+        <div>
+          <h3>Launch Readiness Score <span class="fc-status planned">Planned</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Calculates a clear score (0–100) showing whether the product is ready for launch across 7 dimensions. Planned to render as radar chart.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Scoring</span><span class="fc-tag">Planned</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">⚠️</div>
+        <div>
+          <h3>Risk Assessment <span class="fc-status planned">Planned</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Identifies timeline, budget, workload, technical, requirement, and launch-related risks. Planned risk heatmap matrix with Probability × Impact visualization.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Risk</span><span class="fc-tag">Planned</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">📄</div>
+        <div>
+          <h3>Report Generator <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Creates comprehensive final reports with risks, decisions, recommendations, and launch status. AI analysis results can be exported.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Reporting</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">📢</div>
+        <div>
+          <h3>Pitch Deck Assistant <span class="fc-status in-progress">In Progress</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Helps structure and refine investor pitch decks. Prompt and tool class exist; UI button needed in tool grid.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Pitching</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">📝</div>
+        <div>
+          <h3>Meeting Notes <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI-assisted meeting summarization and action item extraction from conversation transcripts.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Productivity</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">🔍</div>
+        <div>
+          <h3>Document Analyzer <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Extracts insights from uploaded documents and connected sources. Integrates with file parsers for PDF, Word, Excel, CSV, and PowerPoint.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Documents</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">🖼️</div>
+        <div>
+          <h3>Image &amp; Logo Analysis <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Vision-based analysis using multimodal AI (Qwen VL, Gemini Vision). Can analyze uploaded images and logos.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Vision</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon blue">📱</div>
+        <div>
+          <h3>Social Media Analysis <span class="fc-status future">Future</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Analyzes social media presence and suggests content strategies. Future integration with Instagram, Twitter/X, and LinkedIn APIs.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Social</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 2. AI AGENT ARCHITECTURE ═══════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <span class="cat-badge purple">🤖 Section 2</span>
+    <h2>AI Agent Architecture</h2>
+    <p>18 specialized AI agents orchestrated by a Chief Manager Agent — each handling a specific domain of the launch journey.</p>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Agent</th>
+        <th>Role / Responsibility</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Chief Manager Agent</strong></td><td>Orchestrates the full launch journey across all agents</td><td><span class="fc-status ready">Ready</span></td></tr>
+      <tr><td>2</td><td><strong>Business Strategy Agent</strong></td><td>Market analysis, GTM strategy, business model validation</td><td><span class="fc-status ready">Ready</span></td></tr>
+      <tr><td>3</td><td><strong>Requirement Analyst Agent</strong></td><td>Requirements gathering, scope definition, gap analysis</td><td><span class="fc-status ready">Ready</span></td></tr>
+      <tr><td>4</td><td><strong>Information Gap Agent</strong></td><td>Missing information detection and targeted questioning</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>5</td><td><strong>Decision Simulation Agent</strong></td><td>Scenario analysis, trade-off analysis, what-if modeling</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>6</td><td><strong>Interface Intelligence Agent</strong></td><td>Dashboard UX structure, data layout optimization</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>7</td><td><strong>Spatial Visualization Agent</strong></td><td>3D / 360° journey mapping, spatial data representation</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>8</td><td><strong>Risk Intelligence Agent</strong></td><td>Risk identification, scoring, and categorization</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>9</td><td><strong>Risk Mapping Agent</strong></td><td>Risk heatmaps, probability × impact visualization</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>10</td><td><strong>Launch Readiness Agent</strong></td><td>Launch Readiness Score (0–100), dimension scoring</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>11</td><td><strong>Journey Operations Agent</strong></td><td>Roadmap generation, milestone tracking, progress monitoring</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>12</td><td><strong>Recommendation Strategist Agent</strong></td><td>Prioritized recommendations, action planning</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>13</td><td><strong>Analytics Intelligence Agent</strong></td><td>KPIs, dashboard analytics, performance metrics</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>14</td><td><strong>Document Intelligence Agent</strong></td><td>Insights from connected documents, smart parsing</td><td><span class="fc-status ready">Ready</span></td></tr>
+      <tr><td>15</td><td><strong>Integration Agent</strong></td><td>App connections, data sync, API orchestration</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>16</td><td><strong>Executive Report Agent</strong></td><td>Stakeholder-ready reports, executive summaries</td><td><span class="fc-status ready">Ready</span></td></tr>
+      <tr><td>17</td><td><strong>Workflow Automation Agent</strong></td><td>Automated agent pipelines, scheduled operations</td><td><span class="fc-status planned">Planned</span></td></tr>
+      <tr><td>18</td><td><strong>Team Collaboration Agent</strong></td><td>Group projects, roles, tasks, team progress tracking</td><td><span class="fc-status future">Future</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="summary-box" style="margin-top: 24px;">
+    <h3>🧠 Agent Architecture Overview</h3>
+    <p style="font-size:14px;color:#6b7280;line-height:1.7;">Each feature is handled by a professional specialized agent. The <strong>Chief Manager Agent</strong> coordinates all agents and presents a unified experience to the user. The system uses Gemini API (primary) with DeepSeek and Qwen as fallback providers via OpenRouter. Agents communicate through structured prompts and the execution engine for action delivery.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ 3. MULTI-PROVIDER AI INFRASTRUCTURE ═══════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <span class="cat-badge indigo">⚙️ Section 3</span>
+    <h2>Multi-Provider AI Infrastructure</h2>
+    <p>The technical backbone for AI operations — supporting multiple providers, caching, memory, streaming, and analytics.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">🔌</div>
+        <div>
+          <h3>Gemini Provider <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Default AI provider using Google's Gemini 2.0 Flash model. Supports text generation, streaming, and vision capabilities.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Default</span><span class="fc-tag">Vision</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">🔌</div>
+        <div>
+          <h3>DeepSeek Provider <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Secondary provider via OpenRouter. Uses DeepSeek R1 for text generation and reasoning tasks. Free tier available.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Fallback</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">🔌</div>
+        <div>
+          <h3>Qwen VL Provider <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Vision-capable provider via OpenRouter. Uses Qwen 2.5 VL 72B for image analysis and multimodal understanding.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Vision</span><span class="fc-tag">Fallback</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">🔄</div>
+        <div>
+          <h3>Provider Fallback Chain <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Automatic fallback between providers if one fails. Configurable priority order: Gemini → DeepSeek → Qwen.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Resilience</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">💾</div>
+        <div>
+          <h3>Conversation Memory <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Session-aware chat history stored in Supabase `conversation_memory` table. Maintains context across multi-turn conversations.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Memory</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">⚡</div>
+        <div>
+          <h3>Response Caching <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Configurable TTL-based cache with LRU eviction strategy. Reduces API costs and speeds up repeated queries.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Cache</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">📡</div>
+        <div>
+          <h3>Real-Time Streaming <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Token-by-token streaming of AI responses for real-time user experience. `generateStream()` method implemented.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Streaming</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">💰</div>
+        <div>
+          <h3>Token Tracking &amp; Cost Estimation <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Tracks token usage per model and estimates costs. Usage analytics with pricing per model configuration.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Analytics</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">📊</div>
+        <div>
+          <h3>AI Analytics &amp; Usage Logging <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Success/failure tracking, request logging, latency monitoring. Analytics tracker with per-tool usage statistics.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Analytics</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">📝</div>
+        <div>
+          <h3>Prompt Templates System <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">37 system prompt modules for every AI tool. Save-and-reuse template library planned for future release.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Templates</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">🏗️</div>
+        <div>
+          <h3>Pluggable Provider Architecture <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Abstract provider base class with standardized interface. Add new providers by extending BaseProvider.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Architecture</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">🖼️</div>
+        <div>
+          <h3>Vision Support <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Multimodal AI support for image analysis via Gemini Vision and Qwen VL. Extracts text and insights from images.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Vision</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">📄</div>
+        <div>
+          <h3>Document Processing <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Parses PDF, Word, Excel, CSV, and PowerPoint documents. Extracts text content for AI analysis.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Documents</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon indigo">📝</div>
+        <div>
+          <h3>Structured Logging <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Comprehensive logging system for all AI operations including request/response pairs, timing, and errors.</p>
+      <div class="fc-tags"><span class="fc-tag">AI</span><span class="fc-tag">Observability</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 4. EXECUTION ENGINE & AUTONOMOUS ACTIONS ═══════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <span class="cat-badge orange">⚡ Section 4</span>
+    <h2>Execution Engine &amp; Autonomous Actions</h2>
+    <p>The bridge between "AI says" and "AI does" — enabling autonomous execution of AI-proposed actions across the platform.</p>
+  </div>
+
+  <h4>Track B: Execution Infrastructure</h4>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📋</div>
+        <div>
+          <h3>Action Registry <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">A registry that maps tool types to executable actions. Schema: toolType, actionName, handler, requiresApproval, rollbackHandler, description, safetyLevel. File: <span class="inline-code">src/services/ai/actions/actionRegistry.js</span></p>
+      <div class="fc-tags"><span class="fc-tag">Execution</span><span class="fc-tag">Registry</span><span class="fc-tag">Phase B1</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">⚙️</div>
+        <div>
+          <h3>Execution Engine <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Core engine that orchestrates: intent parsing → validation → permission check → approval → execute → rollback. Supports JSON, inline, and bracketed action markers. File: <span class="inline-code">src/services/ai/actions/executionEngine.js</span></p>
+      <div class="fc-tags"><span class="fc-tag">Execution</span><span class="fc-tag">Core</span><span class="fc-tag">Phase B2</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🔐</div>
+        <div>
+          <h3>AI Permission System <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Extends human RBAC with AI-specific rules: spend limits, time-based restrictions, role-based auto-approve levels, and rate limiting. File: <span class="inline-code">src/services/ai/actions/aiPermissions.js</span></p>
+      <div class="fc-tags"><span class="fc-tag">Execution</span><span class="fc-tag">Permissions</span><span class="fc-tag">Phase B3</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">✅</div>
+        <div>
+          <h3>Approval Workflow <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">State machine: proposed → pending_approval → approved → executing → completed | rejected | expired | rolled_back. Includes 30-minute auto-expiry.</p>
+      <div class="fc-tags"><span class="fc-tag">Execution</span><span class="fc-tag">Approvals</span><span class="fc-tag">Phase B4</span></div>
+    </div>
+  </div>
+
+  <h4>Track C: Autonomous Actions</h4>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📌</div>
+        <div>
+          <h3>Create Task from AI <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI analyzes weaknesses or recommendations and offers to create tasks. Uses <span class="inline-code">taskService.createTask()</span> via action registry.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Tasks</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">👤</div>
+        <div>
+          <h3>Assign Task to Team Member <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI suggests best assignee based on skills/workload via <span class="inline-code">taskService.updateTask()</span>.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Tasks</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🔄</div>
+        <div>
+          <h3>Update Task Priority/Status <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI re-prioritizes based on deadlines and workload. Rollback support via delete task handler.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Tasks</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">👁️</div>
+        <div>
+          <h3>Task Deadline Monitoring <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Scheduled health checks monitor all tasks, flag approaching deadlines, alert assignees via notifications.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Monitoring</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">✅</div>
+        <div>
+          <h3>Task Completion Verification <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI reads task descriptions and compares against completion notes to verify output quality.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Quality</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">💬</div>
+        <div>
+          <h3>Send Chat Message <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI sends messages to conversations on behalf of users via <span class="inline-code">chatService.sendMessage()</span>.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Communication</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🔔</div>
+        <div>
+          <h3>Send Notification <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI notifies users about task assignments, mentions, and alerts via <span class="inline-code">notificationService.createNotification()</span>.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Notifications</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📊</div>
+        <div>
+          <h3>Share AI Analysis Result <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI posts its analysis results to a channel or conversation automatically.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Communication</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🗂️</div>
+        <div>
+          <h3>Save AI Analysis <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">Persist AI analysis results to the database for later reference and retrieval.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Data</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🧹</div>
+        <div>
+          <h3>Data Cleanup Automation <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI archives old completed/stale tasks past retention period (configurable, default 90 days).</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Cleanup</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📋</div>
+        <div>
+          <h3>Generate &amp; Send Report <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI generates a comprehensive report and optionally shares it with team members via chat.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Reporting</span></div>
+    </div>
+
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🧑‍💼</div>
+        <div>
+          <h3>Suggest User Provisioning <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">AI analyzes team workload and suggests hiring needs or role additions based on overdue rates.</p>
+      <div class="fc-tags"><span class="fc-tag">Actions</span><span class="fc-tag">Admin</span></div>
+    </div>
+  </div>
+
+  <h4>Autonomous AI Manager (Phase D4.9)</h4>
+  <div class="feature-grid">
+    <div class="feature-card feature-full">
+      <div class="fc-header">
+        <div class="fc-icon orange">🤖</div>
+        <div>
+          <h3>Autonomous AI Manager <span class="fc-status ready">Ready</span></h3>
+        </div>
+      </div>
+      <p class="fc-desc">A self-operating AI manager singleton with 5 subsystems: <strong>Monitor</strong> (health checks, task monitoring, anomaly detection), <strong>Executor</strong> (auto-executes approved actions), <strong>Learner</strong> (tracks outcomes, adjusts confidence), <strong>Reporter</strong> (daily/weekly summaries), <strong>Scheduler</strong> (timed recurring tasks). Features self-healing capabilities and proactive recommendation generation.</p>
+      <div class="fc-tags"><span class="fc-tag">Autonomous</span><span class="fc-tag">Monitoring</span><span class="fc-tag">Self-Healing</span><span class="fc-tag">Phase D4.9</span></div>
+      <div class="fc-details">
+        <strong>Capabilities:</strong> Scheduled health checks every 60s, task health every 5 min, anomaly detection with configurable sensitivity, auto-execution of low-safety actions, proactive recommendations, auto-escalation of critical issues, one-click rollback (30-second undo window), pending action queue with approval UI.<br>
+        <strong>Default registered actions:</strong> create_task, update_task, delete_task, send_message, create_notification, save_analysis, get_analyses, create_conversation, update_assignee_status, generate_report, suggest_provisioning, cleanup_data
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <h3>🏗️ Execution Pipeline Flow</h3>
+    <p style="font-size:14px;color:#6b7280;line-height:1.7;">
+      <strong>AI generates response</strong> → <span class="inline-code">parseIntent()</span> extracts actionable intents (JSON blocks, inline markers, bracketed markers)<br>
+      → <span class="inline-code">validateIntent()</span> checks against action registry<br>
+      → <span class="inline-code">checkPermission()</span> verifies user has RBAC permission + AI-specific rules<br>
+      → <strong>Low safety</strong> actions auto-execute; <strong>high/critical</strong> require user approval<br>
+      → <span class="inline-code">executeAction()</span> runs handler with rollback support<br>
+      → Results logged with <span class="inline-code">[Undo]</span> available for 30 seconds
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════ 5. RBAC ═══════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <span class="cat-badge red">🔐 Section 5</span>
+    <h2>Role-Based Access Control (RBAC)</h2>
+    <p>22 roles with granular permission mapping across 13 resources and 5 actions.</p>
+  </div>
+
+  <h4>The 22 Roles</h4>
+  <table class="data-table">
+    <thead>
+      <tr><th>Level</th><th>Roles</th><th>Access</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>🔴 Unrestricted</td><td>Super Admin, Owner</td><td>Full system-wide access</td></tr>
+      <tr><td>🟠 Full Except Billing</td><td>Administrator</td><td>Full access except billing</td></tr>
+      <tr><td>🟣 Strategic</td><td>Director, Executive</td><td>Strategic management</td></tr>
+      <tr><td>🔵 Operational</td><td>Manager, Assistant Manager, Team Lead</td><td>Operational leadership</td></tr>
+      <tr><td>🟢 Department</td><td>HR, Finance, Marketing, Sales, Operations</td><td>Department-specific access</td></tr>
+      <tr><td>🟡 Engineering</td><td>Developer, Designer, QA</td><td>Engineering &amp; creative</td></tr>
+      <tr><td>⚪ General</td><td>Support, Staff, Intern</td><td>General employees</td></tr>
+      <tr><td>👁️ External</td><td>Client, Guest, Viewer</td><td>External / read-only</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Permissions Matrix</h4>
+  <p style="font-size:14px;color:#6b7280;margin-bottom:8px;">Each role has granular permissions (View, Create, Edit, Delete, Manage) across 13 resources:</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon red">📋</div>
+        <div><h3>Resource Categories</h3></div>
+      </div>
+      <div class="fc-desc">
+        <strong>13 resources:</strong> Users, Tasks, Chat, AI, Reports, Dashboard, Analytics, Organization, Billing, Settings, Documents, Notifications, Audit Logs
+      </div>
+      <div class="fc-tags"><span class="fc-tag">RBAC</span><span class="fc-tag">Core</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon red">🛡️</div>
+        <div><h3>Role Hierarchy</h3></div>
+      </div>
+      <div class="fc-desc">
+        Ranked roles with display info and inherited permissions. Used by permission checks throughout the application.
+      </div>
+      <div class="fc-tags"><span class="fc-tag">RBAC</span><span class="fc-tag">Hierarchy</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 6. AUTHENTICATION & SECURITY ═══════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <span class="cat-badge amber">🔑 Section 6</span>
+    <h2>Authentication &amp; Security</h2>
+    <p>Comprehensive auth system with multiple providers, 2FA, session management, and security monitoring.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">📧</div>
+        <div><h3>Email + Password Auth <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Standard email/password authentication with session persistence via Supabase Auth.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">🅶</div>
+        <div><h3>Google OAuth Login <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Sign in with Google via Supabase OAuth integration.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">OAuth</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">🐙</div>
+        <div><h3>GitHub OAuth Login <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Sign in with GitHub via Supabase OAuth integration.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">OAuth</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">🔐</div>
+        <div><h3>Email-Based 2FA (OTP) <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">6-digit OTP sent to email for two-factor authentication. SHA-256 hashed OTPs stored in `mfa_otps` table.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">2FA</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">🔄</div>
+        <div><h3>Password Reset <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Password reset flow with email verification via Supabase Auth.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">💾</div>
+        <div><h3>Remember Me / Session Persistence <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Extended session duration with "Remember Me" support. Sessions persisted to localStorage with PKCE flow.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">👤</div>
+        <div><h3>Temp Password Flow <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Admin-created accounts receive temporary passwords. Forces password change on first login.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">Admin</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">🚪</div>
+        <div><h3>Logout Everywhere <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Session-scoped sign-out that terminates all active sessions.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">Security</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">📜</div>
+        <div><h3>Login History <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Tracks every login attempt with IP, provider, device, and success/failure. 90-day retention with automatic cleanup.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">Audit</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">👁️</div>
+        <div><h3>Session Timeout / Auto-Logout <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Configurable idle timeout that automatically logs users out for security.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">📱</div>
+        <div><h3>Device Fingerprinting <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Trusted device tracking for 2FA. Future enhancement with fingerprinting library.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">⚡</div>
+        <div><h3>Rate Limiting <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Rate limiting on auth endpoints to prevent brute force attacks.</p>
+      <div class="fc-tags"><span class="fc-tag">Auth</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 7. INTERNAL COMMUNICATION ═══════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <span class="cat-badge green">💬 Section 7</span>
+    <h2>Internal Communication</h2>
+    <p>Real-time messaging, file sharing, and AI chat — the collaboration backbone of OptivianAI.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🤖</div>
+        <div><h3>AI Chat Interface <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Conversational AI interface powered by multi-provider support. Full chat UI with tool integration.</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span><span class="fc-tag">AI</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">💬</div>
+        <div><h3>Real-Time Messaging <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Internal chat with direct messages and group conversations. Real-time updates via Supabase Realtime.</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📎</div>
+        <div><h3>File Sharing in Chat <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Upload and share files within conversations — images, documents, and more via Supabase Storage.</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span><span class="fc-tag">Files</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">😊</div>
+        <div><h3>Message Reactions (Emoji) <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Hover-to-react emoji picker on messages. Planned for Phase 2 implementation.</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🔔</div>
+        <div><h3>Unread Count per Conversation <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Badge with unread message count per conversation. Partially done — needs polish.</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🔍</div>
+        <div><h3>Conversation Search <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Filter conversations by name in sidebar. Client-side filter implementation.</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🔍</div>
+        <div><h3>Message Search <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Search within a conversation's messages. In-memory or Supabase query-based.</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">👁️</div>
+        <div><h3>Chat Read Receipts <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Show "Seen" timestamps for messages. Per-message or per-conversation (needs design decision).</p>
+      <div class="fc-tags"><span class="fc-tag">Chat</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 8. TASK MANAGEMENT ═══════════════ -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <span class="cat-badge teal">📋 Section 8</span>
+    <h2>Task Management</h2>
+    <p>Full task lifecycle management with multi-assignee support, priority, status workflow, and AI integration.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">➕</div>
+        <div><h3>Task Creation <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Create tasks with title, description, assignees, priority, due date, and status.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">👥</div>
+        <div><h3>Multi-Assignee Support <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Assign multiple members to a task with per-assignee completion status tracking.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🏷️</div>
+        <div><h3>Priority Levels <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">4 priority levels: low, medium, high, urgent. Visual indicators for each level.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🔄</div>
+        <div><h3>Status Workflow <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Complete status flow: pending → in_progress → review → done → cancelled. Archive status for cleanup.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🗑️</div>
+        <div><h3>Task Deletion <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Delete tasks with confirmation. Rollback support via execution engine.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">📅</div>
+        <div><h3>Due Dates <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Set due dates with calendar picker. Overdue flagging and deadline monitoring.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🔄</div>
+        <div><h3>Task Drag-and-Drop <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Kanban-style board or priority reorder. Needs design decision on view type.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">📎</div>
+        <div><h3>Task File Attachments <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Upload files to tasks via Supabase Storage. Needs design decision on storage backend.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">💬</div>
+        <div><h3>Task Comments / Activity Log <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Comment threads per task with activity history. Needs design decision on storage schema.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">📦</div>
+        <div><h3>Task Bulk Actions <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Select multiple tasks and batch update status, assignee, or priority.</p>
+      <div class="fc-tags"><span class="fc-tag">Tasks</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 9. ORGANIZATION MANAGEMENT ═══════════════ -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <span class="cat-badge pink">🏢 Section 9</span>
+    <h2>Organization Management</h2>
+    <p>Multi-tenant organization structure with staff management, business profiles, and member lifecycle.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon pink">🏢</div>
+        <div><h3>Organization Creation <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Create organizations with business details: name, type, website, social links, and owner assignment.</p>
+      <div class="fc-tags"><span class="fc-tag">Org</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon pink">👥</div>
+        <div><h3>Staff Directory <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Complete staff directory with role-based permissions, contact info, and status.</p>
+      <div class="fc-tags"><span class="fc-tag">Org</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon pink">📧</div>
+        <div><h3>Member Invitation <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Invite members to organization with temporary passwords. Email invitation with custom template.</p>
+      <div class="fc-tags"><span class="fc-tag">Org</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon pink">🔐</div>
+        <div><h3>Role Assignment <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Assign roles to members from 22 predefined roles. Automatic permission inheritance.</p>
+      <div class="fc-tags"><span class="fc-tag">Org</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon pink">📊</div>
+        <div><h3>Organization Analytics <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Analytics dashboard for organization: member activity, task completion rates, department performance.</p>
+      <div class="fc-tags"><span class="fc-tag">Org</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon pink">🔄</div>
+        <div><h3>Organization Profile &amp; Settings <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Edit organization details, manage settings, view activity logs and member audit trail.</p>
+      <div class="fc-tags"><span class="fc-tag">Org</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 10. DASHBOARD & ANALYTICS ═══════════════ -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <span class="cat-badge green">📊 Section 10</span>
+    <h2>Dashboard &amp; Analytics</h2>
+    <p>Comprehensive dashboards with real-time metrics, charts, KPIs, and AI-powered insights.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📈</div>
+        <div><h3>Executive Stats Dashboard <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">KPI cards with animated counters for key metrics. Links to detail pages planned.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📊</div>
+        <div><h3>Recharts Integration <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">BarChart, RadarChart, AreaChart, PieChart, LineChart all available via recharts library.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Charts</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">⚡</div>
+        <div><h3>Quick Actions Panel <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Quick action shortcuts for common tasks. Currently 3 items, expansion planned.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📋</div>
+        <div><h3>Org Overview Widget <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Organization health and performance overview on dashboard.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📅</div>
+        <div><h3>Calendar Widget <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Calendar display on dashboard. Persistence from localStorage planned.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📋</div>
+        <div><h3>Task Center Widget <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Recent tasks display with status, priority, and assignee. Shows created date.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📊</div>
+        <div><h3>AI Usage Dashboard <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Visualize token usage, costs, popular tools, and provider metrics.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🔢</div>
+        <div><h3>Animated Counter <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Number roll-up animation component for KPI metrics.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Animation</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🔄</div>
+        <div><h3>Real-Time Updates <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Supabase Realtime subscriptions for live dashboard updates.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Realtime</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📊</div>
+        <div><h3>Dashboard Charts (Real Data) <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Charts currently use Math.random() dummy data. Migration to real Supabase data in progress.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">3️⃣</div>
+        <div><h3>3D Journey Viewer <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">3D / 360° visual journey viewer built with Three.js and react-three-fiber. Premium scroll-based interactive experience.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🎨</div>
+        <div><h3>Dashboard Customizer <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Let users pick which widgets appear on their dashboard. Saved per user.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">📤</div>
+        <div><h3>Data Export (CSV/Excel) <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Export dashboard tables and analytics data to CSV or Excel format.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon green">🔍</div>
+        <div><h3>Global Search <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Cmd+K / Ctrl+K command palette for global search across all app data.</p>
+      <div class="fc-tags"><span class="fc-tag">Dashboard</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 11. ENTERPRISE ROLE DASHBOARDS ═══════════════ -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <span class="cat-badge purple">🏢 Section 11</span>
+    <h2>Enterprise Role Dashboards</h2>
+    <p>Planned enterprise transformation where every role gets a completely personalized workspace with role-specific KPIs, widgets, and AI assistants. <span class="fc-status future">Future Vision</span></p>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Role</th>
+        <th>Focus Domain</th>
+        <th>AI Assistant</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>CEO</td><td>Strategy, Leadership, Execution</td><td>Executive AI — market dynamics, org health</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>COO</td><td>Operations, Process, Coordination</td><td>Operations AI — workflow efficiency</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>CFO</td><td>Finance, Budget, Forecasting</td><td>Finance AI — budgets, forecasts</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>CTO</td><td>Technology, Infrastructure, Security</td><td>Technical AI — system health, security</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>CMO</td><td>Marketing, Brand, Growth</td><td>Marketing AI — campaigns, brand</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>CHRO / HR Manager</td><td>HR, Recruitment, Culture</td><td>HR AI — recruitment, satisfaction</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>Sales Manager</td><td>Sales Funnel, Pipeline, Revenue</td><td>Sales AI — lead scoring, forecasting</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>Project Manager</td><td>Projects, Milestones, Risks</td><td>Project AI — delay prediction</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>Team Lead</td><td>Team Tasks, Workload, Reviews</td><td>Team Coach AI — workload balance</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>Employee</td><td>Tasks, Productivity, Collaboration</td><td>Employee AI — daily assistance</td><td><span class="fc-status future">Future</span></td></tr>
+      <tr><td>Admin</td><td>Users, Permissions, System</td><td>Admin AI — infrastructure monitoring</td><td><span class="fc-status future">Future</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="summary-box" style="margin-top:24px;">
+    <h3>🏗️ Infrastructure Console</h3>
+    <p style="font-size:14px;color:#6b7280;line-height:1.7;">
+      Technical AI metrics (tokens, costs, latency, provider status, model usage, API usage, infrastructure health) belong <strong>only</strong> in the Infrastructure/Admin Console. Business dashboards show outcome-focused metrics: Business Health Score, Revenue, Profit, Active Projects, Department Performance, Employee Productivity, AI Recommendations, Risks &amp; Opportunities.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════ 12. FILE ANALYZERS & DOCUMENT PROCESSING ═══════════════ -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <span class="cat-badge orange">📄 Section 12</span>
+    <h2>File Analyzers &amp; Document Processing</h2>
+    <p>Real file upload and parsing for 5 document types, enabling AI-powered analysis of uploaded content.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📄</div>
+        <div><h3>PDF Analyzer <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Parse actual .pdf files with pdfjs-dist library. Extracts text for AI analysis.</p>
+      <div class="fc-tags"><span class="fc-tag">Documents</span><span class="fc-tag">Needs Install</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📝</div>
+        <div><h3>Word Analyzer <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Parse .docx files with mammoth.js. Converts to text for AI processing.</p>
+      <div class="fc-tags"><span class="fc-tag">Documents</span><span class="fc-tag">Needs Install</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📊</div>
+        <div><h3>Excel Analyzer <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Parse .xlsx files with SheetJS (xlsx). Extracts data tables for AI analysis.</p>
+      <div class="fc-tags"><span class="fc-tag">Documents</span><span class="fc-tag">Needs Install</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">📋</div>
+        <div><h3>CSV Analyzer <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Parse .csv files with PapaParse. Column detection and data extraction for AI.</p>
+      <div class="fc-tags"><span class="fc-tag">Documents</span><span class="fc-tag">Needs Install</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🖼️</div>
+        <div><h3>PowerPoint Analyzer <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Parse .pptx files with pptxjs. Extracts slide text and notes for AI analysis.</p>
+      <div class="fc-tags"><span class="fc-tag">Documents</span><span class="fc-tag">Needs Install</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon orange">🌐</div>
+        <div><h3>Website Analyzer <span class="fc-status in-progress">In Progress</span></h3></div>
+      </div>
+      <p class="fc-desc">Accept URL and auto-fetch content via CORS proxy. Extracts text for AI analysis.</p>
+      <div class="fc-tags"><span class="fc-tag">Documents</span><span class="fc-tag">Needs API</span></div>
+    </div>
+  </div>
+  <p style="margin-top:12px;font-size:13px;color:#6b7280;"><strong>Note:</strong> All file analyzers have their AI prompts and tool classes ready. File upload UI components and parser integrations are pending npm package installations (pdfjs-dist, mammoth, xlsx, papaparse, pptxjs — all already in package.json).</p>
+</div>
+
+<!-- ═══════════════ 13. UI & USER EXPERIENCE ═══════════════ -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <span class="cat-badge slate">🎨 Section 13</span>
+    <h2>UI &amp; User Experience</h2>
+    <p>Premium design system with framer-motion animations, Tailwind CSS, and component library.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">🎨</div>
+        <div><h3>Tailwind CSS 4 Design System <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Utility-first CSS with custom color palette, dark mode support, and responsive breakpoints.</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">🎬</div>
+        <div><h3>framer-motion Animations <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">AnimatePresence, motion components, page transitions, and micro-interactions.</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span><span class="fc-tag">Animation</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">🃏</div>
+        <div><h3>Reusable UI Components <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Badge, Card, ProgressBar, Tooltip, Toast, ErrorBoundary, ScrollReveal, Skeleton, CommandPalette, LanguageSwitcher, RecommendationsPanel, RolePickerModal, SessionTimeoutModal, SetupChecklist</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">🌓</div>
+        <div><h3>Dark Mode <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Full dark theme using Tailwind dark: variants. Toggle component persists preference to localStorage.</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">🔤</div>
+        <div><h3>Inter Font <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Premium Inter font family from Google Fonts. All weights included (300–900).</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">💻</div>
+        <div><h3>Lucide Icons <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Comprehensive icon library via lucide-react for all UI elements.</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">💬</div>
+        <div><h3>Toast Notification System <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Global toast feedback after saves, creations, deletions, and actions.</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">⌨️</div>
+        <div><h3>Keyboard Shortcuts <span class="fc-status planned">Planned</span></h3></div>
+      </div>
+      <p class="fc-desc">Cmd+K global command palette, keyboard navigation throughout app.</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span><span class="fc-tag">Planned</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">🖥️</div>
+        <div><h3>Electron Desktop App <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Desktop application with Electron 43. Cross-platform (Windows, macOS, Linux). Native window management.</p>
+      <div class="fc-tags"><span class="fc-tag">Desktop</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon slate">📱</div>
+        <div><h3>Mobile Responsive <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Full responsive design for phones and tablets. Needs breakpoint decisions.</p>
+      <div class="fc-tags"><span class="fc-tag">UI</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 14. NOTIFICATIONS & ALERTS ═══════════════ -->
+<div class="section" id="s14">
+  <div class="section-header">
+    <span class="cat-badge amber">🔔 Section 14</span>
+    <h2>Notifications &amp; Alerts</h2>
+    <p>Real-time notification system with read/unread tracking, AI-powered alerts, and multi-channel delivery.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">🔔</div>
+        <div><h3>Real-Time Notifications <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">In-app notification system with read/unread tracking. Real-time via Supabase Realtime.</p>
+      <div class="fc-tags"><span class="fc-tag">Notifications</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">🔔</div>
+        <div><h3>AI Auto-Notifications <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">AI generates notifications for task assignments, overdue tasks, anomalies, and recommendations.</p>
+      <div class="fc-tags"><span class="fc-tag">Notifications</span><span class="fc-tag">AI</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">📧</div>
+        <div><h3>Email Notifications <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Task reminders, chat notifications, and daily digests via email (SendGrid/Resend).</p>
+      <div class="fc-tags"><span class="fc-tag">Notifications</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">⚡</div>
+        <div><h3>Auto-Escalation <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">AI escalates overdue and critical tasks to managers automatically.</p>
+      <div class="fc-tags"><span class="fc-tag">Notifications</span><span class="fc-tag">AI</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">⚙️</div>
+        <div><h3>Notification Preferences <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Per-user notification settings for different event types and channels.</p>
+      <div class="fc-tags"><span class="fc-tag">Notifications</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon amber">📢</div>
+        <div><h3>Announcements / Broadcasts <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Admin broadcasts to all users. Where shown: popup, banner, or notification center?</p>
+      <div class="fc-tags"><span class="fc-tag">Notifications</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 15. SUPABASE BACKEND ═══════════════ -->
+<div class="section" id="s15">
+  <div class="section-header">
+    <span class="cat-badge teal">🗄️ Section 15</span>
+    <h2>Supabase Backend &amp; Database</h2>
+    <p>Complete PostgreSQL backend with RLS policies, real-time subscriptions, Edge Functions, and storage.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🗄️</div>
+        <div><h3>PostgreSQL Schema <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">15+ tables: organizations, profiles, staff_credentials, conversations, messages, tasks, ai_analyses, conversation_memory, ai_request_logs, user_sessions, login_history, role_permissions, mfa_otps, notifications</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🛡️</div>
+        <div><h3>Row-Level Security (RLS) <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">RLS policies for all tables. Role-based data access control at database level.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Security</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🔄</div>
+        <div><h3>Realtime Subscriptions <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Supabase Realtime for live updates on chats, notifications, tasks, and dashboard data.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Realtime</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">⚡</div>
+        <div><h3>Edge Functions <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Server-side functions: send-otp (email 2FA), delete-user (account deletion), daily-digest (scheduled emails), cors-proxy (planned).</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Edge</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">💾</div>
+        <div><h3>Storage Buckets <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">User avatars bucket and chat files bucket for file uploads and sharing.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Storage</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">📧</div>
+        <div><h3>Email Templates <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Custom HTML templates: confirmation, password reset, magic link, invite, change email.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Email</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🔄</div>
+        <div><h3>Database Migrations <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">Sequential migration files for all schema changes. Production migration script available.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">📊</div>
+        <div><h3>Login History Table <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">90-day retention with automatic cleanup. Tracks IP, provider, device, success/failure.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Security</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">👁️</div>
+        <div><h3>Audit Log Table <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">1-year retention for admin action tracking. Who did what and when.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Audit</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon teal">🏠</div>
+        <div><h3>Developer Mode <span class="fc-status ready">Ready</span></h3></div>
+      </div>
+      <p class="fc-desc">localStorage-based mock data when no Supabase credentials configured. All features work locally.</p>
+      <div class="fc-tags"><span class="fc-tag">Database</span><span class="fc-tag">Dev</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 16. VISION & FUTURE FEATURES ═══════════════ -->
+<div class="section" id="s16">
+  <div class="section-header">
+    <span class="cat-badge purple">🔮 Section 16</span>
+    <h2>Vision &amp; Future Features</h2>
+    <p>Long-term enterprise milestones that transform OptivianAI into a full Enterprise Role-Based Operating System.</p>
+  </div>
+
+  <h4>Phase 9: Enterprise Enhancements (Planned Future)</h4>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🔄</div>
+        <div><h3>AI Project Orchestration <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Full workflow: CEO sets objective → AI creates plan → assigns tasks → monitors execution → reports results.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🧑‍💻</div>
+        <div><h3>Intelligent Task Delegation <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">AI assigns tasks based on skills, workload, and availability.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">⚡</div>
+        <div><h3>Workflow Automation <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">AI automates repetitive business processes across departments.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🎯</div>
+        <div><h3>AI Decision Support <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">AI presents options with probability analysis for executive decisions.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🚨</div>
+        <div><h3>AI Risk Detection <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Proactive identification of project, financial, and operational risks.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">💡</div>
+        <div><h3>Executive Insights Engine <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">AI distills complex data into actionable executive summaries.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">📈</div>
+        <div><h3>Predictive Analytics <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">AI forecasts trends, revenue, and resource needs.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🏥</div>
+        <div><h3>Organization Health Engine <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Real-time composite score across departments, projects, and people.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🔄</div>
+        <div><h3>Cross-Department Intelligence <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">AI identifies synergies and friction points between departments.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">📊</div>
+        <div><h3>Advanced Business Reports <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Rich, exportable reports with charts and AI commentary.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🔍</div>
+        <div><h3>Competitor Intelligence <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Automated competitor tracking and analysis.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🧠</div>
+        <div><h3>AI Meeting Intelligence <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Meeting notes, action items, and follow-up automation.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">📚</div>
+        <div><h3>AI Knowledge Base <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Centralized organizational knowledge with AI search and Q&amp;A.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">💾</div>
+        <div><h3>AI Memory System <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Long-term memory across conversations, decisions, and user preferences.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🎨</div>
+        <div><h3>Premium Motion Design <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Sophisticated animations, transitions, and micro-interactions throughout UI.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🔌</div>
+        <div><h3>Plugin Ecosystem <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Third-party plugin marketplace and SDK for extending platform.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🔗</div>
+        <div><h3>Third-Party Integrations <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Slack, Teams, Google Workspace, Salesforce, SAP connectors.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🌐</div>
+        <div><h3>i18n / Internationalization <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Multi-language support. Needs language decisions.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">♿</div>
+        <div><h3>Accessibility (a11y) <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">WCAG-compliant design audit and improvements.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">📡</div>
+        <div><h3>WebSocket Real-Time <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Upgrade from polling to full WebSocket real-time for all updates.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🗣️</div>
+        <div><h3>AI Avatar with Voice <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">3D AI avatar with voice synthesis for natural interactions.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">📧</div>
+        <div><h3>Daily Digest Email <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Scheduled daily summary email with task updates, notifications, and AI insights.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">🔍</div>
+        <div><h3>Full-Text Search <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Search across all app data. Needs Meilisearch, Elasticsearch, or Supabase full-text.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon purple">📱</div>
+        <div><h3>PWA Offline Support <span class="fc-status future">Future</span></h3></div>
+      </div>
+      <p class="fc-desc">Progressive Web App with offline mode for critical tasks. Service worker + manifest.</p>
+      <div class="fc-tags"><span class="fc-tag">Enterprise</span><span class="fc-tag">Future</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SUMMARY ═══════════════ -->
+<div class="section" style="page-break-after:auto;">
+  <div class="section-header">
+    <span class="cat-badge indigo">📊 Summary</span>
+    <h2>Feature Summary &amp; Statistics</h2>
+    <p>Complete overview of OptivianAI's feature landscape by status, category, and implementation progress.</p>
+  </div>
+
+  <div class="summary-box">
+    <h3>📈 Feature Count by Category</h3>
+    <div class="summary-stats">
+      <div class="stat-card">
+        <div class="num">80+</div>
+        <div class="label">Implemented Features</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">20+</div>
+        <div class="label">In Progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">100+</div>
+        <div class="label">Planned / Future</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">22</div>
+        <div class="label">User Roles</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">18</div>
+        <div class="label">AI Agents</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">4</div>
+        <div class="label">AI Providers</div>
+      </div>
+    </div>
+  </div>
+
+  <h4>Technology Stack</h4>
+  <table class="data-table">
+    <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>React 19, Vite 7, React Router 7, Tailwind CSS 4</td></tr>
+      <tr><td>Desktop</td><td>Electron 43</td></tr>
+      <tr><td>Backend</td><td>Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)</td></tr>
+      <tr><td>AI Providers</td><td>Gemini API, OpenRouter (DeepSeek, Qwen)</td></tr>
+      <tr><td>Animations</td><td>framer-motion 12</td></tr>
+      <tr><td>Charts</td><td>recharts 3</td></tr>
+      <tr><td>Icons</td><td>Lucide React</td></tr>
+      <tr><td>3D Graphics</td><td>Three.js, react-three-fiber, drei</td></tr>
+      <tr><td>Package Manager</td><td>npm</td></tr>
+      <tr><td>Testing</td><td>Vitest</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Database Tables</h4>
+  <table class="data-table">
+    <thead><tr><th>Category</th><th>Tables</th></tr></thead>
+    <tbody>
+      <tr><td>Core</td><td>organizations, profiles, staff_credentials</td></tr>
+      <tr><td>Communication</td><td>conversations, conversation_participants, messages</td></tr>
+      <tr><td>Tasks</td><td>tasks</td></tr>
+      <tr><td>AI &amp; Analytics</td><td>ai_analyses, conversation_memory, ai_request_logs</td></tr>
+      <tr><td>Auth &amp; Security</td><td>user_sessions, login_history, role_permissions, mfa_otps</td></tr>
+      <tr><td>Notifications</td><td>notifications</td></tr>
+      <tr><td>Storage Buckets</td><td>avatars, chat_files</td></tr>
+    </tbody>
+  </table>
+
+  <div class="summary-box" style="margin-top: 24px;">
+    <h3>🚀 Quick Start</h3>
+    <p style="font-size:14px;color:#6b7280;line-height:1.7;">
+      <strong>Domain:</strong> Decision Intelligence &nbsp;|&nbsp; <strong>Team:</strong> Veronyx &nbsp;|&nbsp; <strong>Status:</strong> Planning &amp; Foundation Phase<br>
+      <strong>Run:</strong> <span class="inline-code">npm run dev</span> (browser) or <span class="inline-code">npm run dev:electron</span> (desktop)<br>
+      <strong>Test:</strong> <span class="inline-code">npm test</span> &nbsp;|&nbsp; <strong>Build:</strong> <span class="inline-code">npm run build</span>
+    </p>
+  </div>
+
+  <p style="margin-top: 32px; font-size: 13px; color: #9ca3af; text-align: center;">
+    OptivianAI — Complete Feature Catalog &nbsp;|&nbsp; Generated July 20, 2026 &nbsp;|&nbsp; Team Veronyx &nbsp;|&nbsp; All Rights Reserved
+  </p>
+</div>
+
+</body>
+</html>
