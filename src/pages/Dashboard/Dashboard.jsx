@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   LayoutDashboard, ChevronDown, RefreshCw, Maximize2, Minimize2,
   AlertCircle, X, Info, AlertTriangle, CheckCircle, Settings2,
-  Users, Briefcase, Sparkles,
+  Users, Briefcase, Sparkles, Brain,
   Activity, BarChart3, Crown,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
@@ -19,6 +19,8 @@ import ScrollReveal from '../../components/ui/ScrollReveal';
 import { getAnnouncements, dismissAnnouncement } from '../../services/announcementService';
 import DashboardCustomizer, { loadWidgetConfig } from './DashboardCustomizer';
 import SetupChecklist from '../../components/ui/SetupChecklist';
+import * as orgAnalyticsEngine from '../../services/orgAnalyticsEngine';
+import { startContextUpdates as startOrgContextUpdates } from '../../services/ai/orgContext';
 
 // Lazy load sub-components
 const ExecutiveStats = lazy(() => import('./ExecutiveStats'));
@@ -79,8 +81,8 @@ function Section({ id, title, subtitle, icon: Icon, children, defaultExpanded = 
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const orgId = user?.user_metadata?.organization_id;
+  const { user, profile, userRole } = useAuth();
+  const orgId = profile?.organization_id || user?.user_metadata?.organization_id;
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -100,17 +102,53 @@ export default function Dashboard() {
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [widgetConfig, setWidgetConfig] = useState(() => loadWidgetConfig());
 
-  // Check if this is a new org
-  const [isNewOrg, setIsNewOrg] = useState(() => {
-    return !localStorage.getItem('optivian_setup_dismissed');
-  });
+  // ── AI Org Analytics (DeepSeek-powered proactive analysis) ──
+  const [orgInsights, setOrgInsights] = useState(null);
+
+  // Start the proactive analysis engine and subscribe to real-time insights
+  useEffect(() => {
+    if (!user || !profile) return;
+
+    // Start the background engine
+    orgAnalyticsEngine.start(user, profile);
+
+    // Start the shared org context that all AI models use
+    const stopOrgCtx = startOrgContextUpdates(30000, user);
+
+    // Subscribe to real-time insight updates
+    const unsub = orgAnalyticsEngine.subscribe((insights) => {
+      setOrgInsights(insights);
+    });
+
+    return () => {
+      unsub();
+      orgAnalyticsEngine.stop();
+      stopOrgCtx();
+    };
+  }, [user?.id, profile?.organization_id]);
+
+  // Update engine context when user/profile changes
+  useEffect(() => {
+    if (user && profile) {
+      orgAnalyticsEngine.updateContext(user, profile);
+    }
+  }, [user?.id, profile?.organization_id]);
+
+  // Check if this is a new org — only show Getting Started to the creator, not all admins
+  const [isNewOrg, setIsNewOrg] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const creatorId = localStorage.getItem('optivian_org_creator');
+    const dismissed = localStorage.getItem('optivian_setup_dismissed');
+    setIsNewOrg(creatorId === user.id && !dismissed);
+  }, [user?.id]);
 
   // ── Role-based dashboard config ───────────────────────────
-  const userRole = user?.user_metadata?.role || 'staff';
   const roleInfo = useMemo(() => getRoleInfo(userRole), [userRole]);
 
   const dashboardConfig = useMemo(() => {
-    const isAdmin = ['super_admin', 'owner', 'administrator'].includes(userRole);
+    const isAdmin = ['super_admin', 'administrator'].includes(userRole);
     const isExecutive = ['executive', 'director', 'manager'].includes(userRole) || isAdmin;
     const isStaff = ['staff', 'intern', 'support'].includes(userRole);
 
@@ -175,6 +213,13 @@ export default function Dashboard() {
   }, []);
 
   const fetchData = useCallback(async (isRefresh = false) => {
+    // Don't fetch until we have an org ID — wait for profile to be ready
+    if (!user || !orgId) {
+      if (isRefresh) setRefreshing(false);
+      // Keep loading true — the effect below will retry when orgId is ready
+      return;
+    }
+
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
@@ -235,23 +280,122 @@ export default function Dashboard() {
     getAnnouncements(user?.id).then(setAnnouncements);
   }, [user?.id]);
 
+  // ─── Initial Data Fetch & Polling ─────────────────────────
+  // Runs once when orgId + user are available, then every 30s as a
+  // fallback to catch anything the realtime subscriptions might miss.
   useEffect(() => {
+    if (!orgId || !user) return;
     fetchData();
     const interval = setInterval(() => fetchData(true), 30000);
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, [fetchData, orgId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ─── Realtime Subscriptions ────────────────────────────────
+  // Subscribe to live changes for tasks, profiles, and notifications.
+  // Updates state directly so the UI reflects changes instantly.
+  // The 30s polling in fetchData acts as a fallback for missed events.
   useEffect(() => {
     if (!orgId || !import.meta.env.VITE_SUPABASE_URL) return;
-    const taskChannel = supabase.channel('dashboard-tasks')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `organization_id=eq.${orgId}` }, () => fetchData(true))
+
+    const channels = [];
+
+    // ── Tasks channel: live task count & stats ───────────────
+    const taskChannel = supabase.channel(`dashboard-tasks-${orgId}`)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks', filter: `organization_id=eq.${orgId}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setTasks(prev => [payload.new, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setTasks(prev => prev.map(t => t.id === payload.new.id ? { ...t, ...payload.new } : t));
+          } else if (payload.eventType === 'DELETE') {
+            setTasks(prev => prev.filter(t => t.id !== payload.old.id));
+          }
+        }
+      )
       .subscribe();
-    const notifChannel = supabase.channel('dashboard-notifications')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },
-        (payload) => { setNotifications(prev => [payload.new, ...prev].slice(0, 20)); setUnreadCount(prev => prev + 1); }
-      ).subscribe();
-    return () => { supabase.removeChannel(taskChannel); supabase.removeChannel(notifChannel); };
-  }, [orgId, user?.id, fetchData]);
+    channels.push(taskChannel);
+
+    // ── Profiles channel: live staff count & member list ────
+    const profileChannel = supabase.channel(`dashboard-profiles-${orgId}`)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `organization_id=eq.${orgId}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const p = payload.new;
+            setStaffCount(prev => prev + 1);
+            // Check if this member is online (last_seen within 5 min)
+            if (p.last_seen && Date.now() - new Date(p.last_seen).getTime() < 300000) {
+              setOnlineStaff(prev => prev + 1);
+            }
+            // Add to recent members (max 5)
+            setRecentMembers(prev => [p, ...prev].slice(0, 5));
+          } else if (payload.eventType === 'UPDATE') {
+            const p = payload.new;
+            const wasOnline = payload.old?.last_seen &&
+              Date.now() - new Date(payload.old.last_seen).getTime() < 300000;
+            const nowOnline = p.last_seen &&
+              Date.now() - new Date(p.last_seen).getTime() < 300000;
+            // Update online count if status changed
+            if (wasOnline !== nowOnline) {
+              setOnlineStaff(prev => nowOnline ? prev + 1 : Math.max(0, prev - 1));
+            }
+            // Update in recent members if present
+            setRecentMembers(prev => prev.map(m =>
+              m.id === p.id ? { ...m, ...p } : m
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            const p = payload.old;
+            setStaffCount(prev => Math.max(0, prev - 1));
+            if (p.last_seen && Date.now() - new Date(p.last_seen).getTime() < 300000) {
+              setOnlineStaff(prev => Math.max(0, prev - 1));
+            }
+            setRecentMembers(prev => prev.filter(m => m.id !== p.id));
+          }
+        }
+      )
+      .subscribe();
+    channels.push(profileChannel);
+
+    // ── Notifications channel: live notification badges ──────
+    const notifChannel = supabase.channel(`dashboard-notif-${user?.id}`)
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },
+        (payload) => {
+          setNotifications(prev => [payload.new, ...prev].slice(0, 20));
+          setUnreadCount(prev => prev + 1);
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },
+        (payload) => {
+          setNotifications(prev => prev.map(n => n.id === payload.new.id ? { ...n, ...payload.new } : n));
+          // If marking as read, decrement unread count
+          if (payload.new.read && !payload.old?.read) {
+            setUnreadCount(prev => Math.max(0, prev - 1));
+          }
+          // If marking as unread, increment unread count
+          if (!payload.new.read && payload.old?.read) {
+            setUnreadCount(prev => prev + 1);
+          }
+        }
+      )
+      .on('postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },
+        (payload) => {
+          setNotifications(prev => prev.filter(n => n.id !== payload.old.id));
+          if (!payload.old?.read) {
+            setUnreadCount(prev => Math.max(0, prev - 1));
+          }
+        }
+      )
+      .subscribe();
+    channels.push(notifChannel);
+
+    return () => {
+      channels.forEach(ch => supabase.removeChannel(ch));
+    };
+  }, [orgId, user?.id]);
 
   const taskStats = useMemo(() => {
     const total = tasks.length;
@@ -323,12 +467,12 @@ export default function Dashboard() {
               <div className="flex items-center gap-3">
                 <h1 className="text-xl font-bold text-white font-display tracking-tight">{dashboardConfig.title}</h1>
                 <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/60 text-[10px] font-medium">
-                  {user?.user_metadata?.role || 'Executive'}
+                  {roleInfo.label}
                 </span>
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-xs text-white/40">
-                  {user?.user_metadata?.organization_name || 'Organization'}
+                  {profile?.full_name ? `${user?.email || ''}` : ''}{user?.user_metadata?.organization_name || profile?.organization_name || 'Organization'}
                 </p>
                 <span className="text-white/20">·</span>
                 <p className="text-sm text-white/50">
@@ -416,7 +560,7 @@ export default function Dashboard() {
       {dashboardConfig.showExecutiveStats && widgetConfig.find(w => w.id === 'executive-stats')?.visible !== false && (
         <Suspense fallback={<SectionSkeleton height={380} />}>
           <ExecutiveStats staffCount={staffCount} onlineStaff={onlineStaff} taskStats={taskStats}
-            aiAnalytics={aiAnalytics} unreadCount={unreadCount} loading={loading} />
+            aiAnalytics={aiAnalytics} orgInsights={orgInsights} unreadCount={unreadCount} loading={loading} />
         </Suspense>
       )}
 
@@ -426,7 +570,8 @@ export default function Dashboard() {
           <Section id="analytics" title="Advanced Analytics" subtitle="Interactive charts & metrics" icon={BarChart3} accent="purple">
             <AdvancedAnalytics taskStats={taskStats} taskPriorityData={taskPriorityData}
               taskStatusData={taskStatusData} providerUsageData={providerUsageData}
-              aiAnalytics={aiAnalytics} staffCount={staffCount} loading={loading} />
+              aiAnalytics={aiAnalytics} staffCount={staffCount} loading={loading}
+              orgInsights={orgInsights} />
           </Section>
         </Suspense>
       )}
@@ -437,7 +582,8 @@ export default function Dashboard() {
           {/* Org Overview */}
           {dashboardConfig.showOrgOverview && widgetConfig.find(w => w.id === 'org-overview')?.visible !== false && (
             <Suspense fallback={<SectionSkeleton height={300} />}>
-              <OrgOverview staffCount={staffCount} onlineStaff={onlineStaff} loading={loading} recentMembers={recentMembers} />
+              <OrgOverview staffCount={staffCount} onlineStaff={onlineStaff} loading={loading}
+                recentMembers={recentMembers} orgInsights={orgInsights} />
             </Suspense>
           )}
           {/* Staff Overview */}
@@ -482,7 +628,7 @@ export default function Dashboard() {
       {dashboardConfig.showAIPanel && widgetConfig.find(w => w.id === 'ai-panel')?.visible !== false && (
         <Suspense fallback={<SectionSkeleton height={300} />}>
           <Section id="ai-insights" title="AI Executive Advisor" subtitle="Strategic insights & recommendations" icon={Sparkles} accent="purple">
-            <AIPanel aiAnalytics={aiAnalytics} taskStats={taskStats}
+            <AIPanel aiAnalytics={aiAnalytics} taskStats={taskStats} orgInsights={orgInsights}
               staffCount={staffCount} onlineStaff={onlineStaff} loading={loading} />
           </Section>
         </Suspense>

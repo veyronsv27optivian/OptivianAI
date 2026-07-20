@@ -17,7 +17,7 @@ function generateTempPassword() {
 
 export default function AdminDashboard() {
   const {
-    user, profile, getStaffMembers, createStaffMember,
+    user, profile, userRole, getStaffMembers, createStaffMember,
     removeStaffMember, updateStaffRole, suspendMember,
   } = useAuth();
   const [members, setMembers] = useState([]);
@@ -40,8 +40,7 @@ export default function AdminDashboard() {
     role: 'staff',
   });
 
-  const userRole = profile?.role || user?.user_metadata?.role || 'staff';
-  const canManage = ['super_admin', 'owner', 'administrator', 'director', 'manager'].includes(userRole);
+  const canManage = ['super_admin', 'administrator', 'director', 'manager'].includes(userRole);
   const availableRoles = getLowerRoles(userRole).map(r => r.id);
 
   const loadMembers = async () => {

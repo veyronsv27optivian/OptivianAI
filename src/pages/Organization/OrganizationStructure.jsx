@@ -11,7 +11,7 @@ import {
 } from '../../services/organizationService';
 
 export default function OrganizationStructure() {
-  const { user, profile } = useAuth();
+  const { user, profile, userRole } = useAuth();
   const [org, setOrg] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -25,7 +25,7 @@ export default function OrganizationStructure() {
   const [teamForm, setTeamForm] = useState({ name: '', description: '', departmentId: '' });
 
   const orgId = profile?.organization_id || user?.user_metadata?.organization_id;
-  const isAdmin = ['super_admin', 'owner', 'administrator', 'director', 'manager'].includes(profile?.role || 'staff');
+  const isAdmin = ['super_admin', 'administrator', 'director', 'manager'].includes(userRole);
 
   useEffect(() => {
     if (orgId) loadData();

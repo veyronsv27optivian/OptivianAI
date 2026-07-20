@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, BarChart3, PieChart, Activity, Layout, Grid3X3,
-  Calendar, Filter, ZoomIn, X,
+  Calendar, Filter, ZoomIn, X, Brain,
 } from 'lucide-react';
 import Card, { CardHeader } from '../../components/ui/Card';
 import {
@@ -39,7 +39,9 @@ export default function AdvancedAnalytics({
   aiAnalytics,
   staffCount,
   loading,
+  orgInsights,
 }) {
+  const hasRealInsights = orgInsights && !orgInsights.isDefault;
   const [selectedChartType, setSelectedChartType] = useState('all');
   const [selectedRange, setSelectedRange] = useState('6m');
   const [showFilters, setShowFilters] = useState(false);
@@ -85,24 +87,37 @@ export default function AdvancedAnalytics({
       }));
   }, [aiAnalytics]);
 
-  const radarData = useMemo(() => [
-    { metric: 'Tasks', value: Math.min(100, taskStats.completionRate || 0) },
-    { metric: 'Staff', value: Math.min(100, staffCount > 0 ? 80 : 0) },
-    { metric: 'AI', value: Math.min(100, aiAnalytics?.successRate || 0) },
-    { metric: 'Productivity', value: Math.min(100, taskStats.total > 0 ? (taskStats.completed / taskStats.total) * 100 : 0) },
-    { metric: 'Quality', value: Math.min(100, taskStats.overdue > 0 ? 100 - (taskStats.overdue / Math.max(1, taskStats.total)) * 100 : 80) },
-  ], [taskStats, staffCount, aiAnalytics]);
+  const radarData = useMemo(() => {
+    if (hasRealInsights) {
+      return [
+        { metric: 'Health', value: Math.min(100, orgInsights.orgHealthScore || 0) },
+        { metric: 'Productivity', value: Math.min(100, orgInsights.productivityScore || 0) },
+        { metric: 'Satisfaction', value: Math.min(100, orgInsights.satisfactionScore || 0) },
+        { metric: 'Launch Readiness', value: Math.min(100, orgInsights.launchReadiness || 0) },
+        { metric: 'Risk', value: Math.min(100, 100 - (orgInsights.riskScore || 0)) },
+      ];
+    }
+    return [
+      { metric: 'Tasks', value: Math.min(100, taskStats.completionRate || 0) },
+      { metric: 'Staff', value: Math.min(100, staffCount > 0 ? 80 : 0) },
+      { metric: 'AI', value: Math.min(100, aiAnalytics?.successRate || 0) },
+      { metric: 'Productivity', value: Math.min(100, taskStats.total > 0 ? (taskStats.completed / taskStats.total) * 100 : 0) },
+      { metric: 'Quality', value: Math.min(100, taskStats.overdue > 0 ? 100 - (taskStats.overdue / Math.max(1, taskStats.total)) * 100 : 80) },
+    ];
+  }, [taskStats, staffCount, aiAnalytics, orgInsights, hasRealInsights]);
 
   const composedData = useMemo(() => {
     const perWeek = Math.max(1, Math.round(taskStats.total / 4));
-    const growthTrend = taskStats.completionRate > 50 ? 10 : 5;
+    const growthTrend = hasRealInsights
+      ? Math.round(orgInsights.launchReadiness / 10)
+      : taskStats.completionRate > 50 ? 10 : 5;
     return [
       { name: 'Week 1', tasks: perWeek, growth: growthTrend },
       { name: 'Week 2', tasks: perWeek * 2, growth: growthTrend + 3 },
       { name: 'Week 3', tasks: perWeek * 3, growth: growthTrend + 5 },
       { name: 'Week 4', tasks: Math.max(perWeek * 4, taskStats.total), growth: growthTrend + 8 },
     ];
-  }, [taskStats]);
+  }, [taskStats, orgInsights, hasRealInsights]);
 
   // Filter charts based on selected type
   const chartConfigs = useMemo(() => {
@@ -397,28 +412,49 @@ export default function AdvancedAnalytics({
         </motion.div>
       )}
 
-      {/* Progress Metrics */}
+      {/* Progress Metrics — powered by DeepSeek AI insights when available */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
         <Card variant="default" padding="p-5">
-          <CardHeader title="Key Metrics" subtitle="Overall scores" icon={Activity} color="primary" />
+          <CardHeader title="Key Metrics" subtitle={hasRealInsights ? 'AI-powered scores' : 'Overall scores'} icon={Activity} color="primary" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <motion.div whileHover={{ scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
               <ProgressBar label="Completion Rate" value={taskStats.completionRate}
                 color="emerald" size="lg" showValue />
             </motion.div>
             <motion.div whileHover={{ scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
-              <ProgressBar label="Health Score" value={Math.min(100, taskStats.completionRate + 15)}
+              <ProgressBar label={hasRealInsights ? 'Org Health' : 'Health Score'}
+                value={hasRealInsights ? orgInsights.orgHealthScore : Math.min(100, taskStats.completionRate + 15)}
                 color="violet" size="lg" showValue />
             </motion.div>
             <motion.div whileHover={{ scale: 1.02 }} transition={{ type: 'spring', stiffness: 300 }}>
-              <ProgressBar label="AI Success Rate" value={Math.round(aiAnalytics?.successRate || 0)}
+              <ProgressBar label={hasRealInsights ? 'Productivity' : 'AI Success Rate'}
+                value={hasRealInsights ? orgInsights.productivityScore : Math.round(aiAnalytics?.successRate || 0)}
                 color="cyan" size="lg" showValue />
             </motion.div>
           </div>
+
+          {/* AI insights summary when enabled */}
+          {hasRealInsights && orgInsights.summary && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-4 flex items-start gap-3 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20"
+            >
+              <Brain size={16} className="shrink-0 mt-0.5 text-violet-400" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-violet-300/90 leading-relaxed">{orgInsights.summary}</p>
+                {orgInsights.trendPrediction && (
+                  <p className="text-[11px] text-violet-400/70 mt-1.5 italic">
+                    🔮 {orgInsights.trendPrediction}
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
         </Card>
       </motion.div>
     </motion.div>

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Building2, Users, Layers, Target, Globe, MapPin, Activity,
-  TrendingUp, ArrowRight, Calendar, Shield, Briefcase,
+  TrendingUp, ArrowRight, Calendar, Shield, Briefcase, Brain,
+  CheckCircle,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 import Card, { CardHeader } from '../../components/ui/Card';
@@ -14,17 +15,23 @@ export default function OrgOverview({
   onlineStaff,
   loading,
   recentMembers = [],
+  orgInsights,
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const orgName = user?.user_metadata?.organization_name || 'My Organization';
+  const hasRealInsights = orgInsights && !orgInsights.isDefault;
 
   const stats = useMemo(() => [
     { label: 'Total Staff', value: staffCount, icon: Users, color: 'blue' },
     { label: 'Online Now', value: onlineStaff, icon: Activity, color: 'emerald' },
-    { label: 'Departments', value: 3, icon: Layers, color: 'violet' },
-    { label: 'Teams', value: 5, icon: Target, color: 'cyan' },
-  ], [staffCount, onlineStaff]);
+    { label: hasRealInsights ? 'Org Health' : 'Departments',
+      value: hasRealInsights ? `${orgInsights.orgHealthScore}%` : 3,
+      icon: hasRealInsights ? Brain : Layers, color: 'violet' },
+    { label: hasRealInsights ? 'Productivity' : 'Teams',
+      value: hasRealInsights ? `${orgInsights.productivityScore}%` : 5,
+      icon: hasRealInsights ? TrendingUp : Target, color: 'cyan' },
+  ], [staffCount, onlineStaff, orgInsights, hasRealInsights]);
 
   if (loading) {
     return (
@@ -63,9 +70,28 @@ export default function OrgOverview({
           <span className="text-sm font-semibold text-foreground dark:text-slate-100">{orgName}</span>
         </div>
         <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-          <span className="flex items-center gap-1"><Globe size={12} /> Tech</span>
-          <span className="flex items-center gap-1"><MapPin size={12} /> Remote</span>
-          <span className="flex items-center gap-1"><Calendar size={12} /> Active</span>
+          {hasRealInsights ? (
+            <>
+              <span className="flex items-center gap-1">
+                <CheckCircle size={12} className="text-emerald-400" />
+                Health: {orgInsights.orgHealthScore}%
+              </span>
+              <span className="flex items-center gap-1">
+                <Activity size={12} />
+                Risk: {orgInsights.riskScore}%
+              </span>
+              <span className="flex items-center gap-1">
+                <TrendingUp size={12} />
+                Ready: {orgInsights.launchReadiness}%
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="flex items-center gap-1"><Globe size={12} /> Tech</span>
+              <span className="flex items-center gap-1"><MapPin size={12} /> Remote</span>
+              <span className="flex items-center gap-1"><Calendar size={12} /> Active</span>
+            </>
+          )}
         </div>
       </div>
 

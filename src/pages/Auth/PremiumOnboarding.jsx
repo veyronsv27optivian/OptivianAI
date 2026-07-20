@@ -112,7 +112,7 @@ export default function PremiumOnboarding() {
     try {
       // Map onboarding role ID to our system role ID
       const ONBOARDING_ROLE_MAP = {
-        ceo: 'owner', coo: 'director', cfo: 'finance', cto: 'administrator',
+        ceo: 'administrator', coo: 'director', cfo: 'finance', cto: 'administrator',
         hr_manager: 'hr', operations_manager: 'operations',
         project_manager: 'manager', department_manager: 'manager',
         team_lead: 'team_lead', senior_developer: 'developer',

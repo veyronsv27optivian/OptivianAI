@@ -18,53 +18,46 @@ export default function ExecutiveStats({
   onlineStaff,
   taskStats,
   aiAnalytics,
+  orgInsights,
   unreadCount,
   loading,
 }) {
   const { user } = useAuth();
 
-  // Compute derived metrics
+  // Compute derived metrics — using real AI insights from DeepSeek when available
   const metrics = useMemo(() => {
-    const businessHealth = Math.min(100,
-      (taskStats.completionRate * 0.3) +
-      ((taskStats.total > 0 ? ((taskStats.total - taskStats.overdue) / taskStats.total) * 100 : 70) * 0.2) +
-      (staffCount > 0 ? (onlineStaff / staffCount) * 100 * 0.2 : 50) +
-      ((aiAnalytics?.successRate || 70) * 0.15) +
-      15
-    );
+    // If we have real AI-generated insights from DeepSeek, use those
+    if (orgInsights && !orgInsights.isDefault) {
+      return {
+        businessHealth: Math.round(orgInsights.orgHealthScore || 0),
+        productivity: Math.round(orgInsights.productivityScore || 0),
+        satisfaction: Math.round(orgInsights.satisfactionScore || 0),
+        launchReady: Math.round(orgInsights.launchReadiness || 0),
+        riskScore: Math.round(orgInsights.riskScore || 0),
+      };
+    }
 
-    const productivity = Math.min(100,
-      taskStats.total > 0
-        ? ((taskStats.completed / taskStats.total) * 60) +
-          ((taskStats.total - taskStats.overdue) / taskStats.total * 20) +
-          (onlineStaff > 0 ? (onlineStaff / Math.max(1, staffCount)) * 20 : 0)
-        : 50
-    );
+    // Fallback: compute from available data while DeepSeek analysis is pending
+    const businessHealth = taskStats.total > 0
+      ? Math.min(100, (taskStats.completionRate * 0.4) + (taskStats.completed / taskStats.total * 30) + 20)
+      : 0;
 
-    const satisfaction = Math.min(100,
-      75 + (productivity > 70 ? 10 : 0) + (businessHealth > 70 ? 10 : 0)
-    );
+    const productivity = taskStats.total > 0
+      ? Math.min(100, (taskStats.completed / taskStats.total) * 70 + (taskStats.overdue === 0 ? 15 : 0))
+      : 0;
 
-    const launchReady = Math.min(100,
-      (taskStats.completionRate * 0.4) +
-      ((staffCount > 0 ? onlineStaff / staffCount : 0) * 100 * 0.2) +
-      (businessHealth * 0.2)
-    );
-
-    const riskScore = Math.max(0, Math.min(100,
-      (taskStats.overdue > 0 ? Math.min(taskStats.overdue * 10, 40) : 0) +
-      (staffCount > 0 && onlineStaff < staffCount * 0.3 ? 20 : 0) +
-      (taskStats.completionRate < 30 ? 15 : 0)
-    ));
+    const riskScore = taskStats.total > 0
+      ? Math.min(100, (taskStats.overdue / Math.max(1, taskStats.total)) * 100 + (taskStats.urgent * 5))
+      : 0;
 
     return {
       businessHealth: Math.round(businessHealth),
       productivity: Math.round(productivity),
-      satisfaction: Math.round(satisfaction),
-      launchReady: Math.round(launchReady),
-      riskScore: Math.round(riskScore),
+      satisfaction: Math.round(Math.max(0, 100 - riskScore)),
+      launchReady: Math.round(Math.max(0, businessHealth - riskScore)),
+      riskScore: Math.round(Math.min(100, riskScore)),
     };
-  }, [taskStats, staffCount, onlineStaff, aiAnalytics]);
+  }, [taskStats, staffCount, onlineStaff, aiAnalytics, orgInsights]);
 
   const kpiCards = [
     {

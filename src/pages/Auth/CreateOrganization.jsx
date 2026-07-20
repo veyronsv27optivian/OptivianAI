@@ -43,11 +43,14 @@ export default function CreateOrganization() {
     setError('');
 
     try {
+      // Use 'staff' role for signup so the DB trigger creates the profile
+      // successfully (the original CHECK constraint only allows 'staff', 'admin', 'manager').
+      // The createOrganization call below will upgrade the role to 'administrator'.
       const { data: authData, error: authError } = await signUp({
         email: formData.adminEmail,
         password: formData.adminPassword,
         name: formData.adminName,
-        role: 'owner',
+        role: 'staff',
       });
 
       if (authError) throw new Error(authError.message);
@@ -63,6 +66,9 @@ export default function CreateOrganization() {
 
       if (orgError) throw new Error(orgError.message);
 
+      // Mark this user as the org creator so only they see the Getting Started checklist
+      localStorage.setItem('optivian_org_creator', sessionUser.id);
+      localStorage.removeItem('optivian_setup_dismissed');
       navigate('/app');
     } catch (err) {
       setError(err.message || 'Failed to create organization');

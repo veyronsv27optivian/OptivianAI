@@ -46,9 +46,8 @@ function isOverdue(dateStr, status) {
 }
 
 export default function Tasks() {
-  const { user, getStaffMembers } = useAuth();
-  const userRole = user?.user_metadata?.role || 'staff';
-  const canManage = userRole === 'admin' || userRole === 'owner' || userRole === 'manager' || userRole === 'administrator' || userRole === 'director';
+  const { user, userRole, getStaffMembers } = useAuth();
+  const canManage = userRole === 'manager' || userRole === 'administrator' || userRole === 'director';
 
   const [tasks, setTasks] = useState([]);
   const [staffMembers, setStaffMembers] = useState([]);

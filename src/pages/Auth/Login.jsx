@@ -229,9 +229,7 @@ export default function Login() {
 
           <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
             New here?{' '}
-            <Link to="/onboarding/signup" className="text-primary hover:text-primary-dark font-medium transition-colors">Create an account</Link>
-            {' '}or{' '}
-            <Link to="/onboarding/create" className="text-primary hover:text-primary-dark font-medium transition-colors">create an organization</Link>
+            <Link to="/onboarding/create" className="text-primary hover:text-primary-dark font-medium transition-colors">Create an organization</Link>
           </p>
         </div>
       </div>

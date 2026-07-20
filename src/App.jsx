@@ -6,7 +6,6 @@ import { useAuth } from './services/AuthContext';
 // ─── Lazy-loaded page components ───────────────────────────────
 // Code-splitting: each page loads only when navigated to, reducing initial bundle size by ~60-80%.
 const Onboarding = lazy(() => import('./pages/Auth/Onboarding'));
-const SignUp = lazy(() => import('./pages/Auth/SignUp'));
 const CreateOrganization = lazy(() => import('./pages/Auth/CreateOrganization'));
 const Login = lazy(() => import('./pages/Auth/Login'));
 const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
@@ -86,7 +85,6 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<Navigate to="/onboarding" replace />} />
           <Route path="/onboarding" element={<LazyPage component={Onboarding} />} />
-          <Route path="/onboarding/signup" element={<LazyPage component={SignUp} />} />
           <Route path="/onboarding/create" element={<LazyPage component={CreateOrganization} />} />
           <Route path="/onboarding/login" element={<LazyPage component={Login} />} />
           <Route path="/onboarding/mfa-verify" element={<LazyPage component={MfaVerify} />} />

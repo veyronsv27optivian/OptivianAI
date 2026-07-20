@@ -115,17 +115,6 @@ export const AI_TOOL_TYPES = {
 //
 
 export const PROVIDER_CONFIGS = {
-  [AI_PROVIDERS.GEMINI]: {
-    name: 'Gemini',
-    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
-    envKey: 'VITE_GEMINI_API_KEY',
-    envModel: 'VITE_GEMINI_MODEL',
-    defaultModel: 'gemini-3.5-flash',
-    supportsStreaming: true,
-    supportsVision: true,
-    isDefault: true,
-    priority: 1,     // tried first when auto-fallback is active
-  },
   [AI_PROVIDERS.DEEPSEEK]: {
     name: 'DeepSeek',
     endpoint: 'https://openrouter.ai/api/v1/chat/completions',
@@ -134,8 +123,19 @@ export const PROVIDER_CONFIGS = {
     defaultModel: 'deepseek/deepseek-v4-flash',
     supportsStreaming: true,
     supportsVision: false,
+    isDefault: true,
+    priority: 1,     // PRIMARY provider — DeepSeek is always active
+  },
+  [AI_PROVIDERS.GEMINI]: {
+    name: 'Gemini',
+    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
+    envKey: 'VITE_GEMINI_API_KEY',
+    envModel: 'VITE_GEMINI_MODEL',
+    defaultModel: 'gemini-3.5-flash',
+    supportsStreaming: true,
+    supportsVision: true,
     isDefault: false,
-    priority: 2,     // fallback after Gemini
+    priority: 2,     // fallback if DeepSeek fails
   },
 
   [AI_PROVIDERS.OPENAI_VIA_OPENROUTER]: {

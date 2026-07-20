@@ -48,13 +48,73 @@ export default function AIPanel({
   taskStats,
   staffCount,
   onlineStaff,
+  orgInsights,
   loading,
 }) {
   const navigate = useNavigate();
 
-  // Generate dynamic strategic recommendations based on real data
+  // Generate dynamic strategic recommendations — using real AI insights when available
   const dynamicInsights = useMemo(() => {
     const items = [];
+
+    // Use real AI-generated insights from DeepSeek when available
+    if (orgInsights && !orgInsights.isDefault) {
+      // Add AI key insights
+      if (orgInsights.keyInsights?.length > 0) {
+        for (const insight of orgInsights.keyInsights.slice(0, 4)) {
+          const iconMap = {
+            opportunity: Lightbulb,
+            risk: AlertTriangle,
+            insight: TrendingUp,
+            success: Award,
+            advisory: Brain,
+          };
+          const colorMap = {
+            opportunity: 'emerald',
+            risk: 'rose',
+            insight: 'blue',
+            success: 'emerald',
+            advisory: 'violet',
+          };
+          const typeMap = {
+            opportunity: 'advisory',
+            risk: 'risk',
+            insight: 'insight',
+            success: 'success',
+            advisory: 'advisory',
+          };
+          items.push({
+            type: typeMap[insight.type] || 'insight',
+            icon: iconMap[insight.type] || Lightbulb,
+            title: insight.title,
+            description: insight.description,
+            action: 'View Details',
+            actionTo: '/app/ai',
+            color: colorMap[insight.type] || 'blue',
+            priority: insight.priority || 'medium',
+          });
+        }
+      }
+
+      // Add top risks
+      if (orgInsights.topRisks?.length > 0) {
+        for (const risk of orgInsights.topRisks.slice(0, 2)) {
+          items.push({
+            type: 'risk',
+            icon: Shield,
+            title: risk.title || 'Risk Detected',
+            description: risk.description,
+            action: 'Mitigate',
+            actionTo: '/app/ai?tool=risk_detection',
+            color: risk.severity === 'critical' ? 'rose' : risk.severity === 'moderate' ? 'amber' : 'blue',
+            priority: risk.severity === 'critical' ? 'high' : 'medium',
+          });
+        }
+      }
+
+      if (items.length > 0) return items;
+    }
+
     if (!taskStats) return STRATEGIC_INSIGHTS;
 
     // Overdue task insight
@@ -144,22 +204,34 @@ export default function AIPanel({
       const p = { high: 0, medium: 1, low: 2 };
       return (p[a.priority] || 1) - (p[b.priority] || 1);
     });
-  }, [taskStats, staffCount, onlineStaff]);
+  }, [taskStats, staffCount, onlineStaff, orgInsights]);
 
-  // Compute business health summary for the AI Advisor card
+  // Compute business health summary — using real AI insights from DeepSeek when available
   const advisorSummary = useMemo(() => {
+    // If we have real AI-generated insights, use those
+    if (orgInsights && !orgInsights.isDefault && orgInsights.summary) {
+      const healthScore = orgInsights.orgHealthScore || 0;
+      return {
+        healthScore: Math.round(healthScore),
+        status: healthScore > 70 ? 'Strong' : healthScore > 40 ? 'Moderate' : 'Needs Attention',
+        statusColor: healthScore > 70 ? 'emerald' : healthScore > 40 ? 'amber' : 'rose',
+        aiSummary: orgInsights.summary,
+        recommendations: orgInsights.recommendations || [],
+      };
+    }
+
     if (!taskStats) return null;
-    const healthScore = Math.min(100,
-      (taskStats.completionRate * 0.3) +
-      ((taskStats.total > 0 ? ((taskStats.total - taskStats.overdue) / taskStats.total) * 100 : 70) * 0.2) +
-      (staffCount > 0 ? ((onlineStaff || 0) / staffCount) * 100 * 0.2 : 50) + 15
-    );
+    const healthScore = taskStats.total > 0
+      ? Math.min(100, (taskStats.completionRate * 0.4) + (taskStats.completed / taskStats.total * 30) + 20)
+      : 0;
     return {
       healthScore: Math.round(healthScore),
       status: healthScore > 70 ? 'Strong' : healthScore > 40 ? 'Moderate' : 'Needs Attention',
       statusColor: healthScore > 70 ? 'emerald' : healthScore > 40 ? 'amber' : 'rose',
+      aiSummary: null,
+      recommendations: [],
     };
-  }, [taskStats, staffCount, onlineStaff]);
+  }, [taskStats, staffCount, onlineStaff, orgInsights]);
 
   if (loading) {
     return (
@@ -184,10 +256,12 @@ export default function AIPanel({
           <div className="relative">
             <div className="flex items-center gap-2 mb-3">
               <Brain size={18} className="text-blue-200" />
-              <span className="text-xs font-medium text-blue-200 uppercase tracking-wider">AI Executive Advisor</span>
+              <span className="text-xs font-medium text-blue-200 uppercase tracking-wider">
+                {advisorSummary.aiSummary ? 'DeepSeek Analysis' : 'AI Executive Advisor'}
+              </span>
             </div>
-            <div className="flex items-end justify-between">
-              <div>
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div className="flex-1 min-w-0">
                 <p className="text-sm opacity-90">Organization Health</p>
                 <p className="text-3xl font-bold mt-1">{advisorSummary.healthScore}%</p>
                 <span className={`inline-flex items-center gap-1 mt-1 text-xs font-medium px-2 py-0.5 rounded-full ${
@@ -197,10 +271,30 @@ export default function AIPanel({
                 }`}>
                   {advisorSummary.status}
                 </span>
+                {/* AI-generated summary text */}
+                {advisorSummary.aiSummary && (
+                  <p className="text-xs text-blue-200/80 mt-3 leading-relaxed max-w-lg">
+                    {advisorSummary.aiSummary}
+                  </p>
+                )}
+                {/* AI Recommendations */}
+                {advisorSummary.recommendations?.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    <p className="text-[10px] font-medium text-blue-200 uppercase tracking-wider">Recommendations</p>
+                    <ul className="space-y-1">
+                      {advisorSummary.recommendations.slice(0, 3).map((rec, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[11px] text-blue-100/90">
+                          <span className="text-blue-300 mt-0.5 shrink-0">→</span>
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => navigate('/app/ai')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/15 hover:bg-white/25 transition-all text-xs font-medium"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/15 hover:bg-white/25 transition-all text-xs font-medium shrink-0"
               >
                 <MessageSquare size={12} /> Consult AI
               </button>

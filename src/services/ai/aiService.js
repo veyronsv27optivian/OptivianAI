@@ -23,6 +23,7 @@ import { AnalyticsTracker } from './analytics';
 import { UsageTracker } from './usage';
 import { AiCache } from './cache';
 import { sendNotificationEmail, isEmailConfigured } from '../emailService';
+import { getOrgContext } from './orgContext';
 
 // ─── Prompt module static imports ───────────────────────────────
 import * as _businessAdvisor from './prompts/businessAdvisor';
@@ -224,7 +225,20 @@ export async function generateText(toolType, prompt, options = {}) {
 
   // ── Auto-resolve system prompt from prompt modules ──────────
   const promptModule = _resolvePromptModule(toolType);
-  const systemPrompt = options.systemPrompt || promptModule?.systemPrompt || undefined;
+  const toolSystemPrompt = options.systemPrompt || promptModule?.systemPrompt || undefined;
+
+  // ── Inject shared org context into ALL AI calls ──────────────
+  // This ensures every provider (DeepSeek, Gemini, etc.) has
+  // full awareness of the organization's current state.
+  const orgCtx = getOrgContext();
+  const systemPrompt = orgCtx
+    ? toolSystemPrompt
+      ? `${orgCtx}
+
+─── TOOL INSTRUCTIONS ───
+${toolSystemPrompt}`
+      : orgCtx
+    : toolSystemPrompt;
 
   const genOptions = {
     systemPrompt,
@@ -395,7 +409,18 @@ export async function generateStream(toolType, prompt, options = {}) {
 
   // Auto-resolve system prompt from prompt modules
   const promptModule = _resolvePromptModule(toolType);
-  const systemPrompt = rest.systemPrompt || promptModule?.systemPrompt || undefined;
+  const toolSystemPrompt = rest.systemPrompt || promptModule?.systemPrompt || undefined;
+
+  // ── Inject shared org context into ALL streaming AI calls ────
+  const orgCtx = getOrgContext();
+  const systemPrompt = orgCtx
+    ? toolSystemPrompt
+      ? `${orgCtx}
+
+─── TOOL INSTRUCTIONS ───
+${toolSystemPrompt}`
+      : orgCtx
+    : toolSystemPrompt;
 
   try {
     let fullText = '';

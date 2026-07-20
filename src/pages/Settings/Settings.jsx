@@ -15,7 +15,7 @@ import MfaSetup from './MfaSetup';
 import SessionsPage from './SessionsPage';
 
 export default function Settings() {
-  const { user, profile, signOut, isDevMode, updatePassword, updateProfile, uploadAvatar } = useAuth();
+  const { user, profile, userRole, signOut, isDevMode, updatePassword, updateProfile, uploadAvatar } = useAuth();
   const location = useLocation();
   const avatarInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState(() => {
@@ -130,7 +130,6 @@ export default function Settings() {
     e.target.value = '';
   };
 
-  const userRole = profile?.role || user?.user_metadata?.role || 'staff';
   const roleInfo = getRoleInfo(userRole);
   const displayName = profile?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
 

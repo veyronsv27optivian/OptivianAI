@@ -54,7 +54,7 @@ const TIMEZONES = [
 ];
 
 export default function OrganizationProfile() {
-  const { user, profile } = useAuth();
+  const { user, profile, userRole } = useAuth();
   const [org, setOrg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -210,7 +210,7 @@ export default function OrganizationProfile() {
   }
 
   const isOwner = org?.owner_id === user?.id;
-  const isAdmin = ['super_admin', 'owner', 'administrator'].includes(profile?.role || 'staff');
+  const isAdmin = ['super_admin', 'administrator'].includes(userRole);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

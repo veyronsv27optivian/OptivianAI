@@ -40,20 +40,20 @@ export function initProviderManager(overrides = {}) {
 
   // Determine default provider from env or override
   const envDefault = import.meta.env[ENV_KEYS.DEFAULT_PROVIDER];
-  activeProviderName = overrides.defaultProvider || envDefault || AI_PROVIDERS.GEMINI;
+  activeProviderName = overrides.defaultProvider || envDefault || AI_PROVIDERS.DEEPSEEK;
 
   const apiKeys = overrides.apiKeys || {};
 
-  // Gemini (DEFAULT)
-  providers.set(
-    AI_PROVIDERS.GEMINI,
-    new GeminiProvider({ apiKey: apiKeys.gemini }),
-  );
-
-  // DeepSeek (backup)
+  // DeepSeek (PRIMARY — always active, always analyzing)
   providers.set(
     AI_PROVIDERS.DEEPSEEK,
     new DeepSeekProvider({ apiKey: apiKeys.deepseek }),
+  );
+
+  // Gemini (fallback)
+  providers.set(
+    AI_PROVIDERS.GEMINI,
+    new GeminiProvider({ apiKey: apiKeys.gemini }),
   );
 
 

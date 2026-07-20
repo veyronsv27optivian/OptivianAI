@@ -10,8 +10,7 @@
 /** All available roles with their display info */
 export const roles = [
   { id: 'super_admin',        label: 'Super Admin',       rank: 100, color: 'text-red-600',  bg: 'bg-red-50',    description: 'Unrestricted system-wide access' },
-  { id: 'owner',              label: 'Owner',             rank: 95,  color: 'text-red-600',  bg: 'bg-red-50',    description: 'Full organization ownership' },
-  { id: 'administrator',      label: 'Administrator',     rank: 85,  color: 'text-orange-600', bg: 'bg-orange-50', description: 'Full access except billing' },
+  { id: 'administrator',      label: 'Administrator',     rank: 95,  color: 'text-orange-600', bg: 'bg-orange-50', description: 'Full organization access' },
   { id: 'director',           label: 'Director',          rank: 75,  color: 'text-amber-600', bg: 'bg-amber-50',  description: 'Strategic team management' },
   { id: 'executive',          label: 'Executive',         rank: 70,  color: 'text-amber-600', bg: 'bg-amber-50',  description: 'Strategic oversight' },
   { id: 'manager',            label: 'Manager',           rank: 60,  color: 'text-violet-600', bg: 'bg-violet-50', description: 'Operational team lead' },
@@ -37,12 +36,24 @@ export const roles = [
 const roleMap = {};
 roles.forEach(r => { roleMap[r.id] = r; });
 
+// ── Deprecated role aliases ─────────────────────────────────────
+// These role IDs may exist in stored user data but should map to
+// their modern equivalents for display purposes.
+const DEPRECATED_ROLE_ALIASES = {
+  // 'owner' was replaced by 'administrator' — keep display consistent
+  owner: 'administrator',
+  // 'admin' maps to 'administrator' (used as DB-safe fallback role)
+  admin: 'administrator',
+};
+
 /**
  * Get display info for a role.
  */
 export function getRoleInfo(roleId) {
   const normalized = roleId?.toString().toLowerCase().replace(/\s+/g, '_') || 'staff';
-  return roleMap[normalized] || roleMap.staff;
+  // Check for deprecated role aliases first
+  const resolved = DEPRECATED_ROLE_ALIASES[normalized] || normalized;
+  return roleMap[resolved] || roleMap.staff;
 }
 
 /**
@@ -75,8 +86,7 @@ export function getLowerRoles(roleId) {
  */
 export const roleHierarchy = {
   super_admin: 100,
-  owner: 95,
-  administrator: 85,
+  administrator: 95,
   director: 75,
   executive: 70,
   manager: 60,
@@ -101,4 +111,4 @@ export const roleHierarchy = {
 /**
  * List of roles that can manage other users.
  */
-export const ADMIN_ROLES = ['super_admin', 'owner', 'administrator', 'director', 'manager'];
+export const ADMIN_ROLES = ['super_admin', 'administrator', 'director', 'manager'];

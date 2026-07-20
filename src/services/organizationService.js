@@ -212,7 +212,7 @@ export async function createOrganization(user, orgData) {
     const myIdx = profiles.findIndex(p => p.user_id === user.id);
     if (myIdx !== -1) {
       profiles[myIdx].organization_id = newOrg.id;
-      profiles[myIdx].role = 'owner';
+      profiles[myIdx].role = 'administrator';
       profiles[myIdx].updated_at = new Date().toISOString();
       devSet(DEV_PROFILES_KEY, profiles);
     }
@@ -253,7 +253,7 @@ export async function createOrganization(user, orgData) {
     // Update owner's profile
     await supabase
       .from('profiles')
-      .update({ organization_id: data.id, role: 'owner', updated_at: new Date().toISOString() })
+      .update({ organization_id: data.id, role: 'administrator', updated_at: new Date().toISOString() })
       .eq('user_id', user.id);
 
     // Log activity

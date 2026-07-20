@@ -41,11 +41,24 @@ function saveDevSession(session) {
   else localStorage.removeItem(DEV_KEYS.session);
 }
 
-function clearAllLocalData() {
+function clearSessionData() {
+  // Preserve user accounts, profiles, and org data — only wipe session & cache.
+  const PRESERVE_KEYS = [
+    'optivian_dev_users',
+    'optivian_dev_profiles',
+    'optivian_dev_orgs',
+    'optivian_org_creator',
+    'optivian_setup_dismissed',
+    'optivian_dev_tasks',
+    'optivian_dev_ai_analyses',
+    'optivian_dev_conversations',
+  ];
   const keys = Object.keys(localStorage);
   for (const key of keys) {
     if (key.startsWith('optivian_') || key.startsWith('sb-')) {
-      localStorage.removeItem(key);
+      if (!PRESERVE_KEYS.includes(key)) {
+        localStorage.removeItem(key);
+      }
     }
   }
 }
@@ -201,6 +214,33 @@ export function AuthProvider({ children }) {
     if (DEV_MODE) {
       const profiles = getDev(DEV_KEYS.profiles);
       let p = profiles.find(pr => pr.user_id === currentUser.id);
+
+      // ── Auto-migration: owner → administrator ──────────
+      if (p?.role === 'owner') {
+        p.role = 'administrator';
+        p.updated_at = new Date().toISOString();
+        saveDev(DEV_KEYS.profiles, profiles);
+      }
+      if (currentUser.user_metadata?.role === 'owner') {
+        currentUser = {
+          ...currentUser,
+          user_metadata: { ...currentUser.user_metadata, role: 'administrator' },
+        };
+        // Also update the saved session
+        const sessionData = getDevSession();
+        if (sessionData) {
+          sessionData.user = currentUser;
+          saveDevSession(sessionData);
+        }
+        // Update the stored user in users list
+        const users = getDev(DEV_KEYS.users);
+        const uIdx = users.findIndex(u => u.id === currentUser.id);
+        if (uIdx !== -1) {
+          users[uIdx].user_metadata = { ...users[uIdx].user_metadata, role: 'administrator' };
+          saveDev(DEV_KEYS.users, users);
+        }
+      }
+
       if (!p) {
         p = {
           id: uid(),
@@ -291,6 +331,18 @@ export function AuthProvider({ children }) {
     if (DEV_MODE) {
       const saved = getDevSession();
       if (saved) {
+        // ── Auto-migration: owner → administrator ──────────
+        if (saved.user?.user_metadata?.role === 'owner') {
+          saved.user.user_metadata.role = 'administrator';
+          const users = getDev(DEV_KEYS.users);
+          const u = users.find(u => u.id === saved.user.id);
+          if (u) {
+            u.user_metadata = { ...u.user_metadata, role: 'administrator' };
+            saveDev(DEV_KEYS.users, users);
+          }
+          saveDevSession(saved);
+        }
+
         setSession(saved);
         setUser(saved.user);
         syncProfile(saved.user, 'email');
@@ -384,6 +436,49 @@ export function AuthProvider({ children }) {
     };
   }, [user?.id]);
 
+  // ─── Auto-repair: Link orphaned profile to existing org ──────
+  // If a user created an org but the profile update failed (e.g., DB
+  // CHECK constraint on role), their profile won't have organization_id.
+  // This effect detects that case and auto-links the profile.
+  useEffect(() => {
+    if (!user?.id || DEV_MODE) return;
+    if (profile?.organization_id) return; // Already linked
+
+    let cancelled = false;
+    supabase
+      .from('organizations')
+      .select('id')
+      .eq('owner_id', user.id)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data: ownedOrg }) => {
+        if (cancelled) return;
+        if (ownedOrg?.id) {
+          console.log('[Auth] Repairing unlinked profile — linking to org:', ownedOrg.id);
+          supabase
+            .from('profiles')
+            .update({ organization_id: ownedOrg.id, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id)
+            .then(() => {
+              // Re-fetch profile to get updated organization_id
+              supabase
+                .from('profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .single()
+                .then(({ data: refreshedProfile }) => {
+                  if (refreshedProfile && !cancelled) {
+                    setProfile(refreshedProfile);
+                  }
+                });
+            });
+        }
+      })
+      .catch((err) => console.warn('[Auth] Profile repair check failed:', err?.message));
+
+    return () => { cancelled = true; };
+  }, [user?.id, profile?.id, profile?.organization_id]);
+
   // ─── Profile polling fallback ─────────────────────────────────
   useEffect(() => {
     if (!user?.id || DEV_MODE) return;
@@ -416,7 +511,7 @@ export function AuthProvider({ children }) {
         id,
         email,
         password,
-        user_metadata: { ...metadata, email, role: metadata.role || 'admin' },
+        user_metadata: { ...metadata, email, role: metadata.role || 'staff' },
         created_at: new Date().toISOString(),
       };
       users.push(newUser);
@@ -465,6 +560,12 @@ export function AuthProvider({ children }) {
       const found = users.find(u => u.email === email && u.password === password);
       if (!found) {
         return { error: { message: 'Invalid email or password.' } };
+      }
+
+      // ── Auto-migration: owner → administrator on sign-in ────
+      if (found.user_metadata?.role === 'owner') {
+        found.user_metadata = { ...found.user_metadata, role: 'administrator' };
+        saveDev(DEV_KEYS.users, users);
       }
 
       const devSession = {
@@ -518,8 +619,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signOut = useCallback(async (scope = 'local') => {
-    // Clear ALL local caches first — no leftover data from this session.
-    clearAllLocalData();
+    // Clear session/cache data — preserves user accounts, profiles, and orgs.
+    clearSessionData();
 
     // Clear React state so the UI responds instantly.
     setSession(null);
@@ -705,7 +806,7 @@ export function AuthProvider({ children }) {
       const myProfileIdx = profiles.findIndex(p => p.user_id === currentUser.id);
       if (myProfileIdx !== -1) {
         profiles[myProfileIdx].organization_id = newOrg.id;
-        profiles[myProfileIdx].role = 'owner';
+        profiles[myProfileIdx].role = 'administrator';
         profiles[myProfileIdx].updated_at = new Date().toISOString();
         saveDev(DEV_KEYS.profiles, profiles);
         setProfile(profiles[myProfileIdx]);
@@ -736,12 +837,24 @@ export function AuthProvider({ children }) {
       .limit(1)
       .single();
 
-    await supabase
+    // Use 'admin' role which IS allowed by the original DB CHECK constraint
+    // ('admin', 'manager', 'staff'). The app's role system aliases 'admin' to
+    // 'administrator' for permissions and display.
+    const { error: profileUpdateError } = await supabase
       .from('profiles')
-      .update({ role: 'owner', organization_id: orgResult?.id, updated_at: new Date().toISOString() })
+      .update({ role: 'admin', organization_id: orgResult?.id, updated_at: new Date().toISOString() })
       .eq('user_id', currentUser.id);
 
-    // Refresh profile
+    if (profileUpdateError) {
+      // Unexpected failure — try just setting org_id without the role
+      console.warn('[createOrganization] Profile update with admin role failed:', profileUpdateError.message);
+      await supabase
+        .from('profiles')
+        .update({ organization_id: orgResult?.id, updated_at: new Date().toISOString() })
+        .eq('user_id', currentUser.id);
+    }
+
+    // Refresh profile to get latest organization_id
     await syncProfile(currentUser);
 
     return { error: null };
@@ -977,14 +1090,18 @@ export function AuthProvider({ children }) {
   }, [user, syncProfile]);
 
   // ─── RBAC Helpers ──────────────────────────────────────────────
-  const userRole = profile?.role || user?.user_metadata?.role || 'staff';
+  // Centralized role resolution — maps deprecated/legacy role IDs to their modern equivalents.
+  // This ensures ALL downstream permission checks use the resolved role string.
+  const DEPRECATED_ROLE_MAP = { owner: 'administrator', admin: 'administrator' };
+  const rawRole = profile?.role || user?.user_metadata?.role || 'staff';
+  const userRole = DEPRECATED_ROLE_MAP[rawRole] || rawRole;
 
   const can = useCallback((resource, action) => {
     return hasPermission(userRole, resource, action);
   }, [userRole]);
 
   const isAdmin = useCallback(() => {
-    const adminRoles = ['super_admin', 'owner', 'administrator', 'director', 'manager'];
+    const adminRoles = ['super_admin', 'administrator', 'director', 'manager'];
     return adminRoles.includes(userRole);
   }, [userRole]);
 

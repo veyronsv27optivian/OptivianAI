@@ -18,7 +18,7 @@ function generateTempPassword() {
 
 export default function Users() {
   const {
-    user, profile, getStaffMembers, createStaffMember,
+    user, profile, userRole, getStaffMembers, createStaffMember,
     removeStaffMember, updateStaffRole, suspendMember,
   } = useAuth();
   const [members, setMembers] = useState([]);
@@ -37,23 +37,28 @@ export default function Users() {
   // Add form
   const [newStaff, setNewStaff] = useState({ email: '', password: generateTempPassword(), role: 'staff' });
 
-  const userRole = profile?.role || user?.user_metadata?.role || 'staff';
-  const canManage = ['super_admin', 'owner', 'administrator', 'director', 'manager'].includes(userRole);
+  const canManage = ['super_admin', 'administrator', 'director', 'manager'].includes(userRole);
   const availableRoles = getLowerRoles(userRole).map(r => r.id);
 
-  const loadMembers = async () => {
-    try {
-      setLoading(true);
-      const data = await getStaffMembers();
-      setMembers(data || []);
-    } catch (err) {
-      console.error('Failed to load staff:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
 
-  useEffect(() => { loadMembers(); }, [getStaffMembers]);
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data = await getStaffMembers();
+        if (cancelled) return;
+        setMembers(data || []);
+      } catch (err) {
+        if (!cancelled) console.error('Failed to load staff:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => { cancelled = true; };
+  }, [user?.id, profile?.organization_id]);
 
   const handleAddStaff = async (e) => {
     e.preventDefault();
@@ -88,7 +93,7 @@ export default function Users() {
       }
       
       // Reload from DB instantly since the upsert is guaranteed finished
-      loadMembers();
+      setMembers(await getStaffMembers() || []);
     } catch (err) {
       console.error('[handleAddStaff] caught:', err.message);
       setActionError(err.message);
@@ -110,7 +115,7 @@ export default function Users() {
       const { error } = await removeStaffMember(memberToAction.id, memberToAction.user_id);
       if (error) throw new Error(error.message || error);
       setActionSuccess('Staff member removed successfully.');
-      loadMembers();
+      setMembers(await getStaffMembers() || []);
     } catch (err) {
       setActionError(err.message || 'Failed to remove staff member.');
     } finally {
@@ -123,7 +128,7 @@ export default function Users() {
     try {
       const { error } = await updateStaffRole(member.profileId || member.id, newRole);
       if (error) throw new Error(error.message || error);
-      loadMembers();
+      setMembers(await getStaffMembers() || []);
     } catch (err) {
       console.error(err);
     }
@@ -143,7 +148,7 @@ export default function Users() {
       const { error } = await suspendMember(memberToAction.profileId || memberToAction.id, shouldSuspend);
       if (error) throw new Error(error.message);
       setActionSuccess(shouldSuspend ? 'Member suspended.' : 'Member unsuspended.');
-      loadMembers();
+      setMembers(await getStaffMembers() || []);
     } catch (err) {
       setActionError(err.message);
     } finally {

@@ -1,27 +1,19 @@
-import { Building2, LogIn, UserPlus, ArrowRight, Sparkles } from 'lucide-react';
+import { Building2, LogIn, ArrowRight, Sparkles } from 'lucide-react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../services/AuthContext';
 
 const features = [
   {
     title: 'Create Organization',
-    description: 'Start a new workspace. You will be the owner and can invite your entire team.',
+    description: 'Start a new workspace. You will be the administrator and can invite your entire team.',
     icon: Building2,
     path: '/onboarding/create',
     gradient: 'from-blue-500 to-indigo-500',
     highlight: false,
   },
   {
-    title: 'Create Account',
-    description: 'Sign up with email or continue with Google, GitHub, or Microsoft.',
-    icon: UserPlus,
-    path: '/onboarding/signup',
-    gradient: 'from-violet-500 to-purple-500',
-    highlight: false,
-  },
-  {
     title: 'Sign In',
-    description: 'Already have an account? Sign in with your email and password or a social provider.',
+    description: 'Already have an account? Sign in with your email and password.',
     icon: LogIn,
     path: '/onboarding/login',
     gradient: 'from-blue-600 to-violet-600',
@@ -77,7 +69,7 @@ export default function Onboarding() {
         </div>
 
         {/* Feature Cards */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
