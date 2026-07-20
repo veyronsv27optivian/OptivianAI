@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, createTempSupabaseClient } from './supabase';
+import { clearSupabaseAuthStorage, markSupabaseRefreshInvalid } from './authSanitize';
 import { authService } from './auth/authService';
 import { hasPermission } from './auth/permissions';
 import { getRoleInfo } from './auth/roles';
@@ -349,7 +350,18 @@ export function AuthProvider({ children }) {
       }
       setLoading(false);
     } else {
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (error?.message?.includes('Invalid Refresh Token') ||
+            error?.message?.includes('Refresh Token Not Found')) {
+          markSupabaseRefreshInvalid();
+          clearSupabaseAuthStorage();
+          supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {

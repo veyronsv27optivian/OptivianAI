@@ -10,7 +10,7 @@
  * - Font and icon pre-caching
  */
 
-const CACHE_NAME = 'optivianai-v3';
+const CACHE_NAME = 'optivianai-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -102,6 +102,14 @@ self.addEventListener('fetch', (event) => {
 
   // Skip non-GET requests and unsupported schemes (e.g., chrome-extension://)
   if (request.method !== 'GET' || !url.protocol.startsWith('http')) return;
+
+  // ── Dev mode: skip SW cache entirely for localhost/Vite dev server ──
+  // In development, Vite serves files without content hashes, so cache-first
+  // strategies serve stale versions of edited files. In production, Vite emits
+  // hashed filenames (e.g. index-abc123.js) so HTTP cache + SW cache are safe.
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.port === '5173') {
+    return;
+  }
 
   // ── Fonts: cache-first, long-lived ──────────────────────────
   if (url.hostname.includes('fonts.googleapis') || url.hostname.includes('fonts.gstatic') || url.pathname.endsWith('.woff2')) {

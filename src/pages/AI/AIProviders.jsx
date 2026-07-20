@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Server, RefreshCw, Check, X, AlertCircle, Activity,
   Zap, Eye, Star, ArrowRight, Shield,
 } from 'lucide-react';
 import {
   getAvailableProviders, setActiveProvider, getActiveProviderName,
-  getProvider,
+  getProvider, AiRateLimitError,
 } from '../../services/ai';
 
 export default function AIProviders() {
@@ -35,7 +35,41 @@ export default function AIProviders() {
     refresh();
   };
 
-  const handleTest = async (name) => {
+  // Track rate-limit cooldowns per provider so the UI can show guidance
+  const [rateLimitedUntil, setRateLimitedUntil] = useState({});
+  const clearTimerRef = useRef(null);
+
+  // Clean up any pending auto-clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (clearTimerRef.current) {
+        clearTimeout(clearTimerRef.current);
+        clearTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleTest = useCallback(async (name) => {
+    // Cancel any previous auto-clear timer before starting a new test
+    if (clearTimerRef.current) {
+      clearTimeout(clearTimerRef.current);
+      clearTimerRef.current = null;
+    }
+
+    // If the provider is still in a cooldown period, don't retry yet
+    if (rateLimitedUntil[name] && Date.now() < rateLimitedUntil[name]) {
+      const remaining = Math.ceil((rateLimitedUntil[name] - Date.now()) / 1000);
+      setTestResults(prev => ({
+        ...prev,
+        [name]: {
+          success: false,
+          error: `Rate limited. Please wait ${remaining}s before testing again.`,
+          isRateLimit: true,
+        },
+      }));
+      return;
+    }
+
     setTestLoading(name);
     setTestResults(prev => ({ ...prev, [name]: null }));
 
@@ -60,13 +94,50 @@ export default function AIProviders() {
         },
       }));
     } catch (err) {
+      const isRateLimit = err instanceof AiRateLimitError;
+      let errorMessage = err.message;
+      let cooldown = 0;
+
+      if (isRateLimit) {
+        // Cooldown based on Retry-After header (or default to 30s for free-tier limits)
+        cooldown = (err.retryAfter || 30) * 1000;
+        setRateLimitedUntil(prev => ({ ...prev, [name]: Date.now() + cooldown }));
+
+        if (err.retryAfter) {
+          errorMessage = `Rate limited (429). Try again in ${err.retryAfter}s.`;
+        } else {
+          errorMessage = `Rate limited (429). The free-tier API is busy. Wait ~30s before retrying.`;
+        }
+      }
+
       setTestResults(prev => ({
         ...prev,
-        [name]: { success: false, error: err.message },
+        [name]: { success: false, error: errorMessage, isRateLimit },
       }));
+
+      // Auto-clear the rate-limited state after the cooldown period
+      if (cooldown > 0) {
+        clearTimerRef.current = setTimeout(() => {
+          clearTimerRef.current = null;
+          setRateLimitedUntil(prev => {
+            const next = { ...prev };
+            delete next[name];
+            return next;
+          });
+          // Also clear the error display so the user can try again fresh
+          setTestResults(prev => {
+            if (prev[name]?.isRateLimit) {
+              const next = { ...prev };
+              delete next[name];
+              return next;
+            }
+            return prev;
+          });
+        }, cooldown);
+      }
     }
     setTestLoading(null);
-  };
+  }, [rateLimitedUntil]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
