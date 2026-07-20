@@ -20,6 +20,8 @@
  */
 export const PRICING_TABLE = {
   // Gemini models
+  'gemini-3.5-flash': { input: 0.00015, output: 0.0006, type: 'vision' },
+  'gemini-3.1-flash-lite': { input: 0.000075, output: 0.0003, type: 'text' },
   'gemini-2.0-flash': { input: 0.0001, output: 0.0004, type: 'vision' },
   'gemini-2.0-flash-lite': { input: 0.000075, output: 0.0003, type: 'text' },
   'gemini-1.5-pro': { input: 0.00125, output: 0.005, type: 'vision' },

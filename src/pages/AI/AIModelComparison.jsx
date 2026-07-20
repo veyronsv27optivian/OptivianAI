@@ -16,7 +16,7 @@ import { getAvailableProviders, generateText, getActiveProviderName } from '../.
 const PROVIDER_MODELS = {
   openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
   deepseek: ['deepseek-chat', 'deepseek-reasoner'],
-  gemini: ['gemini-2.0-flash', 'gemini-2.0-pro'],
+  gemini: ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-pro'],
   qwen: ['qwen-max', 'qwen-plus'],
   openaiViaOpenRouter: ['openai/gpt-4o', 'anthropic/claude-3.5-sonnet', 'google/gemini-2.0-flash'],
 };
@@ -26,6 +26,8 @@ const MODEL_COLORS = {
   'gpt-4o-mini': { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800' },
   'deepseek-chat': { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-800' },
   'deepseek-reasoner': { bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-700 dark:text-violet-300', border: 'border-violet-200 dark:border-violet-800' },
+  'gemini-3.5-flash': { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
+  'gemini-3.1-flash-lite': { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
   'gemini-2.0-flash': { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
   default: { bg: 'bg-slate-50 dark:bg-slate-800/50', text: 'text-slate-600 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-700/50' },
 };

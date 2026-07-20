@@ -100,10 +100,14 @@ export default function Dashboard() {
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [widgetConfig, setWidgetConfig] = useState(() => loadWidgetConfig());
 
-  // Check if this is a new org
-  const [isNewOrg, setIsNewOrg] = useState(() => {
-    return !localStorage.getItem('optivian_setup_dismissed');
-  });
+  // Check if this is a new org — only show to admin/owner roles
+  const [isNewOrg, setIsNewOrg] = useState(false);
+
+  useEffect(() => {
+    const userRole = user?.user_metadata?.role || 'staff';
+    const isAdmin = ['super_admin', 'owner', 'administrator'].includes(userRole);
+    setIsNewOrg(isAdmin && !localStorage.getItem('optivian_setup_dismissed'));
+  }, [user?.user_metadata?.role]);
 
   // ── Role-based dashboard config ───────────────────────────
   const userRole = user?.user_metadata?.role || 'staff';

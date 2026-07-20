@@ -320,7 +320,7 @@ export default function AIProviders() {
             <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Automatic Fallback</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               When a provider fails, the system automatically falls back to the next available provider in this order:
-              Gemini → DeepSeek → Qwen VL → OpenAI. This ensures AI features remain operational even if one provider is unavailable.
+              Gemini → DeepSeek → OpenAI. This ensures AI features remain operational even if one provider is unavailable.
             </p>
           </div>
         </div>

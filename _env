@@ -8,25 +8,23 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 #  ┌──────────────┬────────────────────┬───────────────────────┐
 #  │ Provider     │ Env Key            │ Default Model         │
 #  ├──────────────┼────────────────────┼───────────────────────┤
-#  │ Gemini  (1)  │ VITE_GEMINI_API_KEY│ gemini-2.0-flash      │
+#  │ Gemini  (1)  │ VITE_GEMINI_API_KEY│ gemini-3.1-flash-lite │
 #  │ DeepSeek (2) │ VITE_OPENROUTER_KEY│ deepseek/deepseek-r1  │
-#  │ Qwen VL  (3) │ VITE_OPENROUTER_KEY│ qwen/qwen2.5-vl-72b   │
-#  │ OpenAI   (4) │ VITE_OPENROUTER_KEY│ openai/gpt-4o-mini    │
+#  │ OpenAI   (3) │ VITE_OPENROUTER_KEY│ openai/gpt-4o-mini    │
 #  └──────────────┴────────────────────┴───────────────────────┘
 #
 #  IMPORTANT:
 #  - Gemini is the DEFAULT provider. Set VITE_GEMINI_API_KEY first.
-#  - DeepSeek, Qwen, and OpenAI all use OpenRouter. Set ONE key
-#    (VITE_OPENROUTER_API_KEY) for all three, or set individual
-#    VITE_DEEPSEEK_API_KEY / VITE_QWEN_API_KEY to override.
-#  - All 4 providers have automatic fallback: if Gemini fails,
-#    the system tries DeepSeek → Qwen → OpenAI automatically.
+#  - DeepSeek and OpenAI use OpenRouter. Set ONE key
+#    (VITE_OPENROUTER_API_KEY) for both, or set individual
+#    VITE_DEEPSEEK_API_KEY to override.
+#  - Automatic fallback: if Gemini fails, the system tries DeepSeek → OpenAI.
 
 # ── 1. Gemini (DEFAULT) ──────────────────────────────────────────
 # Get a free API key: https://aistudio.google.com/apikey
 # Must start with "AIza" or "AQ." (Google AI Studio). OAuth / Firebase tokens will not work.
 VITE_GEMINI_API_KEY=AIzaSyAb8RN6IQBQUZcievc7RUx5nvxe-Pc89uymw5n5iCIo9ZJ3nXCQ
-VITE_GEMINI_MODEL=gemini-2.0-flash
+VITE_GEMINI_MODEL=gemini-3.1-flash-lite
 
 # ── 2. OpenRouter API Key (shared by DeepSeek, Qwen & OpenAI) ───
 # Get a free key: https://openrouter.ai/keys

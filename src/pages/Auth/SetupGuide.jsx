@@ -11,9 +11,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  CheckCircle, Circle, ArrowRight, ArrowLeft, Rocket, Users, Key,
-  CheckSquare, Brain, Settings, Sparkles, Copy, ExternalLink,
-  Server, Globe, Mail, BookOpen, Shield,
+  CheckCircle, Circle, ArrowRight, ArrowLeft, Rocket, Users,
+  CheckSquare, Brain, Settings, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 
@@ -25,13 +24,7 @@ const STEPS = [
     icon: Sparkles,
     gradient: 'from-blue-500 to-violet-500',
   },
-  {
-    id: 'ai_keys',
-    title: 'AI Provider Setup',
-    subtitle: 'Configure your AI models',
-    icon: Key,
-    gradient: 'from-amber-500 to-orange-500',
-  },
+
   {
     id: 'team',
     title: 'Invite Your Team',
@@ -59,8 +52,6 @@ export default function SetupGuide() {
   const navigate = useNavigate();
   const { user, isDevMode } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
-  const [copiedIndex, setCopiedIndex] = useState(null);
-
   const step = STEPS[currentStep];
 
   const handleNext = () => {
@@ -75,12 +66,6 @@ export default function SetupGuide() {
     navigate('/app');
   };
 
-  const copyToClipboard = (text, index) => {
-    navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
   const renderStepContent = () => {
     switch (step.id) {
       case 'welcome':
@@ -93,7 +78,6 @@ export default function SetupGuide() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { icon: Key, label: 'AI API Keys', desc: 'Unlock all AI features' },
                 { icon: Users, label: 'Team Invites', desc: 'Collaborate with your team' },
                 { icon: CheckSquare, label: 'Task Management', desc: 'Organize your work' },
                 { icon: Brain, label: 'AI Tools', desc: 'SWOT, Forecast, Advisor' },
@@ -111,91 +95,6 @@ export default function SetupGuide() {
                   </div>
                 );
               })}
-            </div>
-          </div>
-        );
-
-      case 'ai_keys':
-        return (
-          <div className="space-y-5">
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              OptivianAI supports <strong>4 AI providers</strong>. Set just <strong>2 API keys</strong> and all of them work:
-            </p>
-
-            <div className="space-y-3">
-              {/* Gemini */}
-              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">G</div>
-                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">Gemini <span className="text-[10px] font-normal text-slate-400">(Default)</span></span>
-                  </div>
-                  <span className="text-[9px] bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">Free tier</span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Get a free key at aistudio.google.com</p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 px-2 py-1 rounded bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-700 dark:text-slate-300 border border-blue-200 dark:border-blue-800">
-                    VITE_GEMINI_API_KEY=AIza...
-                  </code>
-                  <button
-                    onClick={() => copyToClipboard('VITE_GEMINI_API_KEY=', 0)}
-                    className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
-                  >
-                    {copiedIndex === 0 ? <CheckCircle size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                  </button>
-                  <a
-                    href="https://aistudio.google.com/apikey"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
-                  >
-                    <ExternalLink size={14} />
-                  </a>
-                </div>
-              </div>
-
-              {/* OpenRouter (shared) */}
-              <div className="p-4 rounded-lg bg-violet-50 dark:bg-violet-900/10 border border-violet-200 dark:border-violet-800/30">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <div className="w-6 h-6 rounded bg-green-600 flex items-center justify-center text-white text-[9px] font-bold">D</div>
-                      <div className="w-6 h-6 rounded bg-purple-600 flex items-center justify-center text-white text-[9px] font-bold">Q</div>
-                      <div className="w-6 h-6 rounded bg-teal-600 flex items-center justify-center text-white text-[9px] font-bold">O</div>
-                    </div>
-                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                      DeepSeek + Qwen + OpenAI <span className="text-[10px] font-normal text-slate-400">(via OpenRouter)</span>
-                    </span>
-                  </div>
-                  <span className="text-[9px] bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded-full">1 key for 3 models</span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Get a free key at openrouter.ai/keys</p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 px-2 py-1 rounded bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-700 dark:text-slate-300 border border-violet-200 dark:border-violet-800">
-                    VITE_OPENROUTER_API_KEY=sk-or-v1-...
-                  </code>
-                  <button
-                    onClick={() => copyToClipboard('VITE_OPENROUTER_API_KEY=', 1)}
-                    className="p-1.5 rounded text-slate-400 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-all"
-                  >
-                    {copiedIndex === 1 ? <CheckCircle size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                  </button>
-                  <a
-                    href="https://openrouter.ai/keys"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 rounded text-slate-400 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-all"
-                  >
-                    <ExternalLink size={14} />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30">
-              <p className="text-[11px] text-amber-700 dark:text-amber-300">
-                <strong>Tip:</strong> Set these in your <code className="px-1 rounded bg-amber-100 dark:bg-amber-900/30 text-[10px]">_env</code> or <code className="px-1 rounded bg-amber-100 dark:bg-amber-900/30 text-[10px]">.env</code> file. The AI Platform will automatically use them — no restart needed.
-              </p>
             </div>
           </div>
         );
@@ -281,7 +180,6 @@ export default function SetupGuide() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-sm mx-auto">
               {[
                 { icon: CheckCircle, label: 'Organization created', done: true },
-                { icon: CheckCircle, label: 'AI providers configured', done: false },
                 { icon: CheckCircle, label: 'Team ready to invite', done: false },
                 { icon: CheckCircle, label: 'Tasks & AI tools available', done: true },
               ].map((item, i) => {
