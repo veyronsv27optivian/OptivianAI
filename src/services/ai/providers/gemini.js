@@ -1,9 +1,9 @@
 /**
  * Gemini provider (DEFAULT).
  *
- * Uses the Google AI Studio REST API (gemini-2.0-flash by default).
+ * Uses the Google AI Studio REST API (gemini-3.1-flash-lite by default).
  * Environment variable: VITE_GEMINI_API_KEY
- * Custom model:         VITE_GEMINI_MODEL  (default: gemini-2.0-flash)
+ * Custom model:         VITE_GEMINI_MODEL  (default: gemini-3.1-flash-lite)
  *
  * API docs: https://ai.google.dev/api/generate-content
  */
@@ -82,7 +82,11 @@ export class GeminiProvider extends BaseProvider {
   async generateText(prompt, options = {}) {
     this._assertConfigured();
 
-    return this._withRetry(() => this._generateTextOnce(prompt, options));
+    // Auto-route to vision-capable model when needed
+    const needsVision = options.requireVision || (options.images && options.images.length > 0);
+    const effectiveModel = needsVision ? 'gemini-3.5-flash' : undefined;
+
+    return this._withRetry(() => this._generateTextOnce(prompt, { ...options, effectiveModel }));
   }
 
   /**
@@ -90,7 +94,8 @@ export class GeminiProvider extends BaseProvider {
    * @private
    */
   async _generateTextOnce(prompt, options = {}) {
-    const url = `${this.endpoint}/${this.model}:generateContent?key=${this.apiKey}`;
+    const model = options.effectiveModel || this.model;
+    const url = `${this.endpoint}/${model}:generateContent?key=${this.apiKey}`;
 
     /** @type {object} */
     const body = {
@@ -131,7 +136,7 @@ export class GeminiProvider extends BaseProvider {
       text,
       finishReason: candidate.finishReason || 'STOP',
       usage: data.usageMetadata || null,
-      modelUsed: this.model,
+      modelUsed: model,
       provider: 'gemini',
     };
   }
@@ -142,7 +147,10 @@ export class GeminiProvider extends BaseProvider {
   async *generateStream(prompt, options = {}) {
     this._assertConfigured();
 
-    const url = `${this.endpoint}/${this.model}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
+    // Auto-route to vision-capable model when needed
+    const needsVision = options.requireVision || (options.images && options.images.length > 0);
+    const effectiveModel = needsVision ? 'gemini-3.5-flash' : this.model;
+    const url = `${this.endpoint}/${effectiveModel}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
 
     /** @type {object} */
     const body = {

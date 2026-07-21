@@ -7,17 +7,16 @@
  *
  * Steps:
  *   1. ✅ Create your organization (auto-completed if they see this)
- *   2. Set up AI API keys (VITE_GEMINI_API_KEY, VITE_OPENROUTER_API_KEY)
- *   3. Invite team members
- *   4. Create your first task
- *   5. Explore AI tools
- *   6. Configure organization settings
+ *   2. Invite team members
+ *   3. Create your first task
+ *   4. Explore AI tools
+ *   5. Configure organization settings
  */
 
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  CheckCircle, Circle, ArrowRight, Rocket, Users, Key,
+  CheckCircle, Circle, ArrowRight, Rocket, Users,
   CheckSquare, Brain, Settings, Sparkles, X, ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
@@ -55,14 +54,7 @@ const ALL_STEPS = [
     link: null,
     autoComplete: true, // Completed when they see the dashboard
   },
-  {
-    id: 'ai_keys',
-    label: 'Configure AI Providers',
-    description: 'Set your Gemini and OpenRouter API keys to unlock all AI features',
-    icon: Key,
-    link: '/onboarding/setup',
-    action: 'Configure',
-  },
+
   {
     id: 'invite_team',
     label: 'Invite Team Members',

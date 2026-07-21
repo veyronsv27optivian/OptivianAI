@@ -406,7 +406,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -807,14 +807,14 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                 <X size={16} />
               </button>
             ) : (
-              <button onClick={handleSubmit} disabled={!input.trim()} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title="Send (Ctrl+Enter)">
+              <button onClick={handleSubmit} disabled={!input.trim()} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title="Send (Enter)">
                 <Send size={16} />
               </button>
             )}
           </div>
         </div>
         <p className="mt-1.5 text-[10px] text-slate-400">
-          Press Ctrl+Enter to send - Powered by {activeProvider?.label || 'AI'} {activeProvider?.model ? `(${activeProvider.model})` : ''}
+          Press Enter to send, Shift+Enter for new line — Powered by {activeProvider?.label || 'AI'} {activeProvider?.model ? `(${activeProvider.model})` : ''}
         </p>
       </div>
     </div>

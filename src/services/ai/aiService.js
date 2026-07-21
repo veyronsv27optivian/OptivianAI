@@ -245,6 +245,8 @@ ${toolSystemPrompt}`
     temperature: options.temperature ?? DEFAULT_GENERATION_CONFIG.temperature,
     maxTokens: options.maxTokens ?? DEFAULT_GENERATION_CONFIG.maxOutputTokens,
     topP: options.topP ?? DEFAULT_GENERATION_CONFIG.topP,
+    requireVision,
+    images: options.images,
   };
 
   const requireVision = options.requireVision ?? tool.requiredCapabilities.includes('vision');

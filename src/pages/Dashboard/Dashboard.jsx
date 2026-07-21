@@ -134,15 +134,17 @@ export default function Dashboard() {
     }
   }, [user?.id, profile?.organization_id]);
 
-  // Check if this is a new org — only show Getting Started to the creator, not all admins
+  // Check if this is a new org — only show to admin/owner roles AND the org creator
   const [isNewOrg, setIsNewOrg] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
+    const userRole = user?.user_metadata?.role || 'staff';
+    const isAdmin = ['super_admin', 'owner', 'administrator'].includes(userRole);
     const creatorId = localStorage.getItem('optivian_org_creator');
     const dismissed = localStorage.getItem('optivian_setup_dismissed');
-    setIsNewOrg(creatorId === user.id && !dismissed);
-  }, [user?.id]);
+    setIsNewOrg(isAdmin && creatorId === user.id && !dismissed);
+  }, [user?.id, user?.user_metadata?.role]);
 
   // ── Role-based dashboard config ───────────────────────────
   const roleInfo = useMemo(() => getRoleInfo(userRole), [userRole]);
