@@ -88,11 +88,13 @@ export class QwenProvider extends BaseProvider {
    */
   async _generateTextOnce(prompt, options = {}) {
     /** @type {Array<{ role: string, content: string|Array<object> }>} */
-    const messages = [];
-
-    if (options.systemPrompt) {
-      messages.push({ role: 'system', content: options.systemPrompt });
-    }
+    /** @type {Array<{ role: string, content: string|Array<object> }>} */
+    const messages = this.buildMessagesFromHistory(
+      options.conversationHistory,
+      options.systemPrompt,
+      null,  // current prompt added below (may need vision handling)
+      { skipCurrentPrompt: true },
+    );
 
     // Support vision: if images are provided, build a multimodal message
     if (options.images && Array.isArray(options.images) && options.images.length > 0) {
@@ -152,10 +154,11 @@ export class QwenProvider extends BaseProvider {
     }
 
     /** @type {Array<{ role: string, content: string|Array<object> }>} */
-    const messages = [];
-    if (options.systemPrompt) {
-      messages.push({ role: 'system', content: options.systemPrompt });
-    }
+    const messages = this.buildMessagesFromHistory(
+      options.conversationHistory,
+      options.systemPrompt,
+      '',  // current prompt added below (may need vision handling)
+    );
 
     if (options.images && Array.isArray(options.images) && options.images.length > 0) {
       const content = [{ type: 'text', text: prompt }];

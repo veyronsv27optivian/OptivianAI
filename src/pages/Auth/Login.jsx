@@ -118,9 +118,9 @@ export default function Login() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">New Password</label>
+                <label htmlFor="new-password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">New Password</label>
                 <div className="relative">
-                  <input type={showNewPassword ? 'text' : 'password'} required minLength={6} maxLength={128}
+                  <input id="new-password" name="newPassword" type={showNewPassword ? 'text' : 'password'} required minLength={6} maxLength={128}
                     value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full pr-12 pl-4 py-2.5 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm"
                     placeholder="Choose a strong password (min 6 chars)" />
@@ -171,24 +171,24 @@ export default function Login() {
           <form onSubmit={handleSignIn} className="space-y-5">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <User size={18} className="text-slate-400" />
                   </div>
-                  <input type="email" required value={formData.email}
+                  <input id="email" name="email" type="email" required value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm"
                     placeholder="you@company.com" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Lock size={18} className="text-slate-400" />
                   </div>
-                  <input type={showPassword ? 'text' : 'password'} required maxLength={128}
+                  <input id="password" name="password" type={showPassword ? 'text' : 'password'} required maxLength={128}
                     value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
                     className="w-full pl-11 pr-12 py-2.5 bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm"
                     placeholder="Enter your password" />
@@ -201,8 +201,8 @@ export default function Login() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={rememberMe}
+              <label htmlFor="remember-me" className="flex items-center gap-2 cursor-pointer">
+                <input id="remember-me" name="rememberMe" type="checkbox" checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-600 dark:text-slate-400">Remember me</span>

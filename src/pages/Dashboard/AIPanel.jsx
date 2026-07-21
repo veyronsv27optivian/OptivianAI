@@ -412,8 +412,7 @@ export default function AIPanel({
                 <tool.icon size={14} className="text-slate-600 dark:text-slate-300" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{tool.label}</p>
-                <p className="text-[10px] text-slate-400 truncate">{tool.desc}</p>
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{tool.label}</p>                 <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{tool.desc}</p>
               </div>
             </motion.button>
           ))}

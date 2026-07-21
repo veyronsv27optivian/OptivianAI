@@ -130,14 +130,14 @@ export default function AiVisualRenderer({ content, toolType }) {
 
       {/* Render markdown text */}
       {cleanedText && (
-        <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+        <div className="text-sm leading-relaxed prose prose-sm max-w-none whitespace-pre-wrap">
           <SimpleMarkdown content={cleanedText} />
         </div>
       )}
 
       {/* Fallback: render full content if no JSON was extracted */}
       {!cleanedText && jsonBlocks.length === 0 && (
-        <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+        <div className="text-sm leading-relaxed prose prose-sm max-w-none whitespace-pre-wrap">
           <SimpleMarkdown content={content} />
         </div>
       )}

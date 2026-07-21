@@ -88,7 +88,7 @@ export default function OrganizationActivity() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
           <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search activity..."
             className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -194,12 +194,12 @@ export default function OrganizationActivity() {
                             </span>
                           </p>
                           {a.details?.changes && (
-                            <p className="text-xs text-slate-400 mt-0.5">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                               Changes: {Array.isArray(a.details.changes) ? a.details.changes.join(', ') : JSON.stringify(a.details.changes)}
                             </p>
                           )}
                           {a.details?.name && (
-                            <p className="text-xs text-slate-400 mt-0.5">Name: {a.details.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Name: {a.details.name}</p>
                           )}
                         </div>
                       </div>

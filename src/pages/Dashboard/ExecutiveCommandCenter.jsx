@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';import {
   TrendingUp, TrendingDown,
-  Zap, ChevronRight, RefreshCw, Eye,
+  Zap, ChevronRight, RefreshCw, Eye, Activity,
 } from 'lucide-react';
 import Card, { CardHeader } from '../../components/ui/Card';
 

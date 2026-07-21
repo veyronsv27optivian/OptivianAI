@@ -448,7 +448,7 @@ export default function AI() {
             </div>
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Business Advisor</h2>
-              <p className="text-xs text-slate-400 dark:text-slate-500">Fill in details for tailored advice</p>
+              <p className="text-xs text-slate-500 dark:text-slate-500">Fill in details for tailored advice</p>
             </div>
           </div>
           <div className="flex-1 overflow-auto p-4 max-w-2xl mx-auto w-full">
@@ -539,8 +539,7 @@ export default function AI() {
             </div>
           )}
           <div className="flex-1">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{selectedTool.label}</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500">AI-powered analysis and insights</p>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{selectedTool.label}</h2>              <p className="text-xs text-slate-500 dark:text-slate-500">AI-powered analysis and insights</p>
           </div>
           {/* Structured form button for Business Advisor */}
           {selectedTool.type === AI_TOOL_TYPES.BUSINESS_ADVISOR && (
@@ -573,7 +572,7 @@ export default function AI() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">AI Platform</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
+          <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm">
             {searchQuery ? `Search results for "${searchQuery}"` : 'Intelligent tools for analysis, planning, and content creation'}
           </p>
         </div>

@@ -96,6 +96,45 @@ export class BaseProvider {
     );
   }
 
+  // ─── Conversation History Helpers ────────────────────────────
+
+  /**
+   * Convert internal conversation history to the provider's message format.
+   *
+   * For OpenAI-compatible APIs (DeepSeek, OpenRouter, Qwen), this returns
+   * a messages array with roles: 'system', 'user', 'assistant'.
+   * For Gemini, override in subclass to map 'assistant' → 'model'.
+   *
+   * @param {Array<{role:string, content:string}>} history   Internal messages
+   * @param {string}  [systemPrompt]  Optional system prompt to prepend
+   * @param {string}  [currentUserPrompt]   The new user message (omit or null if adding manually later)
+   * @param {object}  [opts]  Options (roleMap, skipCurrentPrompt, etc.)
+   * @returns {Array<{role:string, content:string}>}
+   */
+  buildMessagesFromHistory(history, systemPrompt, currentUserPrompt, opts = {}) {
+    const roleMap = opts.roleMap || { user: 'user', assistant: 'assistant' };
+    const messages = [];
+
+    if (systemPrompt) {
+      messages.push({ role: 'system', content: systemPrompt });
+    }
+
+    if (Array.isArray(history)) {
+      for (const msg of history) {
+        const role = roleMap[msg.role];
+        if (role && msg.content) {
+          messages.push({ role, content: msg.content });
+        }
+      }
+    }
+
+    if (!opts.skipCurrentPrompt && currentUserPrompt) {
+      messages.push({ role: 'user', content: currentUserPrompt });
+    }
+
+    return messages;
+  }
+
   // ─── Shared HTTP helpers ──────────────────────────────────────
 
   /**

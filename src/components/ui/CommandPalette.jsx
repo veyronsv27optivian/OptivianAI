@@ -146,7 +146,7 @@ export default function CommandPalette({ isOpen, onClose }) {
             placeholder="Search pages, tools, or actions..."
             className="flex-1 bg-transparent text-base text-slate-900 dark:text-text-primary placeholder-slate-400 dark:placeholder-text-tertiary focus:outline-none"
           />
-          <div className="flex items-center gap-1.5 text-[10px] text-text-tertiary">
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-text-tertiary">
             <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] font-mono text-[10px] text-slate-400 dark:text-text-tertiary">esc</kbd>
           </div>
         </div>

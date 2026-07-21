@@ -214,7 +214,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex items-center justify-between p-4 border-b border-slate-200">
         <div className="flex items-center gap-3">
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all">
             <ChevronRight size={20} className="rotate-180" />
           </button>
           <div className="p-2 rounded-lg bg-violet-50">
@@ -222,7 +222,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
           </div>
           <div>
             <h2 className="text-base font-semibold text-slate-900">Prompt Templates</h2>
-            <p className="text-xs text-slate-400">{templates.length} saved templates</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{templates.length} saved templates</p>
           </div>
         </div>
         <button
@@ -241,7 +241,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
             <h3 className="text-sm font-semibold text-violet-800">Save New Template</h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Name *</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Name *</label>
                 <input
                   type="text"
                   value={saveForm.name}
@@ -251,7 +251,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Description</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Description</label>
                 <input
                   type="text"
                   value={saveForm.description}
@@ -261,7 +261,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Category</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Category</label>
                 <select
                   value={saveForm.category}
                   onChange={(e) => setSaveForm(prev => ({ ...prev, category: e.target.value }))}
@@ -273,7 +273,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Tool Type</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Tool Type</label>
                 <select
                   value={saveForm.toolType}
                   onChange={(e) => setSaveForm(prev => ({ ...prev, toolType: e.target.value }))}
@@ -286,7 +286,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                 </select>
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Tags (comma-separated)</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Tags (comma-separated)</label>
                 <input
                   type="text"
                   value={saveForm.tags}
@@ -296,7 +296,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Prompt Content *</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Prompt Content *</label>
                 <textarea
                   value={saveForm.prompt}
                   onChange={(e) => setSaveForm(prev => ({ ...prev, prompt: e.target.value }))}
@@ -338,7 +338,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
         {/* ── Filters ───────────────────────────────────────── */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1 max-w-sm">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
             <input
               type="text"
               value={searchQuery}
@@ -371,9 +371,9 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
         {/* ── Template Grid ─────────────────────────────────── */}
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-16">
-            <Bookmark size={40} className="text-slate-300 mx-auto mb-4" />
+            <Bookmark size={40} className="text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-slate-700 mb-2">No templates found</h3>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {searchQuery || selectedCategory !== 'all'
                 ? 'Try a different search or category'
                 : 'Save your first prompt template to reuse it later'}
@@ -429,7 +429,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
                   <span className="flex items-center gap-1">
                     <Tag size={10} />
                     {template.category}
@@ -441,7 +441,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                 </div>
 
                 {/* Prompt preview */}
-                <p className="mt-2 text-[10px] text-slate-400 bg-slate-50 rounded p-2 line-clamp-2 font-mono">
+                <p className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 rounded p-2 line-clamp-2 font-mono">
                   {template.prompt.slice(0, 100)}{template.prompt.length > 100 ? '...' : ''}
                 </p>
 
@@ -463,7 +463,7 @@ export default function AITemplateLibrary({ onSelectTemplate, onClose }) {
                   </button>
                   <button
                     onClick={() => handleDelete(template.id)}
-                    className="p-1 rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                    className="p-1 rounded-md text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                   >
                     <Trash2 size={12} />
                   </button>

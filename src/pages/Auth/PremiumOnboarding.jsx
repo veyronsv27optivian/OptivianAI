@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles, ArrowRight, ArrowLeft, Check, User, Mail, Phone,
   Camera, Building2, Globe, Clock, Hash, Users, Shield,
-  ChevronRight, Loader2,
+  ChevronRight, Loader2, BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';
 import RolePickerModal, { getRoleIcon } from '../../components/ui/RolePickerModal';

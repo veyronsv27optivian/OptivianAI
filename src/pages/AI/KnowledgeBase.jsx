@@ -54,7 +54,7 @@ function KnowledgeEntry({ entry, onDelete }) {
             {entry.favorite && <Star size={12} className="text-amber-500 fill-amber-500" />}
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{entry.summary}</p>
-          <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-400">
+          <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1"><Clock size={10} /> {timeAgo(entry.created_at)}</span>
             <span className="flex items-center gap-1"><Brain size={10} /> {entry.toolType || 'AI Analysis'}</span>
           </div>
@@ -62,7 +62,7 @@ function KnowledgeEntry({ entry, onDelete }) {
         <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onDelete?.(entry.id)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all"
+            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 dark:hover:bg-rose-900/20 transition-all"
             title="Delete"
           >
             <Trash2 size={14} />

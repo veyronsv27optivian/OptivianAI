@@ -40,11 +40,11 @@ function IntegrationCard({ def, connected, onConnect, onDisconnect }) {
             {connected ? 'Connected' : 'Not connected'}
           </span>
         </div>
-        <p className="text-xs text-slate-400 mt-0.5">{def.description}</p>
-        <p className="text-[10px] text-slate-400 mt-0.5">{def.category}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{def.description}</p>
+        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{def.category}</p>
       </div>
       <a href={def.docs} target="_blank" rel="noopener noreferrer"
-        className="p-1.5 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+        className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
         title="Documentation">
         <ExternalLink size={14} />
       </a>
@@ -88,18 +88,18 @@ export default function IntegrationsPage({ onClose }) {
           <div className="p-2 rounded-lg bg-indigo-50"><Link2 size={20} className="text-indigo-600" /></div>
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Third-Party Integrations</h2>
-            <p className="text-xs text-slate-400">{connected.length} of {defs.length} connected</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{connected.length} of {defs.length} connected</p>
           </div>
         </div>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all">
             <ChevronRight size={20} className="rotate-180" />
           </button>
         )}
       </div>
 
       <div className="relative max-w-md">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
         <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search integrations..." className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />

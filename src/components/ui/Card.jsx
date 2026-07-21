@@ -78,8 +78,8 @@ export function CardHeader({ title, subtitle, action, icon: Icon, color = 'prima
           </div>
         )}
         <div>
-          <h3 className="text-sm font-semibold text-text-primary dark:text-slate-100">{title}</h3>
-          {subtitle && <p className="text-xs text-text-tertiary dark:text-slate-500 mt-0.5">{subtitle}</p>}
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+          {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
         </div>
       </div>
       {action && <div className="shrink-0">{action}</div>}
