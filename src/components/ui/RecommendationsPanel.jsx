@@ -20,7 +20,7 @@ const SEVERITY_COLORS = {
 export default function RecommendationsPanel({ compact = false }) {
   const { user } = useAuth();
   const [recommendations, setRecommendations] = useState([]);
-  const [healthScore, setHealthScore] = useState(100);
+  const [healthScore, setHealthScore] = useState(null); // null = not yet computed
   const [dismissed, setDismissed] = useState(new Set());
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +29,8 @@ export default function RecommendationsPanel({ compact = false }) {
     setLoading(true);
     const result = await monitoringEngine.runOnce(user);
     setRecommendations(result.recommendations || []);
-    setHealthScore(result.healthScore ?? 100);
+    // Only set health score if real data was processed
+    setHealthScore(result.results?.length > 0 ? (result.healthScore ?? null) : null);
     setLoading(false);
   }, [user]);
 
@@ -50,9 +51,9 @@ export default function RecommendationsPanel({ compact = false }) {
         className="flex items-center gap-2 px-3 py-2 rounded-lg glass-card dark:bg-surface-raised/60 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-sm"
         title="Refresh health check"
       >
-        <Activity size={16} className={healthScore < 50 ? 'text-red-400' : healthScore < 80 ? 'text-amber-400' : 'text-emerald-400'} />
+        <Activity size={16} className={healthScore === null ? 'text-slate-400' : healthScore < 50 ? 'text-red-400' : healthScore < 80 ? 'text-amber-400' : 'text-emerald-400'} />
         <span className="text-xs font-medium text-slate-600 dark:text-text-secondary">
-          Health: {healthScore}%
+          {healthScore !== null ? `Health: ${healthScore}%` : 'Health: —'}
         </span>
         {visibleRecs.length > 0 && (
           <span className="px-1.5 py-0.5 rounded-full bg-amber-100/80 dark:bg-amber-900/30 text-[10px] font-bold text-amber-700 dark:text-amber-300">
@@ -68,12 +69,12 @@ export default function RecommendationsPanel({ compact = false }) {
       {/* Health Score */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <TrendingUp size={16} className={healthScore < 50 ? 'text-red-400' : healthScore < 80 ? 'text-amber-400' : 'text-emerald-400'} />
+          <TrendingUp size={16} className={healthScore === null ? 'text-slate-400' : healthScore < 50 ? 'text-red-400' : healthScore < 80 ? 'text-amber-400' : 'text-emerald-400'} />
           <span className="text-sm font-medium text-slate-700 dark:text-text-primary">Organization Health</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`text-lg font-bold ${healthScore < 50 ? 'text-red-400' : healthScore < 80 ? 'text-amber-400' : 'text-emerald-400'}`}>
-            {healthScore}%
+          <span className={`text-lg font-bold ${healthScore === null ? 'text-slate-400' : healthScore < 50 ? 'text-red-400' : healthScore < 80 ? 'text-amber-400' : 'text-emerald-400'}`}>
+            {healthScore !== null ? `${healthScore}%` : '—'}
           </span>
           <button
             onClick={refresh}
@@ -90,9 +91,9 @@ export default function RecommendationsPanel({ compact = false }) {
       <div className="w-full h-2 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            healthScore < 50 ? 'bg-red-500' : healthScore < 80 ? 'bg-amber-500' : 'bg-emerald-500'
+            healthScore === null ? 'bg-slate-300 dark:bg-slate-600' : healthScore < 50 ? 'bg-red-500' : healthScore < 80 ? 'bg-amber-500' : 'bg-emerald-500'
           }`}
-          style={{ width: `${healthScore}%` }}
+          style={{ width: healthScore !== null ? `${healthScore}%` : '0%' }}
         />
       </div>
 

@@ -1,0 +1,440 @@
+diff --git a/_env b/_env
+index 76101b5..14914c4 100644
+--- a/_env
++++ b/_env
+@@ -8,25 +8,23 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
+ #  ┌──────────────┬────────────────────┬───────────────────────┐
+ #  │ Provider     │ Env Key            │ Default Model         │
+ #  ├──────────────┼────────────────────┼───────────────────────┤
+-#  │ Gemini  (1)  │ VITE_GEMINI_API_KEY│ gemini-2.0-flash      │
++#  │ Gemini  (1)  │ VITE_GEMINI_API_KEY│ gemini-3.1-flash-lite │
+ #  │ DeepSeek (2) │ VITE_OPENROUTER_KEY│ deepseek/deepseek-r1  │
+-#  │ Qwen VL  (3) │ VITE_OPENROUTER_KEY│ qwen/qwen2.5-vl-72b   │
+-#  │ OpenAI   (4) │ VITE_OPENROUTER_KEY│ openai/gpt-4o-mini    │
++#  │ OpenAI   (3) │ VITE_OPENROUTER_KEY│ openai/gpt-4o-mini    │
+ #  └──────────────┴────────────────────┴───────────────────────┘
+ #
+ #  IMPORTANT:
+ #  - Gemini is the DEFAULT provider. Set VITE_GEMINI_API_KEY first.
+-#  - DeepSeek, Qwen, and OpenAI all use OpenRouter. Set ONE key
+-#    (VITE_OPENROUTER_API_KEY) for all three, or set individual
+-#    VITE_DEEPSEEK_API_KEY / VITE_QWEN_API_KEY to override.
+-#  - All 4 providers have automatic fallback: if Gemini fails,
+-#    the system tries DeepSeek → Qwen → OpenAI automatically.
++#  - DeepSeek and OpenAI use OpenRouter. Set ONE key
++#    (VITE_OPENROUTER_API_KEY) for both, or set individual
++#    VITE_DEEPSEEK_API_KEY to override.
++#  - Automatic fallback: if Gemini fails, the system tries DeepSeek → OpenAI.
+ 
+ # ── 1. Gemini (DEFAULT) ──────────────────────────────────────────
+ # Get a free API key: https://aistudio.google.com/apikey
+ # Must start with "AIza" or "AQ." (Google AI Studio). OAuth / Firebase tokens will not work.
+ VITE_GEMINI_API_KEY=AIzaSyAb8RN6IQBQUZcievc7RUx5nvxe-Pc89uymw5n5iCIo9ZJ3nXCQ
+-VITE_GEMINI_MODEL=gemini-2.0-flash
++VITE_GEMINI_MODEL=gemini-3.1-flash-lite
+ 
+ # ── 2. OpenRouter API Key (shared by DeepSeek, Qwen & OpenAI) ───
+ # Get a free key: https://openrouter.ai/keys
+diff --git a/src/components/ui/SetupChecklist.jsx b/src/components/ui/SetupChecklist.jsx
+index 2190040..3ce1737 100644
+--- a/src/components/ui/SetupChecklist.jsx
++++ b/src/components/ui/SetupChecklist.jsx
+@@ -7,17 +7,16 @@
+  *
+  * Steps:
+  *   1. ✅ Create your organization (auto-completed if they see this)
+- *   2. Set up AI API keys (VITE_GEMINI_API_KEY, VITE_OPENROUTER_API_KEY)
+- *   3. Invite team members
+- *   4. Create your first task
+- *   5. Explore AI tools
+- *   6. Configure organization settings
++ *   2. Invite team members
++ *   3. Create your first task
++ *   4. Explore AI tools
++ *   5. Configure organization settings
+  */
+ 
+ import { useState, useEffect, useMemo } from 'react';
+ import { useNavigate } from 'react-router-dom';
+ import {
+-  CheckCircle, Circle, ArrowRight, Rocket, Users, Key,
++  CheckCircle, Circle, ArrowRight, Rocket, Users,
+   CheckSquare, Brain, Settings, Sparkles, X, ChevronDown,
+ } from 'lucide-react';
+ import { useAuth } from '../../services/AuthContext';
+@@ -55,14 +54,7 @@ const ALL_STEPS = [
+     link: null,
+     autoComplete: true, // Completed when they see the dashboard
+   },
+-  {
+-    id: 'ai_keys',
+-    label: 'Configure AI Providers',
+-    description: 'Set your Gemini and OpenRouter API keys to unlock all AI features',
+-    icon: Key,
+-    link: '/onboarding/setup',
+-    action: 'Configure',
+-  },
++
+   {
+     id: 'invite_team',
+     label: 'Invite Team Members',
+diff --git a/src/pages/AI/AIModelComparison.jsx b/src/pages/AI/AIModelComparison.jsx
+index 122908f..dd98d8b 100644
+--- a/src/pages/AI/AIModelComparison.jsx
++++ b/src/pages/AI/AIModelComparison.jsx
+@@ -16,7 +16,7 @@ import { getAvailableProviders, generateText, getActiveProviderName } from '../.
+ const PROVIDER_MODELS = {
+   openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+   deepseek: ['deepseek-chat', 'deepseek-reasoner'],
+-  gemini: ['gemini-2.0-flash', 'gemini-2.0-pro'],
++  gemini: ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-pro'],
+   qwen: ['qwen-max', 'qwen-plus'],
+   openaiViaOpenRouter: ['openai/gpt-4o', 'anthropic/claude-3.5-sonnet', 'google/gemini-2.0-flash'],
+ };
+@@ -26,6 +26,8 @@ const MODEL_COLORS = {
+   'gpt-4o-mini': { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800' },
+   'deepseek-chat': { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-800' },
+   'deepseek-reasoner': { bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-700 dark:text-violet-300', border: 'border-violet-200 dark:border-violet-800' },
++  'gemini-3.5-flash': { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
++  'gemini-3.1-flash-lite': { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
+   'gemini-2.0-flash': { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
+   default: { bg: 'bg-slate-50 dark:bg-slate-800/50', text: 'text-slate-600 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-700/50' },
+ };
+diff --git a/src/pages/AI/AIProviders.jsx b/src/pages/AI/AIProviders.jsx
+index fa457c2..f004713 100644
+--- a/src/pages/AI/AIProviders.jsx
++++ b/src/pages/AI/AIProviders.jsx
+@@ -320,7 +320,7 @@ export default function AIProviders() {
+             <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Automatic Fallback</h4>
+             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+               When a provider fails, the system automatically falls back to the next available provider in this order:
+-              Gemini → DeepSeek → Qwen VL → OpenAI. This ensures AI features remain operational even if one provider is unavailable.
++              Gemini → DeepSeek → OpenAI. This ensures AI features remain operational even if one provider is unavailable.
+             </p>
+           </div>
+         </div>
+diff --git a/src/pages/AI/AISettings.jsx b/src/pages/AI/AISettings.jsx
+index 2217bdc..62a5006 100644
+--- a/src/pages/AI/AISettings.jsx
++++ b/src/pages/AI/AISettings.jsx
+@@ -157,6 +157,7 @@ export default function AISettings({ onClose }) {
+             description="Override the default model (leave empty for provider default)"
+             options={[
+               { value: '', label: 'Use provider default' },
++              { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
+               { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+               { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+               { value: 'deepseek/deepseek-r1:free', label: 'DeepSeek R1 (Free)' },
+diff --git a/src/pages/AI/AIToolView.jsx b/src/pages/AI/AIToolView.jsx
+index 063bd67..de5bd99 100644
+--- a/src/pages/AI/AIToolView.jsx
++++ b/src/pages/AI/AIToolView.jsx
+@@ -406,7 +406,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
+   };
+ 
+   const handleKeyDown = (e) => {
+-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
++    if (e.key === 'Enter' && !e.shiftKey) {
+       e.preventDefault();
+       handleSubmit();
+     }
+@@ -807,14 +807,14 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
+                 <X size={16} />
+               </button>
+             ) : (
+-              <button onClick={handleSubmit} disabled={!input.trim()} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title="Send (Ctrl+Enter)">
++              <button onClick={handleSubmit} disabled={!input.trim()} className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title="Send (Enter)">
+                 <Send size={16} />
+               </button>
+             )}
+           </div>
+         </div>
+         <p className="mt-1.5 text-[10px] text-slate-400">
+-          Press Ctrl+Enter to send - Powered by {activeProvider?.label || 'AI'} {activeProvider?.model ? `(${activeProvider.model})` : ''}
++          Press Enter to send, Shift+Enter for new line — Powered by {activeProvider?.label || 'AI'} {activeProvider?.model ? `(${activeProvider.model})` : ''}
+         </p>
+       </div>
+     </div>
+diff --git a/src/pages/Auth/SetupGuide.jsx b/src/pages/Auth/SetupGuide.jsx
+index 3e9c115..929fa13 100644
+--- a/src/pages/Auth/SetupGuide.jsx
++++ b/src/pages/Auth/SetupGuide.jsx
+@@ -11,9 +11,8 @@
+ import { useState, useEffect } from 'react';
+ import { useNavigate } from 'react-router-dom';
+ import {
+-  CheckCircle, Circle, ArrowRight, ArrowLeft, Rocket, Users, Key,
+-  CheckSquare, Brain, Settings, Sparkles, Copy, ExternalLink,
+-  Server, Globe, Mail, BookOpen, Shield,
++  CheckCircle, Circle, ArrowRight, ArrowLeft, Rocket, Users,
++  CheckSquare, Brain, Settings, Sparkles,
+ } from 'lucide-react';
+ import { useAuth } from '../../services/AuthContext';
+ 
+@@ -25,13 +24,7 @@ const STEPS = [
+     icon: Sparkles,
+     gradient: 'from-blue-500 to-violet-500',
+   },
+-  {
+-    id: 'ai_keys',
+-    title: 'AI Provider Setup',
+-    subtitle: 'Configure your AI models',
+-    icon: Key,
+-    gradient: 'from-amber-500 to-orange-500',
+-  },
++
+   {
+     id: 'team',
+     title: 'Invite Your Team',
+@@ -59,8 +52,6 @@ export default function SetupGuide() {
+   const navigate = useNavigate();
+   const { user, isDevMode } = useAuth();
+   const [currentStep, setCurrentStep] = useState(0);
+-  const [copiedIndex, setCopiedIndex] = useState(null);
+-
+   const step = STEPS[currentStep];
+ 
+   const handleNext = () => {
+@@ -75,12 +66,6 @@ export default function SetupGuide() {
+     navigate('/app');
+   };
+ 
+-  const copyToClipboard = (text, index) => {
+-    navigator.clipboard.writeText(text);
+-    setCopiedIndex(index);
+-    setTimeout(() => setCopiedIndex(null), 2000);
+-  };
+-
+   const renderStepContent = () => {
+     switch (step.id) {
+       case 'welcome':
+@@ -93,7 +78,6 @@ export default function SetupGuide() {
+             </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+               {[
+-                { icon: Key, label: 'AI API Keys', desc: 'Unlock all AI features' },
+                 { icon: Users, label: 'Team Invites', desc: 'Collaborate with your team' },
+                 { icon: CheckSquare, label: 'Task Management', desc: 'Organize your work' },
+                 { icon: Brain, label: 'AI Tools', desc: 'SWOT, Forecast, Advisor' },
+@@ -115,91 +99,6 @@ export default function SetupGuide() {
+           </div>
+         );
+ 
+-      case 'ai_keys':
+-        return (
+-          <div className="space-y-5">
+-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+-              OptivianAI supports <strong>4 AI providers</strong>. Set just <strong>2 API keys</strong> and all of them work:
+-            </p>
+-
+-            <div className="space-y-3">
+-              {/* Gemini */}
+-              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30">
+-                <div className="flex items-center justify-between mb-1">
+-                  <div className="flex items-center gap-2">
+-                    <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">G</div>
+-                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">Gemini <span className="text-[10px] font-normal text-slate-400">(Default)</span></span>
+-                  </div>
+-                  <span className="text-[9px] bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">Free tier</span>
+-                </div>
+-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Get a free key at aistudio.google.com</p>
+-                <div className="flex items-center gap-2">
+-                  <code className="flex-1 px-2 py-1 rounded bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-700 dark:text-slate-300 border border-blue-200 dark:border-blue-800">
+-                    VITE_GEMINI_API_KEY=AIza...
+-                  </code>
+-                  <button
+-                    onClick={() => copyToClipboard('VITE_GEMINI_API_KEY=', 0)}
+-                    className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
+-                  >
+-                    {copiedIndex === 0 ? <CheckCircle size={14} className="text-emerald-500" /> : <Copy size={14} />}
+-                  </button>
+-                  <a
+-                    href="https://aistudio.google.com/apikey"
+-                    target="_blank"
+-                    rel="noopener noreferrer"
+-                    className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
+-                  >
+-                    <ExternalLink size={14} />
+-                  </a>
+-                </div>
+-              </div>
+-
+-              {/* OpenRouter (shared) */}
+-              <div className="p-4 rounded-lg bg-violet-50 dark:bg-violet-900/10 border border-violet-200 dark:border-violet-800/30">
+-                <div className="flex items-center justify-between mb-1">
+-                  <div className="flex items-center gap-2">
+-                    <div className="flex items-center gap-1">
+-                      <div className="w-6 h-6 rounded bg-green-600 flex items-center justify-center text-white text-[9px] font-bold">D</div>
+-                      <div className="w-6 h-6 rounded bg-purple-600 flex items-center justify-center text-white text-[9px] font-bold">Q</div>
+-                      <div className="w-6 h-6 rounded bg-teal-600 flex items-center justify-center text-white text-[9px] font-bold">O</div>
+-                    </div>
+-                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+-                      DeepSeek + Qwen + OpenAI <span className="text-[10px] font-normal text-slate-400">(via OpenRouter)</span>
+-                    </span>
+-                  </div>
+-                  <span className="text-[9px] bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded-full">1 key for 3 models</span>
+-                </div>
+-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Get a free key at openrouter.ai/keys</p>
+-                <div className="flex items-center gap-2">
+-                  <code className="flex-1 px-2 py-1 rounded bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-700 dark:text-slate-300 border border-violet-200 dark:border-violet-800">
+-                    VITE_OPENROUTER_API_KEY=sk-or-v1-...
+-                  </code>
+-                  <button
+-                    onClick={() => copyToClipboard('VITE_OPENROUTER_API_KEY=', 1)}
+-                    className="p-1.5 rounded text-slate-400 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-all"
+-                  >
+-                    {copiedIndex === 1 ? <CheckCircle size={14} className="text-emerald-500" /> : <Copy size={14} />}
+-                  </button>
+-                  <a
+-                    href="https://openrouter.ai/keys"
+-                    target="_blank"
+-                    rel="noopener noreferrer"
+-                    className="p-1.5 rounded text-slate-400 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-all"
+-                  >
+-                    <ExternalLink size={14} />
+-                  </a>
+-                </div>
+-              </div>
+-            </div>
+-
+-            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30">
+-              <p className="text-[11px] text-amber-700 dark:text-amber-300">
+-                <strong>Tip:</strong> Set these in your <code className="px-1 rounded bg-amber-100 dark:bg-amber-900/30 text-[10px]">_env</code> or <code className="px-1 rounded bg-amber-100 dark:bg-amber-900/30 text-[10px]">.env</code> file. The AI Platform will automatically use them — no restart needed.
+-              </p>
+-            </div>
+-          </div>
+-        );
+-
+       case 'team':
+         return (
+           <div className="space-y-5">
+@@ -281,7 +180,6 @@ export default function SetupGuide() {
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-sm mx-auto">
+               {[
+                 { icon: CheckCircle, label: 'Organization created', done: true },
+-                { icon: CheckCircle, label: 'AI providers configured', done: false },
+                 { icon: CheckCircle, label: 'Team ready to invite', done: false },
+                 { icon: CheckCircle, label: 'Tasks & AI tools available', done: true },
+               ].map((item, i) => {
+diff --git a/src/pages/Dashboard/Dashboard.jsx b/src/pages/Dashboard/Dashboard.jsx
+index 2fa2bf2..ebb5166 100644
+--- a/src/pages/Dashboard/Dashboard.jsx
++++ b/src/pages/Dashboard/Dashboard.jsx
+@@ -100,10 +100,14 @@ export default function Dashboard() {
+   const [showCustomizer, setShowCustomizer] = useState(false);
+   const [widgetConfig, setWidgetConfig] = useState(() => loadWidgetConfig());
+ 
+-  // Check if this is a new org
+-  const [isNewOrg, setIsNewOrg] = useState(() => {
+-    return !localStorage.getItem('optivian_setup_dismissed');
+-  });
++  // Check if this is a new org — only show to admin/owner roles
++  const [isNewOrg, setIsNewOrg] = useState(false);
++
++  useEffect(() => {
++    const userRole = user?.user_metadata?.role || 'staff';
++    const isAdmin = ['super_admin', 'owner', 'administrator'].includes(userRole);
++    setIsNewOrg(isAdmin && !localStorage.getItem('optivian_setup_dismissed'));
++  }, [user?.user_metadata?.role]);
+ 
+   // ── Role-based dashboard config ───────────────────────────
+   const userRole = user?.user_metadata?.role || 'staff';
+diff --git a/src/services/ai/aiService.js b/src/services/ai/aiService.js
+index 93ab994..66ea0dd 100644
+--- a/src/services/ai/aiService.js
++++ b/src/services/ai/aiService.js
+@@ -231,6 +231,8 @@ export async function generateText(toolType, prompt, options = {}) {
+     temperature: options.temperature ?? DEFAULT_GENERATION_CONFIG.temperature,
+     maxTokens: options.maxTokens ?? DEFAULT_GENERATION_CONFIG.maxOutputTokens,
+     topP: options.topP ?? DEFAULT_GENERATION_CONFIG.topP,
++    requireVision,
++    images: options.images,
+   };
+ 
+   const requireVision = options.requireVision ?? tool.requiredCapabilities.includes('vision');
+diff --git a/src/services/ai/config.js b/src/services/ai/config.js
+index dfbeece..564cd61 100644
+--- a/src/services/ai/config.js
++++ b/src/services/ai/config.js
+@@ -120,7 +120,7 @@ export const PROVIDER_CONFIGS = {
+     endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
+     envKey: 'VITE_GEMINI_API_KEY',
+     envModel: 'VITE_GEMINI_MODEL',
+-    defaultModel: 'gemini-2.0-flash',
++    defaultModel: 'gemini-3.1-flash-lite',
+     supportsStreaming: true,
+     supportsVision: true,
+     isDefault: true,
+diff --git a/src/services/ai/providers/gemini.js b/src/services/ai/providers/gemini.js
+index 7cdd1d8..3f12e57 100644
+--- a/src/services/ai/providers/gemini.js
++++ b/src/services/ai/providers/gemini.js
+@@ -1,9 +1,9 @@
+ /**
+  * Gemini provider (DEFAULT).
+  *
+- * Uses the Google AI Studio REST API (gemini-2.0-flash by default).
++ * Uses the Google AI Studio REST API (gemini-3.1-flash-lite by default).
+  * Environment variable: VITE_GEMINI_API_KEY
+- * Custom model:         VITE_GEMINI_MODEL  (default: gemini-2.0-flash)
++ * Custom model:         VITE_GEMINI_MODEL  (default: gemini-3.1-flash-lite)
+  *
+  * API docs: https://ai.google.dev/api/generate-content
+  */
+@@ -82,7 +82,11 @@ export class GeminiProvider extends BaseProvider {
+   async generateText(prompt, options = {}) {
+     this._assertConfigured();
+ 
+-    return this._withRetry(() => this._generateTextOnce(prompt, options));
++    // Auto-route to vision-capable model when needed
++    const needsVision = options.requireVision || (options.images && options.images.length > 0);
++    const effectiveModel = needsVision ? 'gemini-3.5-flash' : undefined;
++
++    return this._withRetry(() => this._generateTextOnce(prompt, { ...options, effectiveModel }));
+   }
+ 
+   /**
+@@ -90,7 +94,8 @@ export class GeminiProvider extends BaseProvider {
+    * @private
+    */
+   async _generateTextOnce(prompt, options = {}) {
+-    const url = `${this.endpoint}/${this.model}:generateContent?key=${this.apiKey}`;
++    const model = options.effectiveModel || this.model;
++    const url = `${this.endpoint}/${model}:generateContent?key=${this.apiKey}`;
+ 
+     /** @type {object} */
+     const body = {
+@@ -131,7 +136,7 @@ export class GeminiProvider extends BaseProvider {
+       text,
+       finishReason: candidate.finishReason || 'STOP',
+       usage: data.usageMetadata || null,
+-      modelUsed: this.model,
++      modelUsed: model,
+       provider: 'gemini',
+     };
+   }
+@@ -142,7 +147,10 @@ export class GeminiProvider extends BaseProvider {
+   async *generateStream(prompt, options = {}) {
+     this._assertConfigured();
+ 
+-    const url = `${this.endpoint}/${this.model}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
++    // Auto-route to vision-capable model when needed
++    const needsVision = options.requireVision || (options.images && options.images.length > 0);
++    const effectiveModel = needsVision ? 'gemini-3.5-flash' : this.model;
++    const url = `${this.endpoint}/${effectiveModel}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
+ 
+     /** @type {object} */
+     const body = {
+diff --git a/src/services/ai/usage/pricing.js b/src/services/ai/usage/pricing.js
+index 9254e88..3e24a87 100644
+--- a/src/services/ai/usage/pricing.js
++++ b/src/services/ai/usage/pricing.js
+@@ -20,6 +20,8 @@
+  */
+ export const PRICING_TABLE = {
+   // Gemini models
++  'gemini-3.5-flash': { input: 0.00015, output: 0.0006, type: 'vision' },
++  'gemini-3.1-flash-lite': { input: 0.000075, output: 0.0003, type: 'text' },
+   'gemini-2.0-flash': { input: 0.0001, output: 0.0004, type: 'vision' },
+   'gemini-2.0-flash-lite': { input: 0.000075, output: 0.0003, type: 'text' },
+   'gemini-1.5-pro': { input: 0.00125, output: 0.005, type: 'vision' },

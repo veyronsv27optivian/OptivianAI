@@ -26,10 +26,10 @@ export default function OrgOverview({
     { label: 'Total Staff', value: staffCount, icon: Users, color: 'blue' },
     { label: 'Online Now', value: onlineStaff, icon: Activity, color: 'emerald' },
     { label: hasRealInsights ? 'Org Health' : 'Departments',
-      value: hasRealInsights ? `${orgInsights.orgHealthScore}%` : 3,
+      value: hasRealInsights ? `${orgInsights.orgHealthScore}%` : '—',
       icon: hasRealInsights ? Brain : Layers, color: 'violet' },
     { label: hasRealInsights ? 'Productivity' : 'Teams',
-      value: hasRealInsights ? `${orgInsights.productivityScore}%` : 5,
+      value: hasRealInsights ? `${orgInsights.productivityScore}%` : '—',
       icon: hasRealInsights ? TrendingUp : Target, color: 'cyan' },
   ], [staffCount, onlineStaff, orgInsights, hasRealInsights]);
 
@@ -86,11 +86,7 @@ export default function OrgOverview({
               </span>
             </>
           ) : (
-            <>
-              <span className="flex items-center gap-1"><Globe size={12} /> Tech</span>
-              <span className="flex items-center gap-1"><MapPin size={12} /> Remote</span>
-              <span className="flex items-center gap-1"><Calendar size={12} /> Active</span>
-            </>
+            <span className="text-slate-400 italic">Waiting for data...</span>
           )}
         </div>
       </div>

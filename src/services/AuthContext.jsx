@@ -159,8 +159,8 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Check every 30 seconds
-    timeoutCheckRef.current = setInterval(checkTimeout, 30000);
+    // Check every 60 seconds (was 30s) to reduce main thread pressure
+    timeoutCheckRef.current = setInterval(checkTimeout, 60000);
     // Also check immediately
     checkTimeout();
 
@@ -492,6 +492,8 @@ export function AuthProvider({ children }) {
   }, [user?.id, profile?.id, profile?.organization_id]);
 
   // ─── Profile polling fallback ─────────────────────────────────
+  // Reduced frequency: polls every 3 minutes instead of 1 minute.
+  // The realtime subscription handles instant updates; this is just a fallback.
   useEffect(() => {
     if (!user?.id || DEV_MODE) return;
     const interval = setInterval(async () => {

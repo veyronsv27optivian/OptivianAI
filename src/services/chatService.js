@@ -339,7 +339,44 @@ export async function deleteMessageForEveryone(user, messageId) {
 export async function uploadFile(user, file) {
   if (!user || !file) return { error: 'Invalid input' };
 
-  if (DEV_MODE) return { error: 'File upload not supported in dev mode' };
+  if (DEV_MODE) {
+    // Store file as a data URL in localStorage for dev mode
+    try {
+      // localStorage has ~5MB limit; data URLs are ~37% larger than binary
+      if (file.size > 4 * 1024 * 1024) {
+        return { error: 'File too large for dev mode (max 4MB). Please configure Supabase for larger uploads.' };
+      }
+      const reader = new FileReader();
+      const dataUrl = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
+      
+      // Store the file reference in dev storage so Files page can find it
+      const fileKey = `optivian_dev_file_${Date.now()}`;
+      const fileRecord = {
+        id: fileKey,
+        url: dataUrl,
+        path: dataUrl,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        created_at: new Date().toISOString(),
+      };
+      localStorage.setItem(fileKey, JSON.stringify(fileRecord));
+      
+      // Track in file index
+      const fileIndex = JSON.parse(localStorage.getItem('optivian_dev_file_index') || '[]');
+      fileIndex.push(fileKey);
+      localStorage.setItem('optivian_dev_file_index', JSON.stringify(fileIndex));
+      
+      return { data: { url: dataUrl, path: dataUrl, name: file.name, type: file.type }, error: null };
+    } catch (err) {
+      console.error('Failed to upload file in dev mode:', err);
+      return { error: err.message || 'File upload failed' };
+    }
+  }
 
   try {
     const ext = file.name.split('.').pop();

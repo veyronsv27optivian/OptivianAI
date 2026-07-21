@@ -139,7 +139,8 @@ export default function MainLayout() {
     refreshNotifications();
     const handler = () => refreshNotifications();
     window.addEventListener('notification-update', handler);
-    const interval = setInterval(refreshNotifications, 10000);
+    // Poll every 30 seconds instead of 10 to reduce network requests
+    const interval = setInterval(refreshNotifications, 30000);
     return () => {
       window.removeEventListener('notification-update', handler);
       clearInterval(interval);
@@ -286,6 +287,8 @@ export default function MainLayout() {
               <button
                 onClick={() => {
                   if (item.submenu && !collapsed) {
+                    // Navigate to the main page AND toggle the submenu
+                    navigate(item.path);
                     setExpandedNavItem(expandedNavItem === item.label ? null : item.label);
                   } else {
                     navigate(item.path);
@@ -377,10 +380,10 @@ export default function MainLayout() {
                 placeholder="Search anything..."
                 onClick={() => setCommandOpen(true)}
                 readOnly
-                className="w-full pl-10 pr-20 py-2 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] rounded-xl text-slate-900 dark:text-slate-100 placeholder-text-tertiary dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm cursor-pointer hover:border-slate-300 dark:hover:border-white/10"
+                className="w-full pl-10 pr-20 py-2 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500">
-                <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/[0.06] font-mono text-[9px] text-slate-400 dark:text-text-tertiary">⌘K</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700/70 font-mono text-[9px] text-slate-400 dark:text-slate-500">⌘K</kbd>
               </div>
             </div>
           </div>

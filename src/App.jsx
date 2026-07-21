@@ -212,7 +212,41 @@ function AnimatedRoutes() {
   );
 }
 
+// ─── One-time stale cache cleanup ───────────────────────────────
+// Clears old localStorage cache entries that may have accumulated from
+// previous app versions. Only removes keys with known cache prefixes,
+// never touches session/auth/org data. Runs once and marks itself done.
+const CACHE_CLEANUP_KEY = 'optivian_cache_cleanup_v2';
+const CACHE_PREFIXES_TO_CLEAR = [
+  'optivian_ai_cache',       // Old AI response caches (org-specific variants)
+  'optivian_knowledge_base', // Knowledge base cache
+  'optivian_ai_favorites',   // AI favorites cache
+];
+
+function runStaleCacheCleanup() {
+  if (localStorage.getItem(CACHE_CLEANUP_KEY) === 'done') return;
+  try {
+    for (const key of Object.keys(localStorage)) {
+      // Clear all org-specific AI cache variants (optivian_ai_cache_<orgId>)
+      for (const prefix of CACHE_PREFIXES_TO_CLEAR) {
+        if (key === prefix || key.startsWith(prefix + '_')) {
+          localStorage.removeItem(key);
+          break;
+        }
+      }
+    }
+    localStorage.setItem(CACHE_CLEANUP_KEY, 'done');
+  } catch {
+    // Silently fail — cache cleanup is non-critical
+  }
+}
+
 function App() {
+  // ─── Run stale cache cleanup once on mount ───────────────────
+  useEffect(() => {
+    runStaleCacheCleanup();
+  }, []);
+
   // ─── OAuth callback guard (#2) ──────────────────────────────
   // When Supabase redirects back after OAuth, the access_token lands in the
   // URL hash fragment. But HashRouter consumes the hash for routing, so the

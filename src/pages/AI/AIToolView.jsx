@@ -748,7 +748,11 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                     Document parsed successfully. Click <strong>Send</strong> below to analyze.
                   </p>
                 </div>
-              {/* Hidden file input — kept outside conditional so ref stays alive */}
+            </div>
+          )}
+
+            {/* Hidden file input — rendered unconditionally so the ref is always available */}
+            {supportsFileUpload && (
               <input
                 ref={fileInputRef}
                 type="file"
@@ -756,8 +760,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                 onChange={handleFileInputChange}
                 className="hidden"
               />
-            </div>
-          )}
+            )}
 
             {/* ── Empty state (for all tools except file-upload-only tools before parse) ── */}
             {(!supportsFileUpload || fileState.parsed) && (

@@ -240,6 +240,8 @@ ${toolSystemPrompt}`
       : orgCtx
     : toolSystemPrompt;
 
+  const requireVision = options.requireVision ?? tool.requiredCapabilities.includes('vision');
+
   const genOptions = {
     systemPrompt,
     conversationHistory: options.conversationHistory,
@@ -249,8 +251,6 @@ ${toolSystemPrompt}`
     requireVision,
     images: options.images,
   };
-
-  const requireVision = options.requireVision ?? tool.requiredCapabilities.includes('vision');
   const useFallback = options.useFallback ?? true;
   const useCache = options.useCache ?? true;
   const skipLogging = options.skipLogging ?? false;

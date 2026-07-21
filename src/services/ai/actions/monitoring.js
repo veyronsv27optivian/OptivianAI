@@ -236,7 +236,7 @@ async function _autoEscalate(results, user) {
  * Returns check results and recommendations.
  */
 export async function runOnce(user) {
-  if (!user) return { results: [], recommendations: [], healthScore: 100 };
+  if (!user) return { results: [], recommendations: [], healthScore: null };
 
   const results = await _runChecks(user);
   const recommendations = _generateRecommendations(results);
@@ -324,7 +324,7 @@ export function onRecommendation(callback) {
  * Higher is healthier.
  */
 export function getHealthScore() {
-  if (_checkResults.length === 0) return 100;
+  if (_checkResults.length === 0) return null;
   return Math.round(
     _checkResults.reduce((sum, r) => sum + (r.score ?? 100), 0) / _checkResults.length
   );

@@ -10,7 +10,8 @@
  * - Font and icon pre-caching
  */
 
-const CACHE_NAME = 'optivianai-v4';
+const CACHE_NAME = 'optivianai-v5';
+const CLEANUP_KEY = 'optivianai_cleanup_v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -39,9 +40,8 @@ self.addEventListener('activate', (event) => {
           .filter((key) => key !== CACHE_NAME && key !== FONT_CACHE && key !== IMG_CACHE)
           .map((key) => caches.delete(key))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // ─── Offline HTML (branded) ────────────────────────────────────

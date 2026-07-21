@@ -57,6 +57,29 @@ function collectFiles() {
     });
   } catch { /* ignore */ }
 
+  // From dev file index (standalone uploads via chatService.uploadFile)
+  try {
+    const fileIndex = JSON.parse(localStorage.getItem('optivian_dev_file_index') || '[]');
+    fileIndex.forEach(key => {
+      try {
+        const record = JSON.parse(localStorage.getItem(key) || 'null');
+        if (record) {
+          allFiles.push({
+            id: record.id,
+            name: record.name,
+            size: record.size || 0,
+            type: record.type || 'application/octet-stream',
+            url: record.url,
+            data: record.url,
+            source: 'upload',
+            sourceName: 'Direct Upload',
+            created_at: record.created_at,
+          });
+        }
+      } catch { /* skip corrupt entry */ }
+    });
+  } catch { /* ignore */ }
+
   // Sort by date, newest first
   return allFiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
@@ -105,6 +128,7 @@ function getFileColor(file) {
 const SOURCE_LABELS = {
   task: 'Task Attachment',
   chat: 'Chat File',
+  upload: 'Direct Upload',
 };
 
 export default function Files() {
@@ -219,7 +243,7 @@ export default function Files() {
 
         <div className="flex items-center gap-2">
           <div className="flex p-0.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50">
-            {['all', 'task', 'chat'].map(s => (
+            {['all', 'task', 'chat', 'upload'].map(s => (
               <button
                 key={s}
                 onClick={() => setSourceFilter(s)}

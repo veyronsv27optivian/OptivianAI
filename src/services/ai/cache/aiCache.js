@@ -232,21 +232,29 @@ export class AiCache {
   _persist() {
     if (!this._isDevMode()) return;
 
-    try {
-      const entries = Object.fromEntries(this._cache.entries());
-      localStorage.setItem(this._storageKey, JSON.stringify(entries));
-    } catch {
-      // localStorage might be full; prune aggressively
-      if (this._cache.size > 100) {
-        const entriesArray = Array.from(this._cache.entries());
-        const kept = entriesArray.slice(-100);
-        this._cache = new Map(kept);
-        try {
-          localStorage.setItem(this._storageKey, JSON.stringify(Object.fromEntries(kept)));
-        } catch {
-          // Give up on persistence
+    // Debounce: only persist the latest state within a 500ms window.
+    // This prevents write amplification when many cache operations happen in rapid succession.
+    if (this._persistTimer) {
+      clearTimeout(this._persistTimer);
+    }
+    this._persistTimer = setTimeout(() => {
+      this._persistTimer = null;
+      try {
+        const entries = Object.fromEntries(this._cache.entries());
+        localStorage.setItem(this._storageKey, JSON.stringify(entries));
+      } catch {
+        // localStorage might be full; prune aggressively
+        if (this._cache.size > 100) {
+          const entriesArray = Array.from(this._cache.entries());
+          const kept = entriesArray.slice(-100);
+          this._cache = new Map(kept);
+          try {
+            localStorage.setItem(this._storageKey, JSON.stringify(Object.fromEntries(kept)));
+          } catch {
+            // Give up on persistence
+          }
         }
       }
-    }
+    }, 500);
   }
 }
