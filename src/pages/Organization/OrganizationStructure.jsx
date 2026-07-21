@@ -108,7 +108,7 @@ export default function OrganizationStructure() {
       <div className="flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm text-slate-400">Loading structure...</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Loading structure...</p>
         </div>
       </div>
     );
@@ -188,7 +188,7 @@ export default function OrganizationStructure() {
           <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-lg shadow-lg">
             <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50">
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Add Department</h2>
-              <button onClick={() => setShowDeptModal(false)} className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"><X size={20} /></button>
+              <button onClick={() => setShowDeptModal(false)} className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"><X size={20} /></button>
             </div>
             <form onSubmit={handleAddDept} className="p-5 space-y-4">
               <div>
@@ -228,7 +228,7 @@ export default function OrganizationStructure() {
           <div className="w-full max-w-lg bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/50 rounded-lg shadow-lg">
             <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700/50">
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Add Team</h2>
-              <button onClick={() => setShowTeamModal(false)} className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"><X size={20} /></button>
+              <button onClick={() => setShowTeamModal(false)} className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"><X size={20} /></button>
             </div>
             <form onSubmit={handleAddTeam} className="p-5 space-y-4">
               <div>
@@ -273,7 +273,7 @@ function DepartmentNode({ department, departments, teams, expanded, onToggle, is
         style={{ paddingLeft: `${16 + depth * 24}px` }}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <button className="p-0.5 rounded text-slate-400 hover:text-slate-600">
+          <button className="p-0.5 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
             {hasChildren ? (
               expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
             ) : (

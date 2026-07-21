@@ -68,13 +68,13 @@ export default function MfaSetup() {
         {enabled ? (
           <ShieldCheck size={28} className="text-emerald-600 shrink-0" />
         ) : (
-          <Shield size={28} className="text-slate-400 shrink-0" />
+          <Shield size={28} className="text-slate-500 dark:text-slate-400 shrink-0" />
         )}
         <div className="flex-1">
           <p className={`text-sm font-medium ${enabled ? 'text-emerald-800' : 'text-slate-700'}`}>
             {enabled ? 'Email 2FA is active' : 'Email 2FA is not set up'}
           </p>
-          <p className={`text-xs mt-1 ${enabled ? 'text-emerald-600' : 'text-slate-400'}`}>
+          <p className={`text-xs mt-1 ${enabled ? 'text-emerald-600' : 'text-slate-500 dark:text-slate-400'}`}>
             {enabled
               ? 'You\'ll receive a 6-digit code via email on every sign-in.'
               : 'No additional app needed — codes arrive in your inbox.'}

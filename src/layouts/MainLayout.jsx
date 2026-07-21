@@ -270,7 +270,7 @@ export default function MainLayout() {
           )}
           <button
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            onClick={() => setCollapsed(!collapsed)}                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-95"
+            onClick={() => setCollapsed(!collapsed)}                className="p-1.5 rounded-xl text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-primary hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-95"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -425,7 +425,7 @@ export default function MainLayout() {
                   <div className="overflow-y-auto max-h-80">
                     {notifications.length === 0 ? (
                       <div className="p-8 text-center text-sm text-slate-400 dark:text-text-tertiary">
-                        <Bell size={24} className="mx-auto mb-2 opacity-30 text-slate-300 dark:text-text-tertiary" />
+                        <Bell size={24} className="mx-auto mb-2 opacity-50 text-slate-400 dark:text-text-tertiary" />
                         No notifications
                       </div>
                     ) : (

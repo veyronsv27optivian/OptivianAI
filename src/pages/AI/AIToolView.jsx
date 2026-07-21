@@ -8,7 +8,7 @@ import AiVisualRenderer from '../../components/ai-visualizations/AiVisualRendere
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-2 text-slate-400 py-2">
+    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 py-2">
       <div className="flex gap-1">
         <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
         <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -56,7 +56,7 @@ function MessageBubble({ message, onCopy }) {
           )}
         </div>
         <div className={`flex items-center gap-2 mt-1 ${isUser ? 'justify-end' : ''}`}>
-          <span className="text-[10px] text-slate-400">{message.timestamp}</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400">{message.timestamp}</span>
           {!isUser && (
             <button
               onClick={handleCopy}
@@ -84,8 +84,14 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState(null);
   const streamingRef = useRef(false);
+  const messagesRef = useRef([]);
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
+
+  // Keep messages ref in sync with state for use in callbacks
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // File upload state (for document analyzers)
   const [fileState, setFileState] = useState({
@@ -162,7 +168,10 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     if (!params || !params.businessContext) return rawText;
     // If structured context already in the text, use as-is
     if (rawText.includes(params.businessContext)) return rawText;
-    // Prepend structured context
+    // Only prepend business context for the FIRST message (no history yet)
+    // Follow-up messages rely on the conversation history for context
+    if (messagesRef.current.length > 0) return rawText;
+    // Prepend structured context for the initial query
     const lines = [`Business Context: ${params.businessContext}`];
     if (params.industry) lines.push(`Industry: ${params.industry}`);
     if (params.stage) lines.push(`Stage: ${params.stage}`);
@@ -197,6 +206,12 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
     setStreaming(true);
     streamingRef.current = true;
 
+    // Prepare conversation history for follow-up context
+    // Use messagesRef to avoid stale closure issues
+    const conversationHistory = messagesRef.current
+      .filter(m => m.role !== 'system')
+      .map(m => ({ role: m.role, content: m.content }));
+
     const useStreaming = streamingEnabled && activeProvider?.supportsStreaming !== false;
 
     if (useStreaming) {
@@ -204,6 +219,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
       try {
         await generateStream(toolType, effective, {
           systemPrompt,
+          conversationHistory,
           onChunk: (chunk) => {
             if (!streamingRef.current) return;
             fullText += chunk;
@@ -274,6 +290,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
       try {
         const result = await generateText(toolType, effective, {
           systemPrompt,
+          conversationHistory,
           analytics: {
             organizationId: user?.user_metadata?.organization_id,
             userId: user?.id,
@@ -597,7 +614,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                       onKeyDown={handleUrlKeyDown}
                       placeholder={toolType === 'youtube_analyzer' ? 'https://youtube.com/watch?v=...' : 'https://example.com'}
                       disabled={urlState.fetching}
-                      className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
+                      className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                     />
                     <button
                       onClick={handleUrlFetch}
@@ -612,7 +629,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                       {urlState.fetching ? 'Fetching...' : 'Fetch'}
                     </button>
                   </div>
-                  <p className="mt-2 text-[10px] text-slate-400">
+                  <p className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">
                     Press Enter to fetch {toolType === 'youtube_analyzer' ? 'video metadata' : 'website content'}
                   </p>
                 </div>
@@ -680,10 +697,9 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
                   </div>
                   <h4 className="text-base font-semibold text-slate-700 mb-1">
                     {fileState.dragOver ? 'Drop your file here' : 'Upload a document'}
-                  </h4>
-                  <p className="text-sm text-slate-400 mb-3">
-                    Drag & drop or click to browse
-                  </p>
+                  </h4>                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                      Drag & drop or click to browse
+                    </p>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-xs text-slate-500 font-medium">
                     <FileType size={14} />
                     {fileUploadConfig.config.label} files ({fileUploadConfig.config.accept})
@@ -748,7 +764,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
               <>
                 <Brain size={48} className="text-slate-200 mb-4" />
                 <h3 className="text-lg font-medium text-slate-700 mb-2">{toolLabel}</h3>
-                <p className="text-sm text-slate-400 max-w-md">
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">
                   {placeholderText || 'Describe your request and the AI will provide insights and recommendations.'}
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-2 w-full max-w-md">
@@ -798,7 +814,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
             onKeyDown={handleKeyDown}
             placeholder={placeholderText || 'Type your request...'}
             rows={2}
-            className="w-full px-4 py-3 pr-24 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none text-sm"
+            className="w-full px-4 py-3 pr-24 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none text-sm"
             disabled={streaming}
           />
           <div className="absolute bottom-2 right-2 flex items-center gap-1">
@@ -813,7 +829,7 @@ export default function AIToolView({ toolType, toolLabel, placeholderText, syste
             )}
           </div>
         </div>
-        <p className="mt-1.5 text-[10px] text-slate-400">
+        <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">
           Press Ctrl+Enter to send - Powered by {activeProvider?.label || 'AI'} {activeProvider?.model ? `(${activeProvider.model})` : ''}
         </p>
       </div>

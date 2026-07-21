@@ -309,7 +309,7 @@ export default function Dashboard() {
       className={`space-y-6 transition-all duration-300 ${fullscreen ? 'max-w-7xl mx-auto' : ''}`}
     >
       {/* ═══ SECTION 1: HERO OVERVIEW ═══ */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-violet-600/20 via-blue-600/10 to-slate-900/80 backdrop-blur-xl p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/5 bg-gradient-to-br from-violet-600 via-blue-600 to-slate-900 dark:from-violet-600/20 dark:via-blue-600/10 dark:to-slate-900/80 backdrop-blur-xl p-6 sm:p-8">
         {/* Abstract background decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
@@ -321,21 +321,21 @@ export default function Dashboard() {
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-white font-display tracking-tight">{dashboardConfig.title}</h1>
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/60 text-[10px] font-medium">
+                <h1 className="text-xl font-bold text-white dark:text-white font-display tracking-tight">{dashboardConfig.title}</h1>
+                <span className="px-2 py-0.5 rounded-full bg-white/20 dark:bg-white/10 text-white text-[10px] font-medium">
                   {user?.user_metadata?.role || 'Executive'}
                 </span>
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-white/70 dark:text-white/40">
                   {user?.user_metadata?.organization_name || 'Organization'}
                 </p>
-                <span className="text-white/20">·</span>
-                <p className="text-sm text-white/50">
+                <span className="text-white/40 dark:text-white/20">·</span>
+                <p className="text-sm text-white/70 dark:text-white/50">
                   {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
-                <span className="text-white/20">·</span>
-                <p className="text-sm text-white/50">
+                <span className="text-white/40 dark:text-white/20">·</span>
+                <p className="text-sm text-white/70 dark:text-white/50">
                   {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -375,23 +375,30 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ═══ QUICK ACTIONS BAR ═══ */}
+      {dashboardConfig.showQuickActions && widgetConfig.find(w => w.id === 'quick-actions')?.visible !== false && (
+        <Suspense fallback={<SectionSkeleton height={80} />}>
+          <QuickActions />
+        </Suspense>
+      )}
+
       {/* Announcements */}
       {announcements.map((announcement) => {
         const style = {
-          info: { bg: 'bg-blue-500/10 border-blue-500/20 text-blue-300', icon: Info },
-          warning: { bg: 'bg-amber-500/10 border-amber-500/20 text-amber-300', icon: AlertTriangle },
-          success: { bg: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300', icon: CheckCircle },
-          alert: { bg: 'bg-red-500/10 border-red-500/20 text-red-300', icon: AlertCircle },
-        }[announcement.type] || { bg: 'bg-blue-500/10 border-blue-500/20 text-blue-300', icon: Info };
+          info: { bg: 'bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/20 text-blue-700 dark:text-blue-300', icon: Info },
+          warning: { bg: 'bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20 text-amber-700 dark:text-amber-300', icon: AlertTriangle },
+          success: { bg: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300', icon: CheckCircle },
+          alert: { bg: 'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/20 text-red-700 dark:text-red-300', icon: AlertCircle },
+        }[announcement.type] || { bg: 'bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/20 text-blue-700 dark:text-blue-300', icon: Info };
         const Icon = style.icon;
         return (
           <div key={announcement.id} className={`flex items-start gap-3 px-5 py-4 rounded-2xl border backdrop-blur-sm ${style.bg}`}>
             <Icon size={18} className="shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold">{announcement.title}</p>
+              <h4 className="text-sm font-semibold">{announcement.title}</h4>
               <p className="text-xs mt-0.5 opacity-80">{announcement.message}</p>
             </div>
-            <button onClick={() => handleDismissAnnouncement(announcement.id)} className="p-1 rounded hover:bg-white/10 transition-all shrink-0">
+            <button onClick={() => handleDismissAnnouncement(announcement.id)} className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-all shrink-0">
               <X size={14} />
             </button>
           </div>
@@ -400,10 +407,10 @@ export default function Dashboard() {
 
       {/* Fetch error */}
       {fetchError && (
-        <div className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-300 backdrop-blur-sm">
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20 text-sm text-amber-700 dark:text-amber-300 backdrop-blur-sm">
           <AlertCircle size={16} className="shrink-0" />
           <span className="flex-1">{fetchError}</span>
-          <button onClick={() => setFetchError(null)} className="p-1 rounded hover:bg-white/10 transition-colors">
+          <button onClick={() => setFetchError(null)} className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
             <X size={14} />
           </button>
         </div>
@@ -488,14 +495,7 @@ export default function Dashboard() {
         </Suspense>
       )}
 
-      {/* ═══ SECTION 8: QUICK ACTIONS ═══ */}
-      {dashboardConfig.showQuickActions && widgetConfig.find(w => w.id === 'quick-actions')?.visible !== false && (
-        <Suspense fallback={<SectionSkeleton height={250} />}>
-          <Section id="quick-actions" title="Quick Actions" subtitle="Frequently used tools" defaultExpanded={true} accent="emerald">
-            <QuickActions />
-          </Section>
-        </Suspense>
-      )}
+
 
       {/* Dashboard Customizer */}
       {showCustomizer && (

@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CheckCircle, Circle, ArrowRight, ArrowLeft, Rocket, Users, Key,
-  CheckSquare, Brain, Settings, Sparkles, Copy, ExternalLink,
+  CheckSquare, Brain, Settings, Sparkles, Copy, ExternalLink, MessageSquare,
   Server, Globe, Mail, BookOpen, Shield,
 } from 'lucide-react';
 import { useAuth } from '../../services/AuthContext';

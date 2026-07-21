@@ -86,6 +86,30 @@ export class GeminiProvider extends BaseProvider {
   }
 
   /**
+   * Build Gemini `contents` array from conversation history.
+   * Gemini uses role 'user' for user messages and 'model' for assistant messages.
+   * @private
+   */
+  _buildGeminiContents(prompt, options = {}) {
+    const contents = [];
+
+    // Add conversation history if provided
+    if (Array.isArray(options.conversationHistory)) {
+      for (const msg of options.conversationHistory) {
+        const role = msg.role === 'assistant' ? 'model' : 'user';
+        if (msg.content) {
+          contents.push({ role, parts: [{ text: msg.content }] });
+        }
+      }
+    }
+
+    // Add current user prompt
+    contents.push({ role: 'user', parts: [{ text: prompt }] });
+
+    return contents;
+  }
+
+  /**
    * Single non-retried text generation call.
    * @private
    */
@@ -94,7 +118,7 @@ export class GeminiProvider extends BaseProvider {
 
     /** @type {object} */
     const body = {
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: this._buildGeminiContents(prompt, options),
       generationConfig: {
         temperature: options.temperature ?? 0.7,
         maxOutputTokens: options.maxTokens ?? 2048,
@@ -146,7 +170,7 @@ export class GeminiProvider extends BaseProvider {
 
     /** @type {object} */
     const body = {
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: this._buildGeminiContents(prompt, options),
       generationConfig: {
         temperature: options.temperature ?? 0.7,
         maxOutputTokens: options.maxTokens ?? 2048,

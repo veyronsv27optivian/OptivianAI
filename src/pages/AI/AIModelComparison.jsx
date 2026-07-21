@@ -188,7 +188,7 @@ export default function AIModelComparison({ onClose }) {
                           : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 border border-transparent'
                       }`}
                     >
-                      <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-current' : 'bg-slate-300'}`} />
+                      <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-current' : 'bg-slate-300 dark:bg-slate-600'}`} />
                       <span className="truncate">{model.label}</span>
                     </button>
                   );
@@ -305,7 +305,7 @@ export default function AIModelComparison({ onClose }) {
                         <Brain size={14} className={style.text} />
                         <span className={`text-sm font-semibold ${style.text}`}>{result.model}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                      <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
                         {result.latency > 0 && (
                           <span className="flex items-center gap-0.5">
                             <Clock size={10} />
@@ -340,7 +340,7 @@ export default function AIModelComparison({ onClose }) {
                       <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/30 flex justify-end">
                         <button
                           onClick={() => handleCopy(result.content, index)}
-                          className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                          className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                         >
                           {copiedIndex === index ? (
                             <>

@@ -232,7 +232,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex items-center justify-between p-4 border-b border-slate-200">
         <div className="flex items-center gap-3">
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all">
             <ChevronRight size={20} className="rotate-180" />
           </button>
           <div className="p-2 rounded-lg bg-cyan-50">
@@ -240,7 +240,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
           </div>
           <div>
             <h2 className="text-base font-semibold text-slate-900">Persona Presets</h2>
-            <p className="text-xs text-slate-400">{presets.length} presets available</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{presets.length} presets available</p>
           </div>
         </div>
         <button
@@ -261,7 +261,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Name *</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Name *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -271,7 +271,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                 />
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Icon</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Icon</label>
                 <div className="flex flex-wrap gap-1.5">
                   {iconOptions.map(icon => (
                     <button
@@ -289,7 +289,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                 </div>
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Description</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Description</label>
                 <input
                   type="text"
                   value={formData.description}
@@ -299,7 +299,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Industry</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Industry</label>
                 <input
                   type="text"
                   value={formData.persona.industry}
@@ -309,7 +309,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Company Size</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Company Size</label>
                 <select
                   value={formData.persona.companySize}
                   onChange={(e) => setFormData(prev => ({ ...prev, persona: { ...prev.persona, companySize: e.target.value } }))}
@@ -323,7 +323,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Stage</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Stage</label>
                 <select
                   value={formData.persona.stage}
                   onChange={(e) => setFormData(prev => ({ ...prev, persona: { ...prev.persona, stage: e.target.value } }))}
@@ -338,7 +338,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                 </select>
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Goals</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Goals</label>
                 <input
                   type="text"
                   value={formData.persona.goals}
@@ -348,7 +348,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-slate-600 mb-1">Business Context</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Business Context</label>
                 <textarea
                   value={formData.persona.businessContext}
                   onChange={(e) => setFormData(prev => ({ ...prev, persona: { ...prev.persona, businessContext: e.target.value } }))}
@@ -369,7 +369,7 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
               </button>
               <button
                 onClick={() => { setShowForm(false); resetForm(); }}
-                className="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all"
+                className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
               >
                 Cancel
               </button>
@@ -380,9 +380,9 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
         {/* ── Preset Grid ───────────────────────────────────── */}
         {presets.length === 0 && !showForm ? (
           <div className="text-center py-16">
-            <UserCircle size={40} className="text-slate-300 mx-auto mb-4" />
+            <UserCircle size={40} className="text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-slate-700 mb-2">No presets yet</h3>
-            <p className="text-sm text-slate-400">Create your first persona preset for quick Business Advisor setup</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Create your first persona preset for quick Business Advisor setup</p>
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
               className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-600 text-white text-sm font-medium hover:bg-cyan-700 transition-all mx-auto"
@@ -403,30 +403,30 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-semibold text-slate-800">{preset.name}</h4>
                     {preset.description && (
-                      <p className="text-xs text-slate-500 line-clamp-2">{preset.description}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{preset.description}</p>
                     )}
                   </div>
                   {preset.isBuiltIn && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 shrink-0">Built-in</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 shrink-0">Built-in</span>
                   )}
                 </div>
 
-                <div className="space-y-1.5 text-xs text-slate-500">
+                <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
                   <p className="flex items-center gap-1.5">
-                    <Building2 size={12} className="text-slate-400" />
+                    <Building2 size={12} className="text-slate-500 dark:text-slate-400" />
                     {preset.persona.industry || 'Any industry'}
                   </p>
                   <p className="flex items-center gap-1.5">
-                    <Users size={12} className="text-slate-400" />
+                    <Users size={12} className="text-slate-500 dark:text-slate-400" />
                     {preset.persona.companySize} employees
                   </p>
                   <p className="flex items-center gap-1.5">
-                    <Target size={12} className="text-slate-400" />
+                    <Target size={12} className="text-slate-500 dark:text-slate-400" />
                     {getStageLabel(preset.persona.stage)}
                   </p>
                   {preset.persona.goals && (
                     <p className="flex items-start gap-1.5">
-                      <TrendingUp size={12} className="text-slate-400 mt-0.5" />
+                      <TrendingUp size={12} className="text-slate-500 dark:text-slate-400 mt-0.5" />
                       <span className="line-clamp-1">{preset.persona.goals}</span>
                     </p>
                   )}
@@ -442,14 +442,14 @@ export default function AIPersonaPresets({ onSelectPreset, onClose }) {
                   </button>
                   <button
                     onClick={() => handleEdit(preset)}
-                    className="p-1.5 rounded-md text-slate-300 hover:text-slate-500 hover:bg-slate-100 transition-all"
+                    className="p-1.5 rounded-md text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
                   >
                     <Edit size={12} />
                   </button>
                   {!preset.isBuiltIn && (
                     <button
                       onClick={() => handleDelete(preset.id)}
-                      className="p-1.5 rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                      className="p-1.5 rounded-md text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                     >
                       <Trash2 size={12} />
                     </button>

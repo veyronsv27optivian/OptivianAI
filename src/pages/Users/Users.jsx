@@ -241,7 +241,7 @@ export default function Users() {
           <div className="p-12 text-center">
             <UsersIcon size={36} className="text-slate-300 mx-auto mb-3" />
             <p className="text-slate-500 font-medium">No team members yet</p>
-            <p className="text-sm text-slate-400 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               {canManage ? 'Add your first team member to get started' : 'Ask your admin to add team members'}
             </p>
           </div>
@@ -389,13 +389,13 @@ export default function Users() {
                   <button
                     type="button"
                     onClick={regeneratePassword}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
                     title="Generate new password"
                   >
                     <Key size={16} />
                   </button>
                 </div>
-                <p className="mt-1.5 text-xs text-slate-400">Share this password securely with the staff member</p>
+                <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Share this password securely with the staff member</p>
               </div>
 
               <div>

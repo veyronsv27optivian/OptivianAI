@@ -159,7 +159,7 @@ export default function TaskCenter({
                       {t.due_date ? new Date(t.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
                     </span>
                     {t.priority === 'urgent' && <Badge color="rose" size="xs">Urgent</Badge>}
-                    {timeAgo && <span className="text-[10px] text-slate-400 italic">updated {timeAgo}</span>}
+                    {timeAgo && <span className="text-[10px] text-slate-500 dark:text-slate-400 italic">updated {timeAgo}</span>}
                   </div>
                 </motion.div>
               );

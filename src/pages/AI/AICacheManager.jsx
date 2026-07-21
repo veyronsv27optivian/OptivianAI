@@ -67,7 +67,7 @@ export default function AICacheManager({ onClose }) {
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
           >
             <ChevronRight size={20} className="rotate-180" />
           </button>
@@ -76,14 +76,14 @@ export default function AICacheManager({ onClose }) {
           </div>
           <div>
             <h2 className="text-base font-semibold text-slate-900">AI Cache Manager</h2>
-            <p className="text-xs text-slate-400">View and manage cached AI responses</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">View and manage cached AI responses</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={refresh}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
           >
             <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             Refresh
@@ -155,9 +155,9 @@ export default function AICacheManager({ onClose }) {
 
             {/* ── Usage gauge ───────────────────────────────── */}
             <div className="bg-white border border-slate-200 rounded-lg p-5">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">Cache Capacity</h3>
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Cache Capacity</h3>
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
                   <span>{formatCount(stats.size)} entries used</span>
                   <span>{formatCount(stats.maxEntries)} max entries</span>
                 </div>
@@ -173,7 +173,7 @@ export default function AICacheManager({ onClose }) {
                     style={{ width: `${Math.min((stats.size / stats.maxEntries) * 100, 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {stats.size === 0
                     ? 'Cache is empty. Run some AI analyses to populate it.'
                     : stats.size / stats.maxEntries > 0.8
@@ -185,11 +185,11 @@ export default function AICacheManager({ onClose }) {
 
             {/* ── Info Panel ────────────────────────────────── */}
             <div className="bg-white border border-slate-200 rounded-lg p-5">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                 <AlertTriangle size={16} className="text-amber-500" />
                 About AI Caching
               </h3>
-              <div className="space-y-2 text-xs text-slate-500">
+              <div className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
                 <p>
                   AI responses are cached to reduce latency and API costs. Identical prompts
                   within the cache TTL (default: 5 minutes) will return cached results instead of
@@ -213,8 +213,8 @@ export default function AICacheManager({ onClose }) {
             {/* ── Empty state ────────────────────────────────── */}
             {stats.size === 0 && (
               <div className="text-center py-8">
-                <Database size={40} className="text-slate-200 mx-auto mb-3" />
-                <h3 className="text-sm font-medium text-slate-500">Cache is empty</h3>
+                <Database size={40} className="text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">Cache is empty</h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Cached entries will appear here after you run AI analyses.
                 </p>
@@ -243,12 +243,12 @@ function StatCard({ icon: Icon, label, value, sub, color }) {
         <div className={`p-1.5 rounded-md ${colorMap[color] || colorMap.blue}`}>
           <Icon size={14} />
         </div>
-        <span className="text-xs text-slate-500">{label}</span>
+        <span className="text-xs text-slate-600 dark:text-slate-400">{label}</span>
       </div>
       <p className="text-lg font-bold text-slate-800 truncate" title={value}>
         {value}
       </p>
-      {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
+      {sub && <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{sub}</p>}
     </div>
   );
 }

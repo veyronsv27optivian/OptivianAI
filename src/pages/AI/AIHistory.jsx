@@ -203,7 +203,7 @@ export default function AIHistory() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
           <input
             type="text"
             value={searchQuery}
@@ -293,14 +293,14 @@ export default function AIHistory() {
                 </button>
                 <button
                   onClick={() => handleExport(analysis)}
-                  className="p-1.5 rounded-lg text-slate-300 hover:text-slate-500 transition-all"
+                  className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 transition-all"
                   title="Export"
                 >
                   <Download size={14} />
                 </button>
                 <button
                   onClick={() => handleDelete(analysis.id)}
-                  className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 transition-all"
+                  className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-500 transition-all"
                   title="Delete"
                 >
                   <Trash2 size={14} />

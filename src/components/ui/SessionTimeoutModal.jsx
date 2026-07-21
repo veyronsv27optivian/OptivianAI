@@ -14,13 +14,13 @@ export default function SessionTimeoutModal({ onExtend, onLogout }) {
           <div className="mx-auto w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center mb-4">
             <Clock size={28} className="text-amber-400" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-text-primary mb-2">
             Session Expiring Soon
           </h2>
-          <p className="text-sm text-text-secondary mb-1">
+          <p className="text-sm text-slate-600 dark:text-text-secondary mb-1">
             Your session will expire in less than 1 minute due to inactivity.
           </p>
-          <p className="text-xs text-text-tertiary">
+          <p className="text-xs text-slate-500 dark:text-text-tertiary">
             Click "Stay Signed In" to continue your session.
           </p>
         </div>

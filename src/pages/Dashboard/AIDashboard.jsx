@@ -130,7 +130,7 @@ export default function AIDashboard({
             </div>
             <div className="min-w-0 text-left">
               <p className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{tool.label}</p>
-              <p className="text-[9px] text-slate-400 truncate">{tool.desc}</p>
+              <p className="text-[9px] text-slate-500 dark:text-slate-400 truncate">{tool.desc}</p>
             </div>
           </motion.button>
         ))}

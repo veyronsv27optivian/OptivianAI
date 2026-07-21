@@ -172,7 +172,7 @@ export default function AIProviders() {
             <Server size={18} className="text-blue-600" />
             Available Providers
           </h3>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
             Configure and switch between AI providers. The active provider is used for all AI features.
           </p>
         </div>
@@ -233,11 +233,11 @@ export default function AIProviders() {
                         <span className="text-xs text-slate-400 dark:text-slate-500">{p.model}</span>
                       </div>
                       <div className="flex items-center gap-3 mt-1.5">
-                        <span className="flex items-center gap-1 text-xs text-slate-400">
+                        <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                           <Zap size={12} />
                           {p.supportsStreaming ? 'Streaming' : 'No streaming'}
                         </span>
-                        <span className="flex items-center gap-1 text-xs text-slate-400">
+                        <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                           <Eye size={12} />
                           {p.supportsVision ? 'Vision' : 'Text only'}
                         </span>

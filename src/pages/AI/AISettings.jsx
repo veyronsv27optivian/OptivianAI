@@ -81,12 +81,12 @@ export default function AISettings({ onClose }) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {Icon && <Icon size={16} className="text-slate-400" />}
+          {Icon && <Icon size={16} className="text-slate-500 dark:text-slate-400" />}
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
         </div>
         <span className="text-sm text-blue-600 font-mono">{value}</span>
       </div>
-      {description && <p className="text-xs text-slate-400">{description}</p>}        <input
+      {description && <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>}        <input
         type="range"
         min={min}
         max={max}
@@ -95,7 +95,7 @@ export default function AISettings({ onClose }) {
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-600"
       />
-      <div className="flex justify-between text-[10px] text-slate-400">
+      <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400">
         <span>{min}</span>
         <span>{max}</span>
       </div>
@@ -105,10 +105,10 @@ export default function AISettings({ onClose }) {
   const SelectField = ({ label, value, options, onChange, icon: Icon, description }) => (
     <div className="space-y-1.5">
       <div className="flex items-center gap-2">
-        {Icon && <Icon size={16} className="text-slate-400" />}
-        <label className="text-sm font-medium text-slate-700">{label}</label>
+        {Icon && <Icon size={16} className="text-slate-400 dark:text-slate-500" />}
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
       </div>
-      {description && <p className="text-xs text-slate-400">{description}</p>}
+      {description && <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}

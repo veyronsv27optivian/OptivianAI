@@ -265,12 +265,12 @@ export default function BatchAnalyzer({ onClose }) {
             <div className={`p-3 rounded-xl inline-block mb-4 transition-all ${
               dragOver ? 'bg-violet-100 scale-110' : 'bg-slate-100 group-hover:bg-violet-50'
             }`}>
-              <Upload size={36} className={dragOver ? 'text-violet-600' : 'text-slate-400 group-hover:text-violet-500'} />
+              <Upload size={36} className={dragOver ? 'text-violet-600' : 'text-slate-500 dark:text-slate-400 group-hover:text-violet-500'} />
             </div>
             <h4 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-1">
               {dragOver ? 'Drop your files here' : 'Upload multiple documents'}
             </h4>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mb-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
               Drag & drop files or click to browse — PDF, Word, Excel, CSV, PowerPoint
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -292,11 +292,11 @@ export default function BatchAnalyzer({ onClose }) {
           <div className="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700/50">
               <div className="flex items-center gap-2">
-                <FileText size={16} className="text-slate-400" />
+                <FileText size={16} className="text-slate-500 dark:text-slate-400" />
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {files.length} file{files.length !== 1 ? 's' : ''} uploaded
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   ({parsedCount} parsed, {statusCounts.error} errors)
                 </span>
               </div>
@@ -332,7 +332,7 @@ export default function BatchAnalyzer({ onClose }) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-slate-700 dark:text-slate-300 truncate">{entry.name}</p>
-                      <p className="text-[10px] text-slate-400">{formatSize(entry.size)}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{formatSize(entry.size)}</p>
                     </div>
                     {entry.error && (
                       <span className="text-[10px] text-red-500 max-w-[120px] truncate" title={entry.error}>
@@ -343,7 +343,7 @@ export default function BatchAnalyzer({ onClose }) {
                     {entry.analysisResult && (
                       <button
                         onClick={() => setViewResult(entry)}
-                        className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/50 opacity-0 group-hover:opacity-100 transition-all"
+                        className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 opacity-0 group-hover:opacity-100 transition-all"
                         title="View result"
                       >
                         <Eye size={14} />
@@ -351,7 +351,7 @@ export default function BatchAnalyzer({ onClose }) {
                     )}
                     <button
                       onClick={() => removeFile(entry.id)}
-                      className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all"
                       title="Remove"
                     >
                       <X size={14} />
@@ -385,7 +385,7 @@ export default function BatchAnalyzer({ onClose }) {
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Analyzing files... ({currentIndex + 1} of {parsedCount})
                 </p>
-                <p className="text-xs text-slate-400">Processing each document through AI</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Processing each document through AI</p>
               </div>
             </div>
             <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
@@ -423,9 +423,9 @@ export default function BatchAnalyzer({ onClose }) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{a.fileName}</p>
-                    <p className="text-[10px] text-slate-400">{a.provider} · {a.timestamp}</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">{a.provider} · {a.timestamp}</p>
                   </div>
-                  <ChevronRight size={14} className="text-slate-300" />
+                  <ChevronRight size={14} className="text-slate-300 dark:text-slate-600" />
                 </button>
               ))}
             </div>
@@ -456,7 +456,7 @@ export default function BatchAnalyzer({ onClose }) {
               </div>
               <button
                 onClick={() => setViewResult(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
               >
                 <X size={16} />
               </button>
@@ -472,7 +472,7 @@ export default function BatchAnalyzer({ onClose }) {
             {/* Modal footer */}
             {viewResult.analysisResult && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/50">
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">
                   {viewResult.provider} · {viewResult.model}
                 </span>
                 <button

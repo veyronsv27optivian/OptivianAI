@@ -585,7 +585,7 @@ export default function Tasks() {
                   ? 'No tasks yet'
                   : 'No tasks assigned to you'}
               </p>
-              <p className="text-sm text-slate-400 mt-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 {canManage && !searchQuery && statusFilter === 'all'
                   ? 'Create a new task to get started'
                   : 'Try adjusting your filters'}
@@ -702,12 +702,12 @@ export default function Tasks() {
                         {/* File & comment indicators */}
                         <div className="flex items-center gap-2 mt-1">
                           {fileCount > 0 && (
-                            <span className="flex items-center gap-0.5 text-[10px] text-slate-400">
+                            <span className="flex items-center gap-0.5 text-[10px] text-slate-500 dark:text-slate-400">
                               <Paperclip size={10} />{fileCount}
                             </span>
                           )}
                           {commentCount > 0 && (
-                            <span className="flex items-center gap-0.5 text-[10px] text-slate-400">
+                            <span className="flex items-center gap-0.5 text-[10px] text-slate-500 dark:text-slate-400">
                               <MessageSquare size={10} />{commentCount}
                             </span>
                           )}

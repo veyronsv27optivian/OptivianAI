@@ -84,8 +84,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
             <Brain size={20} className="text-blue-600" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Business Advisor</h3>
-            <p className="text-xs text-slate-500">Fill in the details below for tailored advice</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Business Advisor</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Fill in the details below for tailored advice</p>
           </div>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
               {s}
             </button>
           ))}
-          <span className="text-[10px] text-slate-400 ml-1">
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 ml-1">
             Step {step} of 3
           </span>
         </div>
@@ -122,8 +122,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
               className="space-y-3"
             >
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 mb-1.5">
-                  <Building2 size={12} className="text-slate-400" />
+                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <Building2 size={12} className="text-slate-500 dark:text-slate-400" />
                   Business Context
                 </label>
                 <textarea
@@ -131,8 +131,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                   onChange={(e) => updateField('businessContext', e.target.value)}
                   placeholder="Describe your business, what you do, your target market..."
                   rows={3}
-                  className={`w-full px-3 py-2 border rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all ${
-                    errors.businessContext ? 'border-red-300 bg-red-50' : 'border-slate-200'
+                  className={`w-full px-3 py-2 border rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all ${
+                    errors.businessContext ? 'border-red-300 bg-red-50 dark:bg-red-900/20' : 'border-slate-200 dark:border-slate-600'
                   }`}
                 />
                 {errors.businessContext && (
@@ -164,8 +164,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
               className="space-y-3"
             >
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 mb-1.5">
-                  <TrendingUp size={12} className="text-slate-400" />
+                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <TrendingUp size={12} className="text-slate-500 dark:text-slate-400" />
                   Industry
                 </label>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -177,7 +177,7 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                       className={`px-2.5 py-1.5 rounded-lg text-[10px] text-left border transition-all ${
                         formData.industry === ind
                           ? 'border-blue-300 bg-blue-50 text-blue-700 font-medium'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                          : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
                       {ind}
@@ -187,8 +187,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
               </div>
 
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 mb-1.5">
-                  <Users size={12} className="text-slate-400" />
+                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <Users size={12} className="text-slate-500 dark:text-slate-400" />
                   Company Size
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -200,7 +200,7 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                       className={`px-2.5 py-1.5 rounded-lg text-[10px] border transition-all ${
                         formData.companySize === size.value
                           ? 'border-blue-300 bg-blue-50 text-blue-700 font-medium'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                          : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
                       {size.icon} {size.label}
@@ -213,7 +213,7 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition-all"
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
                 >
                   Back
                 </button>
@@ -238,8 +238,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
               className="space-y-3"
             >
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 mb-1.5">
-                  <Target size={12} className="text-slate-400" />
+                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <Target size={12} className="text-slate-500 dark:text-slate-400" />
                   Business Stage
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -251,7 +251,7 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                       className={`px-2.5 py-1.5 rounded-lg text-[10px] border transition-all ${
                         formData.stage === stage.value
                           ? 'border-blue-300 bg-blue-50 text-blue-700 font-medium'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                          : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
                       {stage.icon} {stage.label}
@@ -261,8 +261,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
               </div>
 
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 mb-1.5">
-                  <AlertCircle size={12} className="text-slate-400" />
+                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <AlertCircle size={12} className="text-slate-500 dark:text-slate-400" />
                   Your Challenge / Question *
                 </label>
                 <textarea
@@ -270,8 +270,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                   onChange={(e) => updateField('challenge', e.target.value)}
                   placeholder="What specific challenge are you facing? E.g., How to increase customer retention, enter a new market, reduce churn..."
                   rows={2}
-                  className={`w-full px-3 py-2 border rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all ${
-                    errors.challenge ? 'border-red-300 bg-red-50' : 'border-slate-200'
+                  className={`w-full px-3 py-2 border rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all ${
+                    errors.challenge ? 'border-red-300 bg-red-50 dark:bg-red-900/20' : 'border-slate-200 dark:border-slate-600'
                   }`}
                 />
                 {errors.challenge && (
@@ -282,8 +282,8 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
               </div>
 
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 mb-1.5">
-                  <Target size={12} className="text-slate-400" />
+                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <Target size={12} className="text-slate-500 dark:text-slate-400" />
                   Business Goals (optional)
                 </label>
                 <textarea
@@ -291,7 +291,7 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                   onChange={(e) => updateField('goals', e.target.value)}
                   placeholder="Your key business goals and objectives..."
                   rows={1}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all"
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all"
                 />
               </div>
 
@@ -299,7 +299,7 @@ export default function BusinessAdvisorForm({ onSubmit, onClose, initialData }) 
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition-all"
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
                 >
                   Back
                 </button>

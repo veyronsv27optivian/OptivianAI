@@ -86,12 +86,11 @@ export class DeepSeekProvider extends BaseProvider {
    */
   async _generateTextOnce(prompt, options = {}) {
     /** @type {Array<{ role: string, content: string }>} */
-    const messages = [];
-
-    if (options.systemPrompt) {
-      messages.push({ role: 'system', content: options.systemPrompt });
-    }
-    messages.push({ role: 'user', content: prompt });
+    const messages = this.buildMessagesFromHistory(
+      options.conversationHistory,
+      options.systemPrompt,
+      prompt,
+    );
 
     const body = {
       model: this.model,
@@ -137,11 +136,11 @@ export class DeepSeekProvider extends BaseProvider {
     }
 
     /** @type {Array<{ role: string, content: string }>} */
-    const messages = [];
-    if (options.systemPrompt) {
-      messages.push({ role: 'system', content: options.systemPrompt });
-    }
-    messages.push({ role: 'user', content: prompt });
+    const messages = this.buildMessagesFromHistory(
+      options.conversationHistory,
+      options.systemPrompt,
+      prompt,
+    );
 
     const body = {
       model: this.model,
